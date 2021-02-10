@@ -1,0 +1,18 @@
+Package: pathtools
+Type: Package
+Title: Tools for Pathway Analysis
+Version: 1.1.0
+Date: 2020-05-25
+Author: Ettore Mosca
+Maintainer: Ettore Mosca <ettore.mosca@itb.cnr.it>
+Description: Methods for Pathway Analysis.
+License: GPL-3
+LazyData: TRUE
+RoxygenNote: 7.1.0
+Imports:
+  igraph,
+  parallel,
+  RColorBrewer,
+  dmfind
+Depends:
+  R (>= 3.2.1)

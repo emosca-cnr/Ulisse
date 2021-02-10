@@ -1,0 +1,17 @@
+pathools version 1.1
+- added leading edfe analysis
+
+pathools first version 1.0
+- updated es function; now prevents NaN due to zero hits
+
+pathtools (development version) v0.0.0.9003 (Release date: 2017-02-06)
+- many ranked gene list processed in parallel
+
+pathtools (development version) v0.0.0.9002 (Release date: 2016-08-31)
+- added support for pie shape
+- enrichment_map with and withoutplot
+- enrichment_map -> pathway_sim_comm
+
+pathtools (development version) v0.0.0.9001 (Release date: 2016-08-11)
+- added ora with hypergeometric test
+- fixed some bugs in enrichment_map

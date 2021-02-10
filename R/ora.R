@@ -1,0 +1,21 @@
+#' Over Representation Analysis
+#' @param wb hits (white balls)
+#' @param bb other elements (black balls)
+#' @param gsl named list of sets
+#' @param p_adj_method p value adjustment method, see p.adjust.methods
+#' @export
+
+ora <- function(wb, bb, gsl, p_adj_method='fdr'){
+
+
+  out <- lapply(gsl, function(x) ora1gs(wb, bb, x))
+
+  out <- as.data.frame(do.call(rbind, out), stringsAsFactors = FALSE)
+  out$N <- length(wb) + length(bb)
+  out$exp <- out$wb * out$bd / out$N
+  out$id <- rownames(out)
+  out$p_adj <- p.adjust(out$p, p_adj_method)
+
+  return(out[, c('id', 'N', 'wb', 'bb', 'bd', 'wbd', 'exp', 'p', 'p_adj')])
+
+}
