@@ -1,5 +1,7 @@
 pathools version 1.1
-- added leading edfe analysis
+- added leading edge analysis
+- added deviation as output of es
+- added er as output of ora
 
 pathools first version 1.0
 - updated es function; now prevents NaN due to zero hits

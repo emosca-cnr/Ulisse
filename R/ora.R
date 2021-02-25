@@ -15,7 +15,8 @@ ora <- function(wb, bb, gsl, p_adj_method='fdr'){
   out$exp <- out$wb * out$bd / out$N
   out$id <- rownames(out)
   out$p_adj <- p.adjust(out$p, p_adj_method)
+  out$er <- out$wbd / out$exp
 
-  return(out[, c('id', 'N', 'wb', 'bb', 'bd', 'wbd', 'exp', 'p', 'p_adj')])
+  return(out[, c('id', 'N', 'wb', 'bb', 'bd', 'wbd', 'exp', 'er', 'p', 'p_adj')])
 
 }
