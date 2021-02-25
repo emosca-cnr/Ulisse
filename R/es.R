@@ -28,7 +28,11 @@ es <- function(idx, x, le=F){
     es <- 0
     if(le){
       tags <- 0
+      tags_perc <- 0
       list_top <- 0
+      list_top_perc <- 0
+      lead_edge <- 0
+      lead_edge_subset <- 0
     }
 
   }else{
@@ -66,14 +70,11 @@ es <- function(idx, x, le=F){
 
     lead_edge <- tags_perc * (1-list_top_perc) * N / (N - Nh)
 
-    return(list(es=es, lea=data.frame(tags=tags, tags_perc=tags_perc, list_top=list_top, list_top_perc=list_top_perc, lead_edge=lead_edge, lead_edge_subset=lead_edge_subset, stringsAsFactors = F)))
+    return(list(es=es, deviation=deviation, lea=data.frame(tags=tags, tags_perc=tags_perc, list_top=list_top, list_top_perc=list_top_perc, lead_edge=lead_edge, lead_edge_subset=lead_edge_subset, stringsAsFactors = F)))
 
   }else{
 
     return(es)
   }
-
-
-
 
 }
