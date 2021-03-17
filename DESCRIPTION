@@ -1,8 +1,8 @@
 Package: Ulisse
 Type: Package
 Title: Tools for Pathway Analysis
-Version: 1.1.0
-Date: 2020-05-25
+Version: 1.2.0
+Date: 2021-03-17
 Author: Ettore Mosca
 Maintainer: Ettore Mosca <ettore.mosca@itb.cnr.it>
 Description: Methods for Pathway Analysis.
