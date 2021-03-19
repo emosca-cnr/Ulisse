@@ -20,12 +20,10 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj) {
           s <- i_genes[which(i_genes %in% j_genes)]
           idx_i <- which(i_genes %in% s)
           idx_j <- which(j_genes %in% s)
-          #sh <- rowSums(matrix(gene_network_adj_ij[idx_i, -idx_j])) + colSums(matrix(gene_network_adj_ij[-idx_i, idx_j]))
           
           gene_network_adj_ij <- gene_network_adj_ij[-idx_i, -idx_j]
-          
-          #tmp <- sum(gene_network_adj_ij) + length(which(sh != 0))
-          
+          i_genes <- i_genes[-idx_i]
+          j_genes <- j_genes[-idx_j]
         }
         #print(i)
         #print(j)
