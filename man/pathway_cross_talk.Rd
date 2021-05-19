@@ -4,14 +4,12 @@
 \alias{pathway_cross_talk}
 \title{Pathway Cross Talk}
 \usage{
-pathway_cross_talk(pathway_list, gene_network_adj, sim_method = "overlap")
+pathway_cross_talk(pathway_list, gene_network_adj)
 }
 \arguments{
 \item{pathway_list}{list of gene sets}
 
 \item{gene_network_adj}{adjacency matrix of the gene network under analysis}
-
-\item{sim_method}{method to define the similarity between pathways}
 }
 \description{
 Pathway Cross Talk
