@@ -27,6 +27,7 @@ es <- function(idx, x, le=F){
 
     es <- 0
     if(le){
+      deviation <- 0
       tags <- 0
       tags_perc <- 0
       list_top <- 0
