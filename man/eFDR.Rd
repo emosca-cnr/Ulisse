@@ -7,7 +7,9 @@
 eFDR(real_values, all_values, mc.cores = 1)
 }
 \arguments{
-\item{real_values}{vactor of all values (real + permuted) values}
+\item{real_values}{vactor of real (observed) values}
+
+\item{all_values}{vactor of all values (real + permuted) values}
 
 \item{mc.cores}{number of cores}
 }

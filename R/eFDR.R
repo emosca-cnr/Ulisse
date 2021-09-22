@@ -1,6 +1,6 @@
 #' empirical False Discovery Rate
 #' @param real_values vactor of real (observed) values
-#' @param real_values vactor of all values (real + permuted) values
+#' @param all_values vactor of all values (real + permuted) values
 #' @param mc.cores number of cores
 #' @import parallel
 #' @export
