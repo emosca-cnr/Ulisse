@@ -2,6 +2,7 @@
 
 export(TM_PCT)
 export(calc_p)
+export(eFDR)
 export(edge_weights)
 export(enrichment_map_with_plot)
 export(es)
