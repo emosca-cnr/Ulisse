@@ -8,7 +8,9 @@ pathway_cross_talk(
   pathway_list,
   gene_network_adj,
   weight = attr_v$Sp,
-  cluster = 4
+  mc_cores_pct = 2,
+  mc_cores_perm = 1,
+  k = 9
 )
 }
 \arguments{
@@ -16,9 +18,13 @@ pathway_cross_talk(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{cluster}{numebr of threads to be used}
+\item{mc_cores_pct}{numebr of threads to be used for pathway cross talk calculation}
+
+\item{k}{number of permutation of the adjacency matrix}
 
 \item{wight}{an ordered weight vertex vector}
+
+\item{mc_cores_permutation}{number of thread to be used in permutations}
 }
 \description{
 Caluclate cross-talks between pathways

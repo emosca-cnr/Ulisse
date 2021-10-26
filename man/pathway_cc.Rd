@@ -4,14 +4,25 @@
 \alias{pathway_cc}
 \title{Caluclate cross-talks between pathways}
 \usage{
-pathway_cc(pathway_list, gene_network_adj, weight = attr_v$Sp, cluster = 4)
+pathway_cc(
+  pathway_list,
+  gene_network_adj,
+  weight,
+  k = 9,
+  mc_cores_cc = 2,
+  mc_cores_perm = 2
+)
 }
 \arguments{
 \item{pathway_list}{a named list of genes grouped into pathways}
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{cluster}{numebr of threads to be used}
+\item{k}{numebr of permutation of the adjacency amtrix}
+
+\item{mc_cores_cc}{numebr of threads to be used for cc calculation}
+
+\item{mc_cores_perm}{number of threads to be used for permutations}
 
 \item{wight}{an ordered weight vertex vector}
 }

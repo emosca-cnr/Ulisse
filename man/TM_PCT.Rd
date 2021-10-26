@@ -8,8 +8,11 @@ TM_PCT(
   pathway_list,
   gene_network_adj,
   membership = attr_v$comm_id,
+  mc_cores_pct = 2,
+  mc_cores_perm = 2,
+  mc_cores_tm = 2,
   weight = attr_v$Sp,
-  cluster = 4
+  k = 9
 )
 }
 \arguments{
@@ -19,7 +22,13 @@ TM_PCT(
 
 \item{membership}{an ordered vector of vertex membership to a topological community}
 
-\item{cluster}{numebr of threads to be used}
+\item{mc_cores_pct}{numebr of threads to be used to calculate cross talk between different communities}
+
+\item{mc_cores_perm}{numebr of threads to be used to calcualte permutation}
+
+\item{mc_cores_tm}{number of threads to be used to calcualte TM-PCT on different communities combination}
+
+\item{k}{number of permutation of the adjacency matrix}
 
 \item{wight}{an ordered weight vertex vector}
 }
