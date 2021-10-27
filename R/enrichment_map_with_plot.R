@@ -31,8 +31,6 @@
 #' @return list of two data frames containing pathway network and vertex similarity
 #' @import igraph
 #' @importFrom  RColorBrewer brewer.pal
-#' @importFrom  dmfind round
-#' @importFrom  dmfind linear_map
 #' @export
 #'
 enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=c(0.5, 0.1), all_gs=TRUE, weight.within = 4, weight.between = 1, file='en_map.jpg', comm_method=c('auto', 'fastgreedy', 'multilev'), vertex.label.cex=1, vertex.label.dist=0.5, vertex.label.degree=pi/2, vertex.label.font=2, gs_list_size=NULL, set_sim_df=NULL, plot_flag=TRUE, vertex.color=NULL, img.width=200, img.height=200, img.res=300, min_comm_size=2, vertex.size.min=2, vertex.size.max=5, edge.wd.min=1, edge.wd.max=4, mark.groups=T, vertex.shape='circle', vertex.pie=NULL, ...){
@@ -111,7 +109,7 @@ enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'),
     #vertex color
     if(vertex.shape != 'pie'){
       if(is.null(vertex.color)){
-        igraph::V(path_mod)$color <- RColorBrewer::brewer.pal(9, "Greens")[dmfind::round(dmfind::linear_map(x[match(igraph::V(path_mod)$name, names(x))], 1, 9))]
+        igraph::V(path_mod)$color <- RColorBrewer::brewer.pal(9, "Greens")[round(linear_map(x[match(igraph::V(path_mod)$name, names(x))], 1, 9))]
       }else{
         igraph::V(path_mod)$color <- vertex.color[match(igraph::V(path_mod)$name, names(vertex.color))]
       }
@@ -128,8 +126,8 @@ enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'),
     temp <- temp[order(temp[, 3], temp[,2]), ]
     temp <- temp[!duplicated(temp[, 3]), ]
     igraph::V(path_mod)$label <- ''
-    igraph::V(path_mod)$size <- dmfind::round(dmfind::linear_map(gs_list_size[match(igraph::V(path_mod)$name, names(gs_list_size))], vertex.size.min, vertex.size.max))
-    igraph::E(path_mod)$width <- dmfind::round(dmfind::linear_map(igraph::E(path_mod)$sim, edge.wd.min, edge.wd.max))
+    igraph::V(path_mod)$size <- round(linear_map(gs_list_size[match(igraph::V(path_mod)$name, names(gs_list_size))], vertex.size.min, vertex.size.max))
+    igraph::E(path_mod)$width <- round(linear_map(igraph::E(path_mod)$sim, edge.wd.min, edge.wd.max))
 
     if(mark.groups){
       mark.groups <- split(igraph::V(path_mod)$name, out$module)
@@ -143,7 +141,7 @@ enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'),
     igraph::plot.igraph(path_mod, mark.groups = mark.groups, mark.expand = 2, layout=L, ...)
 
     if(is.null(vertex.color) & vertex.shape != 'pie'){
-      legend_text <- c(dmfind::round(sort(x)[1], 2), rep(NA, 3), dmfind::round(median(x), 2), rep(NA, 3), dmfind::round(sort(x)[length(x)], 2))
+      legend_text <- c(round(sort(x)[1], 2), rep(NA, 3), round(median(x), 2), rep(NA, 3), round(sort(x)[length(x)], 2))
       legend("bottomright", legend = legend_text, pch = 22, pt.bg = RColorBrewer::brewer.pal(9, "Greens"), col = "black", xpd = TRUE, bty = "n", cex = 0.8)
     }
 
@@ -157,7 +155,7 @@ enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'),
     igraph::plot.igraph(path_mod, mark.groups = mark.groups, layout=L, vertex.label.cex=vertex.label.cex, vertex.label.dist=vertex.label.dist, vertex.label.degree=vertex.label.degree, vertex.label.font=vertex.label.font, vertex.pie=V(path_mod)$pie, ...)
 
     if(is.null(vertex.color) & vertex.shape != 'pie'){
-      legend_text <- c(dmfind::round(sort(x)[1], 2), rep(NA, 3), dmfind::round(median(x), 2), rep(NA, 3), dmfind::round(sort(x)[length(x)], 2))
+      legend_text <- c(round(sort(x)[1], 2), rep(NA, 3), round(median(x), 2), rep(NA, 3), round(sort(x)[length(x)], 2))
       legend("bottomright", legend = legend_text, pch = 22, pt.bg = RColorBrewer::brewer.pal(9, "Greens"), col = "black", xpd = TRUE, bty = "n", cex = 0.8)
     }
 

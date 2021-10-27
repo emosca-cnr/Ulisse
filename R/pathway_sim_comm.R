@@ -9,8 +9,6 @@
 #' @return list of two data frames containing pathway network and vertex similarity
 #' @import igraph
 #' @importFrom  RColorBrewer brewer.pal
-#' @importFrom  dmfind round
-#' @importFrom  dmfind linear_map
 #' @export
 #'
 pathway_sim_comm <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=c(0.5, 0.1), all_gs=TRUE, comm_method=c('auto', 'fastgreedy', 'multilev'), set_sim_df=NULL){
