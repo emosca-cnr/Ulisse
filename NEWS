@@ -1,5 +1,9 @@
+Ulisse version 1.2.2
+- added functions for ora pipeline and ora comparison
+
 Ulisse version 1.2.1
 - addition of a function that handles gene set list filtering
+- update pathway cross-talk
 
 Ulisse version 1.2
 - name changed to Ulisse
