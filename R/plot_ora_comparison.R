@@ -23,9 +23,6 @@ plot_ora_comparison <- function(ora_res_list=NULL, p_sig=0.001, p_max=0.1, dir_o
   }else{
     ora_names <- names(ora_res_list)
   }
-  if(is.null(col_pal)){
-    col_pal <- viridis::turbo(length(ora_res_list))
-  }
 
 
   ora_res_merged <- merge(ora_res_list[[1]][, c("gsid", "name", "er", p_type)], ora_res_list[[2]][, c("gsid", "name", "er", p_type)], by=c("gsid", "name"), sort=F, suffixes = c(paste0("_", ora_names[1:2])))
@@ -46,21 +43,29 @@ plot_ora_comparison <- function(ora_res_list=NULL, p_sig=0.001, p_max=0.1, dir_o
   ora_res_merged_filt$all_under_p_max <- FALSE
   ora_res_merged_filt$all_under_p_max[all_ok] <- TRUE
 
-  cut_val <- unlist(ora_res_merged_filt[, p_columns])
-  cex_lev <- cut(-log10(cut_val), breaks = c(-p_max, -log10(p_max), -log10(p_sig), -log10(min(cut_val))))
+  p_val <- unlist(ora_res_merged_filt[, p_columns])
+  p_fact <- cut(-log10(p_val), breaks = c(-p_max, -log10(p_max), -log10(p_sig), -log10(min(p_val)))) #3 values
+
+  er_val <- unlist(ora_res_merged_filt[, er_columns])
+  er_fact <- cut(er_val, breaks = 4) #4 values
 
   dir.create(dir_out, recursive = T)
 
-  jpeg(paste0(dir_out, "/ora_res_dotplot.jpg"), width = 200, height = 200, units="mm", res=300)
+  if(is.null(col_pal)){
+    col_pal1 <- viridis::turbo(length(ora_res_list)) #conditions
+    col_pal2 <- viridis::viridis(3) #p_values
+  }
+
+  jpeg(paste0(dir_out, "/ora_res_dotplot1.jpg"), width = 200, height = 200, units="mm", res=300)
 
   par(mar=mar)
   par(mgp=mgp)
   layout(matrix(1:2, ncol = 2), widths = c(0.9, 0.1))
 
-  plot(ora_res_merged_filt[, er_columns[1]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(cex_lev)[1:nrow(ora_res_merged_filt)]], pch=16, col=adjustcolor(col_pal[1], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis, xlim = c(min(ora_res_merged_filt[, er_columns]), max(ora_res_merged_filt[, er_columns])))
+  plot(ora_res_merged_filt[, er_columns[1]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(p_fact)[1:nrow(ora_res_merged_filt)]], pch=16, col=adjustcolor(col_pal1[1], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis, xlim = c(min(ora_res_merged_filt[, er_columns]), max(ora_res_merged_filt[, er_columns])))
 
   for(i in 2:length(ora_res_list)){
-    points(ora_res_merged_filt[, er_columns[i]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(cex_lev)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=adjustcolor(col_pal[i], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis)
+    points(ora_res_merged_filt[, er_columns[i]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(p_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=adjustcolor(col_pal1[i], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis)
   }
 
   abline(h=1:nrow(ora_res_merged_filt), col="gray", lty=3)
@@ -70,9 +75,37 @@ plot_ora_comparison <- function(ora_res_list=NULL, p_sig=0.001, p_max=0.1, dir_o
 
   par(mar=c(0, 0, 0, 1))
   plot.new()
-  legend("center", pch=16, pt.cex=c(0.4, 1, 1.6, rep(1, length(ora_res_list))), legend =c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig), ora_names), cex=cex.axis, col=c(1, 1, 1, col_pal))
+  legend("center", pch=16, pt.cex=c(0.4, 1, 1.6, rep(1, length(ora_res_list))), legend =c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig), ora_names), cex=cex.axis, col=c(1, 1, 1, col_pal1))
 
   dev.off()
+
+
+  jpeg(paste0(dir_out, "/ora_res_dotplot2.jpg"), width = 200, height = 200, units="mm", res=300)
+
+  par(mar=mar)
+  par(mgp=mgp)
+  layout(matrix(1:2, ncol = 2), widths = c(0.85, 0.15))
+
+  plot(rep(1, nrow(ora_res_merged_filt)), 1:nrow(ora_res_merged_filt), cex=c(1, 1.3, 1.6, 2)[as.numeric(er_fact)[1:nrow(ora_res_merged_filt)]], pch=16, col=adjustcolor(col_pal2[as.numeric(p_fact)[1:nrow(ora_res_merged_filt)]], 0.8), xaxt="none", yaxt="none", ylab="", xlab="", cex.axis=cex.axis, xlim = c(0.5, length(ora_res_list)+0.5))
+
+  for(i in 2:length(ora_res_list)){
+    points(rep(i, nrow(ora_res_merged_filt)), 1:nrow(ora_res_merged_filt), cex=c(1, 1.3, 1.6, 2)[as.numeric(er_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=adjustcolor(col_pal2[as.numeric(p_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], 0.8), cex.axis=cex.axis)
+  }
+
+  abline(h=1:nrow(ora_res_merged_filt), col="gray", lty=3)
+  abline(v=1:length(ora_res_list), col="gray", lty=3)
+
+  axis(1, at=1:length(ora_res_list), ora_names, cex.axis=cex.axis, las=2, tick = F)
+  axis(2, at=1:nrow(ora_res_merged_filt), ora_res_merged_filt$name, cex.axis=cex.axis, las=2, tick = F)
+  axis(2, at=(1:nrow(ora_res_merged_filt))[all_ok], ora_res_merged_filt$name[all_ok], cex.axis=cex.axis, las=2, tick = F, font=2)
+
+  par(mar=c(mar[1], 0, mar[3], 1))
+  plot.new()
+  legend("center", pt.cex=c(1, 1.3, 1.6, 2), legend = levels(er_fact), cex=cex.axis, pch=1)
+  legend("bottom", pch=16, legend=c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig)), cex=cex.axis, col=col_pal2)
+
+  dev.off()
+
 
   return(ora_res_merged_filt)
 
