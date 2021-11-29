@@ -17,6 +17,8 @@ plot_ora_comparison(
 )
 }
 \arguments{
+\item{ora_res_list}{list of results of ora_pipeline}
+
 \item{p_sig}{thresold for significant pathways}
 
 \item{p_max}{maximum p-value allowed for marginally significant pathways}
@@ -31,11 +33,10 @@ plot_ora_comparison(
 
 \item{use_nominal_p}{whether to use or not nominal p-values}
 
-\item{ora_res_1}{result of ora_pipeline}
-
-\item{ora_res_2}{another result of ora_pipeline}
-
-\item{ora_names}{project names}
+\item{col_pal}{color palette function}
+}
+\value{
+data.frame with merged results only for pathways that satisfy p_sig in at least one condition
 }
 \description{
 Plot a comparion between two ORAs

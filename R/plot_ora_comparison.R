@@ -1,15 +1,15 @@
 #' Plot a comparion between two ORAs
-#' @param ora_res_1 result of ora_pipeline
-#' @param ora_res_2 another result of ora_pipeline
+#' @param ora_res_list list of results of ora_pipeline
 #' @param p_sig thresold for significant pathways
 #' @param p_max maximum p-value allowed for marginally significant pathways
 #' @param dir_out output directory
-#' @param ora_names project names
 #' @param mar mar parameter
 #' @param mgp mgp parameter
 #' @param cex.axis cex.axis
 #' @param use_nominal_p whether to use or not nominal p-values
-#' @importFrom viridis turbo
+#' @param col_pal color palette function
+#' @return data.frame with merged results only for pathways that satisfy p_sig in at least one condition
+#' @importFrom viridis turbo viridis
 #' @export
 
 plot_ora_comparison <- function(ora_res_list=NULL, p_sig=0.001, p_max=0.1, dir_out="./", mar=c(2.5, 20, 1, 1), mgp=c(1.2, 0.3, 0), cex.axis=0.6, use_nominal_p=TRUE, col_pal=NULL){
