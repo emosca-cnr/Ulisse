@@ -5,30 +5,23 @@
 \title{Plot a comparion between two ORAs}
 \usage{
 plot_ora_comparison(
-  ora_res_1 = NULL,
-  ora_res_2 = NULL,
+  ora_res_list = NULL,
   p_sig = 0.001,
   p_max = 0.1,
   dir_out = "./",
-  ora_names = c("1", "2"),
   mar = c(2.5, 20, 1, 1),
   mgp = c(1.2, 0.3, 0),
   cex.axis = 0.6,
-  use_nominal_p = TRUE
+  use_nominal_p = TRUE,
+  col_pal = NULL
 )
 }
 \arguments{
-\item{ora_res_1}{result of ora_pipeline}
-
-\item{ora_res_2}{another result of ora_pipeline}
-
 \item{p_sig}{thresold for significant pathways}
 
 \item{p_max}{maximum p-value allowed for marginally significant pathways}
 
 \item{dir_out}{output directory}
-
-\item{ora_names}{project names}
 
 \item{mar}{mar parameter}
 
@@ -37,6 +30,12 @@ plot_ora_comparison(
 \item{cex.axis}{cex.axis}
 
 \item{use_nominal_p}{whether to use or not nominal p-values}
+
+\item{ora_res_1}{result of ora_pipeline}
+
+\item{ora_res_2}{another result of ora_pipeline}
+
+\item{ora_names}{project names}
 }
 \description{
 Plot a comparion between two ORAs
