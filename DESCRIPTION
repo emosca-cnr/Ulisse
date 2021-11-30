@@ -12,6 +12,12 @@ RoxygenNote: 7.1.2
 Imports:
   igraph,
   parallel,
-  RColorBrewer
+  RColorBrewer,
+  DOSE,
+  gtools,
+  kit,
+  msigdbr,
+  qvalue,
+  viridis
 Depends:
   R (>= 3.2.1)

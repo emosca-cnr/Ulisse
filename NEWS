@@ -1,5 +1,6 @@
 Ulisse version 1.2.3
 - improved plot_ora_comparison
+- translation of ora res into enrichResult class
 
 Ulisse version 1.2.2
 - added functions for ora pipeline and ora comparison

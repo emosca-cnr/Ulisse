@@ -3,6 +3,7 @@
 #' @param bb other elements (black balls)
 #' @param gsl named list of sets
 #' @param p_adj_method p value adjustment method, see p.adjust.methods
+#' @importFrom qvalue qvalue
 #' @export
 
 ora <- function(wb, bb, gsl, p_adj_method='fdr'){
@@ -15,8 +16,9 @@ ora <- function(wb, bb, gsl, p_adj_method='fdr'){
   out$exp <- out$wb * out$bd / out$N
   out$id <- rownames(out)
   out$p_adj <- p.adjust(out$p, method = p_adj_method)
+  out$q_val <- qvalue::qvalue(p=out$p, lambda=0.05, pi0.method="bootstrap")$qvalues
   out$er <- out$wbd / out$exp
 
-  return(out[, c('id', 'N', 'wb', 'bb', 'bd', 'wbd', 'exp', 'er', 'p', 'p_adj')])
+  return(out[, c('id', 'N', 'wb', 'bb', 'bd', 'wbd', 'exp', 'er', 'p', 'p_adj', 'q_val')])
 
 }
