@@ -36,9 +36,9 @@ that participate in significative pathway cross-talks
 gene_funct_relevance() takes as an input the data.frame obtained from `pathway_cross_talk()` and the 
 adjacency matrix used as an input of `pathway_cross_talk()`. The function then extract the genes partecipating in
 significative cross-talks and calculate for each of them the functional diversity and the interactor diversity. 
-Considering a gene, the functional diversity is the number of pathway with which the gene has a link and participate 
-in the formation of a significative cross-talk; the interactor diversity is the number of gene with which the gene 
-has a link that contibute in the formation of a significative cross-talk.
+For each gene, the functional diversity is the number of pathway with which the gene participate in the formation
+of a cross-talk of interest; the interactor diversity is the number of different genes with which the gene has links 
+that contribute to the formation of a cross-talk
 }
 \examples{
 ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
