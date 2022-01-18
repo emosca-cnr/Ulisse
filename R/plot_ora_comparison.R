@@ -56,55 +56,55 @@ plot_ora_comparison <- function(ora_res_list=NULL, p_sig=0.001, p_max=0.1, dir_o
     col_pal2 <- viridis::viridis(3) #p_values
   }
 
-  jpeg(paste0(dir_out, "/ora_res_dotplot1.jpg"), width = 200, height = 200, units="mm", res=300)
+  grDevices::jpeg(paste0(dir_out, "/ora_res_dotplot1.jpg"), width = 200, height = 200, units="mm", res=300)
 
-  par(mar=mar)
-  par(mgp=mgp)
-  layout(matrix(1:2, ncol = 2), widths = c(0.9, 0.1))
+  graphics::par(mar=mar)
+  graphics::par(mgp=mgp)
+  graphics::layout(matrix(1:2, ncol = 2), widths = c(0.9, 0.1))
 
-  plot(ora_res_merged_filt[, er_columns[1]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(p_fact)[1:nrow(ora_res_merged_filt)]], pch=16, col=adjustcolor(col_pal1[1], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis, xlim = c(min(ora_res_merged_filt[, er_columns]), max(ora_res_merged_filt[, er_columns])))
-
-  for(i in 2:length(ora_res_list)){
-    points(ora_res_merged_filt[, er_columns[i]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(p_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=adjustcolor(col_pal1[i], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis)
-  }
-
-  abline(h=1:nrow(ora_res_merged_filt), col="gray", lty=3)
-
-  axis(2, at=1:nrow(ora_res_merged_filt), ora_res_merged_filt$name, cex.axis=cex.axis, las=2, tick = F)
-  axis(2, at=(1:nrow(ora_res_merged_filt))[all_ok], ora_res_merged_filt$name[all_ok], cex.axis=cex.axis, las=2, tick = F, font=2)
-
-  par(mar=c(0, 0, 0, 1))
-  plot.new()
-  legend("center", pch=16, pt.cex=c(0.4, 1, 1.6, rep(1, length(ora_res_list))), legend =c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig), ora_names), cex=cex.axis, col=c(1, 1, 1, col_pal1))
-
-  dev.off()
-
-
-  jpeg(paste0(dir_out, "/ora_res_dotplot2.jpg"), width = 200, height = 200, units="mm", res=300)
-
-  par(mar=mar)
-  par(mgp=mgp)
-  layout(matrix(1:2, ncol = 2), widths = c(0.85, 0.15))
-
-  plot(rep(1, nrow(ora_res_merged_filt)), 1:nrow(ora_res_merged_filt), cex=c(1, 1.3, 1.6, 2)[as.numeric(er_fact)[1:nrow(ora_res_merged_filt)]], pch=16, col=adjustcolor(col_pal2[as.numeric(p_fact)[1:nrow(ora_res_merged_filt)]], 0.8), xaxt="none", yaxt="none", ylab="", xlab="", cex.axis=cex.axis, xlim = c(0.5, length(ora_res_list)+0.5))
+  plot(ora_res_merged_filt[, er_columns[1]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(p_fact)[1:nrow(ora_res_merged_filt)]], pch=16, col=grDevices::adjustcolor(col_pal1[1], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis, xlim = c(min(ora_res_merged_filt[, er_columns]), max(ora_res_merged_filt[, er_columns])))
 
   for(i in 2:length(ora_res_list)){
-    points(rep(i, nrow(ora_res_merged_filt)), 1:nrow(ora_res_merged_filt), cex=c(1, 1.3, 1.6, 2)[as.numeric(er_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=adjustcolor(col_pal2[as.numeric(p_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], 0.8), cex.axis=cex.axis)
+    graphics::points(ora_res_merged_filt[, er_columns[i]], 1:nrow(ora_res_merged_filt), cex=c(0.4, 1, 1.6)[as.numeric(p_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=grDevices::adjustcolor(col_pal1[i], 0.8), yaxt="none", ylab="", xlab="ER", cex.axis=cex.axis)
   }
 
-  abline(h=1:nrow(ora_res_merged_filt), col="gray", lty=3)
-  abline(v=1:length(ora_res_list), col="gray", lty=3)
+  graphics::abline(h=1:nrow(ora_res_merged_filt), col="gray", lty=3)
 
-  axis(1, at=1:length(ora_res_list), ora_names, cex.axis=cex.axis, las=2, tick = F)
-  axis(2, at=1:nrow(ora_res_merged_filt), ora_res_merged_filt$name, cex.axis=cex.axis, las=2, tick = F)
-  axis(2, at=(1:nrow(ora_res_merged_filt))[all_ok], ora_res_merged_filt$name[all_ok], cex.axis=cex.axis, las=2, tick = F, font=2)
+  graphics::axis(2, at=1:nrow(ora_res_merged_filt), ora_res_merged_filt$name, cex.axis=cex.axis, las=2, tick = F)
+  graphics::axis(2, at=(1:nrow(ora_res_merged_filt))[all_ok], ora_res_merged_filt$name[all_ok], cex.axis=cex.axis, las=2, tick = F, font=2)
 
-  par(mar=c(mar[1], 0, mar[3], 1))
-  plot.new()
-  legend("center", pt.cex=c(1, 1.3, 1.6, 2), legend = levels(er_fact), cex=cex.axis, pch=1)
-  legend("bottom", pch=16, legend=c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig)), cex=cex.axis, col=col_pal2)
+  graphics::par(mar=c(0, 0, 0, 1))
+  graphics::plot.new()
+  graphics::legend("center", pch=16, pt.cex=c(0.4, 1, 1.6, rep(1, length(ora_res_list))), legend =c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig), ora_names), cex=cex.axis, col=c(1, 1, 1, col_pal1))
 
-  dev.off()
+  grDevices::dev.off()
+
+
+  grDevices::jpeg(paste0(dir_out, "/ora_res_dotplot2.jpg"), width = 200, height = 200, units="mm", res=300)
+
+  graphics::par(mar=mar)
+  graphics::par(mgp=mgp)
+  graphics::layout(matrix(1:2, ncol = 2), widths = c(0.85, 0.15))
+
+  plot(rep(1, nrow(ora_res_merged_filt)), 1:nrow(ora_res_merged_filt), cex=c(1, 1.3, 1.6, 2)[as.numeric(er_fact)[1:nrow(ora_res_merged_filt)]], pch=16, col=grDevices::adjustcolor(col_pal2[as.numeric(p_fact)[1:nrow(ora_res_merged_filt)]], 0.8), xaxt="none", yaxt="none", ylab="", xlab="", cex.axis=cex.axis, xlim = c(0.5, length(ora_res_list)+0.5))
+
+  for(i in 2:length(ora_res_list)){
+    graphics::points(rep(i, nrow(ora_res_merged_filt)), 1:nrow(ora_res_merged_filt), cex=c(1, 1.3, 1.6, 2)[as.numeric(er_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], pch=16, col=grDevices::adjustcolor(col_pal2[as.numeric(p_fact)[(((i-1)*nrow(ora_res_merged_filt))+1):(nrow(ora_res_merged_filt)*i)]], 0.8), cex.axis=cex.axis)
+  }
+
+  graphics::abline(h=1:nrow(ora_res_merged_filt), col="gray", lty=3)
+  graphics::abline(v=1:length(ora_res_list), col="gray", lty=3)
+
+  graphics::axis(1, at=1:length(ora_res_list), ora_names, cex.axis=cex.axis, las=2, tick = F)
+  graphics::axis(2, at=1:nrow(ora_res_merged_filt), ora_res_merged_filt$name, cex.axis=cex.axis, las=2, tick = F)
+  graphics::axis(2, at=(1:nrow(ora_res_merged_filt))[all_ok], ora_res_merged_filt$name[all_ok], cex.axis=cex.axis, las=2, tick = F, font=2)
+
+  graphics::par(mar=c(mar[1], 0, mar[3], 1))
+  graphics::plot.new()
+  graphics::legend("center", pt.cex=c(1, 1.3, 1.6, 2), legend = levels(er_fact), cex=cex.axis, pch=1)
+  graphics::legend("bottom", pch=16, legend=c(paste0(">", p_max), paste0("<", p_max), paste0("<", p_sig)), cex=cex.axis, col=col_pal2)
+
+  grDevices::dev.off()
 
 
   return(ora_res_merged_filt)

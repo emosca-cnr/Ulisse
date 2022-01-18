@@ -51,7 +51,7 @@ enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'),
   }
 
   if(is.null(set_sim_df)){
-    set_sim_df <- data.frame(t(combn(names(x), 2)), stringsAsFactors = FALSE)
+    set_sim_df <- data.frame(t(utils::combn(names(x), 2)), stringsAsFactors = FALSE)
     colnames(set_sim_df)[1:2] <- c('set1', 'set2')
     for(j in 1:nrow(set_sim_df)){
       if(j %% 1000 ==0 ){
@@ -136,30 +136,30 @@ enrichment_map_with_plot <- function(x, gs_list, method=c('overlap', 'jaccard'),
     }
 
     #without labels
-    jpeg(file, units='mm', width = img.width, height = img.height, res=img.res)
-    par(mar=c(2, 0, 0, 0), oma=c(0, 0, 0, 0))
+    grDevices::jpeg(file, units='mm', width = img.width, height = img.height, res=img.res)
+    graphics::par(mar=c(2, 0, 0, 0), oma=c(0, 0, 0, 0))
     igraph::plot.igraph(path_mod, mark.groups = mark.groups, mark.expand = 2, layout=L, ...)
 
     if(is.null(vertex.color) & vertex.shape != 'pie'){
-      legend_text <- c(round(sort(x)[1], 2), rep(NA, 3), round(median(x), 2), rep(NA, 3), round(sort(x)[length(x)], 2))
-      legend("bottomright", legend = legend_text, pch = 22, pt.bg = RColorBrewer::brewer.pal(9, "Greens"), col = "black", xpd = TRUE, bty = "n", cex = 0.8)
+      legend_text <- c(round(sort(x)[1], 2), rep(NA, 3), round(stats::median(x), 2), rep(NA, 3), round(sort(x)[length(x)], 2))
+      graphics::legend("bottomright", legend = legend_text, pch = 22, pt.bg = RColorBrewer::brewer.pal(9, "Greens"), col = "black", xpd = TRUE, bty = "n", cex = 0.8)
     }
 
-    dev.off()
+    grDevices::dev.off()
 
     #with LABELS
     igraph::V(path_mod)$label[temp[, 4]] <- temp[, 3]
 
-    jpeg(paste(gsub(".jpg", "_labels", file), ".jpg", sep=''), units='mm', width = img.width, height = img.height, res=img.res)
-    par(mar=c(2, 0, 0, 0), oma=c(0, 0, 0, 0))
+    grDevices::jpeg(paste(gsub(".jpg", "_labels", file), ".jpg", sep=''), units='mm', width = img.width, height = img.height, res=img.res)
+    graphics::par(mar=c(2, 0, 0, 0), oma=c(0, 0, 0, 0))
     igraph::plot.igraph(path_mod, mark.groups = mark.groups, layout=L, vertex.label.cex=vertex.label.cex, vertex.label.dist=vertex.label.dist, vertex.label.degree=vertex.label.degree, vertex.label.font=vertex.label.font, vertex.pie=V(path_mod)$pie, ...)
 
     if(is.null(vertex.color) & vertex.shape != 'pie'){
-      legend_text <- c(round(sort(x)[1], 2), rep(NA, 3), round(median(x), 2), rep(NA, 3), round(sort(x)[length(x)], 2))
-      legend("bottomright", legend = legend_text, pch = 22, pt.bg = RColorBrewer::brewer.pal(9, "Greens"), col = "black", xpd = TRUE, bty = "n", cex = 0.8)
+      legend_text <- c(round(sort(x)[1], 2), rep(NA, 3), round(stats::median(x), 2), rep(NA, 3), round(sort(x)[length(x)], 2))
+      graphics::legend("bottomright", legend = legend_text, pch = 22, pt.bg = RColorBrewer::brewer.pal(9, "Greens"), col = "black", xpd = TRUE, bty = "n", cex = 0.8)
     }
 
-    dev.off()
+    grDevices::dev.off()
   }
   return(list(network=out, sim_coeff=set_sim_df))
 

@@ -123,7 +123,7 @@ gsea <- function(rl, gsl, k=100, ord.mode=-1, mc_cores_path=1, mc_cores_perm=1){
     rm(all_nes)
 
     #out table
-    out[[i]] <- data.frame(id=rownames(res[[i]]), es=res[[i]][, 1], p_val=p_val, adj_p_val=p.adjust(p_val, method='fdr'), nes=nes[, 1], FDRq=fdrq, stringsAsFactors=FALSE)
+    out[[i]] <- data.frame(id=rownames(res[[i]]), es=res[[i]][, 1], p_val=p_val, adj_p_val=stats::p.adjust(p_val, method='fdr'), nes=nes[, 1], FDRq=fdrq, stringsAsFactors=FALSE)
 
   }
 

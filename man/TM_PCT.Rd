@@ -64,7 +64,7 @@ CT and permutd CT are then used to calcualte `p-value` and `FDR`
 \examples{
  
  ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
- adj <- matrix(data = sample(c(0,1), 6*6, replace = T), nrow = 6, 
+ adj <- matrix(data = sample(c(0,1), 6*6, replace = TRUE), nrow = 6, 
  ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
  wgt <- rep(1, 6)
  memb <- c(1, 1, 2, 2, 3, 3)

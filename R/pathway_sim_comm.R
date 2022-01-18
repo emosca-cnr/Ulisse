@@ -26,7 +26,7 @@ pathway_sim_comm <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=c
 
 
   if(is.null(set_sim_df)){
-    set_sim_df <- data.frame(t(combn(names(x), 2)), stringsAsFactors = FALSE)
+    set_sim_df <- data.frame(t(utils::combn(names(x), 2)), stringsAsFactors = FALSE)
     colnames(set_sim_df)[1:2] <- c('set1', 'set2')
     for(j in 1:nrow(set_sim_df)){
       if(j %% 1000 ==0 ){
