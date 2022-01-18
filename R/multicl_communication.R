@@ -43,7 +43,7 @@
 #' DEG_list <- list("cl1|cl2" = list("cl1" = cl1, "cl2" = cl2), 
 #' "cl2|cl3" = list("cl2" = cl2, "cl3" = cl3),
 #' "cl1|cl3" = list("cl1" = cl1, "cl3" = cl3))
-#' adj <- matrix(data = sample(c(0,1), 9*9, replace = T), nrow = 9, ncol = 9, 
+#' adj <- matrix(data = sample(c(0,1), 9*9, replace = TRUE), nrow = 9, ncol = 9, 
 #' dimnames = list(LETTERS[1:9], LETTERS[1:9]))
 #' ligand <- c("A", "D", "G", "F", "C", "I")
 #' receptor <- c("B", "E", "H", "C", "I")
