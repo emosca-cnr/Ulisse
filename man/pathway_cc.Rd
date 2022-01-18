@@ -2,7 +2,7 @@
 % Please edit documentation in R/pathway_cc.R
 \name{pathway_cc}
 \alias{pathway_cc}
-\title{Caluclate cross-talks between pathways}
+\title{Function to caluclate sub-components pathway score}
 \usage{
 pathway_cc(
   pathway_list,
@@ -18,14 +18,45 @@ pathway_cc(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{k}{numebr of permutation of the adjacency amtrix}
+\item{weight}{weights of the genes in gene_network_adj}
+
+\item{k}{numebr of permutation of the adjacency matrix}
 
 \item{mc_cores_cc}{numebr of threads to be used for cc calculation}
 
 \item{mc_cores_perm}{number of threads to be used for permutations}
-
-\item{wight}{an ordered weight vertex vector}
+}
+\value{
+The function returns a list of two object:
+\enumerate{
+ \item membership: results of [igraph::components()] for each pathway considered
+ \item {pathway_cc}: a data frame with
+\itemize{
+ \item pathway: name of the pathway where the components scores are calcualted
+ \item ID: id of the component of the pathway
+ \item score: component score
+ \item n_gene: number of genes in the component
+ \item n_link: number of links in the component
+ \item gene: names of the genes in the component
+ \item p_value: empirical p-value calculated by using the permutation approcah
+ \item eFDR: empirical FDR
+}
+}
 }
 \description{
-Caluclate cross-talks between pathways
+Calculates the score of each pathway connected components
+}
+\details{
+By coupling the pathway data to the adjacency matrix, the function identifies the pathway components as
+ connected components (see [igraph::components()] for details). For each component, the function calcualtes the score 
+ as described in the article. Ths approach is applied also to all permuted version of the adjacency matrix. 
+ The score and the permuted score are then used to calcualte p-value and FDR
+}
+\examples{
+ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
+adj <- matrix(data = sample(c(0,1), 6*6, replace = T), nrow = 6, 
+ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+wgt <- rep(1, 6)
+p_cc <- pathway_cc(pathway_list = ptw_list, 
+gene_network_adj <- adj, weight = wgt, mc_cores_cc = 1, mc_cores_perm = 1, k = 9)
 }

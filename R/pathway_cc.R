@@ -1,10 +1,37 @@
-#' Caluclate cross-talks between pathways
+#' Function to caluclate sub-components pathway score
+#' @description Calculates the score of each pathway connected components
+#' @details By coupling the pathway data to the adjacency matrix, the function identifies the pathway components as
+#'  connected components (see [igraph::components()] for details). For each component, the function calcualtes the score 
+#'  as described in the article. Ths approach is applied also to all permuted version of the adjacency matrix. 
+#'  The score and the permuted score are then used to calcualte p-value and FDR
 #' @param pathway_list a named list of genes grouped into pathways
 #' @param gene_network_adj gene network adjacency matrix
-#' @param wight an ordered weight vertex vector
+#' @param weight weights of the genes in gene_network_adj
 #' @param mc_cores_cc numebr of threads to be used for cc calculation
 #' @param mc_cores_perm number of threads to be used for permutations
-#' @param k numebr of permutation of the adjacency amtrix
+#' @param k numebr of permutation of the adjacency matrix
+#' @return The function returns a list of two object:
+#' \enumerate{
+#'  \item membership: results of [igraph::components()] for each pathway considered
+#'  \item {pathway_cc}: a data frame with
+#' \itemize{
+#'  \item pathway: name of the pathway where the components scores are calcualted
+#'  \item ID: id of the component of the pathway
+#'  \item score: component score
+#'  \item n_gene: number of genes in the component
+#'  \item n_link: number of links in the component
+#'  \item gene: names of the genes in the component
+#'  \item p_value: empirical p-value calculated by using the permutation approcah
+#'  \item eFDR: empirical FDR
+#' }
+#' }
+#' @examples 
+#' ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
+#' adj <- matrix(data = sample(c(0,1), 6*6, replace = T), nrow = 6, 
+#' ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+#' wgt <- rep(1, 6)
+#' p_cc <- pathway_cc(pathway_list = ptw_list, 
+#' gene_network_adj <- adj, weight = wgt, mc_cores_cc = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
 #' @export
@@ -12,7 +39,6 @@
 
 pathway_cc <- function (pathway_list, gene_network_adj,
                         weight, k=9, mc_cores_cc = 2, mc_cores_perm = 2
-                        #cluster = 4
 ) {
   gene_network_adj <- sign(gene_network_adj)
   perm_list <- mclapply(1:k, function(x) {
@@ -52,30 +78,28 @@ pathway_cc <- function (pathway_list, gene_network_adj,
                             ID = 1:cc$no,
                             score = rep(0, cc$no),
                             n_gene = rep(0, cc$no),
-                            n_link = rep(0, cc$no), stringsAsFactors = F)
+                            n_link = rep(0, cc$no), 
+                            gene = rep(0, cc$no),
+                            stringsAsFactors = F)
       
       
       for(j in 1:cc$no) {
         cc_genes <- names(cc$membership[which(cc$membership==j)])
-        #CCgene_network_adj_ij <- xx2[[x]]
-        gene_network_adj_ijW <- sum(t(weight[cc_genes]) %*% as.matrix(xx2[[x]][cc_genes, cc_genes]))
-        #gene_network_adj_ijW <- gene_network_adj_ijW %*% weight[idx[cc_genes]]
+        gene_network_adj_ijW <- sum(t(weight[cc_genes]) %*% as.matrix(xx2[[x]][cc_genes, cc_genes]))/2
         gene_network_adj_ijW <- gene_network_adj_ijW/length(cc_genes)
         cc_data$score[j] <- gene_network_adj_ijW
         cc_data$n_gene[j] <- length(cc_genes)
-        cc_data$n_link[j] <- sum(xx2[[x]][cc_genes, cc_genes])
+        cc_data$n_link[j] <- sum(xx2[[x]][cc_genes, cc_genes])/2
+        cc_data$gene[j] <- paste(cc_genes, collapse = ";")
         
         
       }
-      #cc_data <- cc_data[which(cc_data$score > 0),, drop = F]
       perm_cc <- mclapply(1:length(xxPL), function(j) {
         tmp <- matrix(data=0, nrow = nrow(cc_data), dimnames = list(cc_data$ID))
         z = 1
         for (k in cc_data$ID) {
           cc_genes <- names(cc$membership[which(cc$membership==k)])
-          #CCgene_network_adj_ij <- xx2[[x]]
           gene_network_adj_ijW <- sum(t(weight[cc_genes]) %*% as.matrix(xxPL[[j]][[x]][cc_genes, cc_genes]))
-          #gene_network_adj_ijW <- gene_network_adj_ijW %*% weight[idx[cc_genes]]
           gene_network_adj_ijW <- gene_network_adj_ijW/length(cc_genes)
           tmp[z,1] <- gene_network_adj_ijW
           z = z+1
@@ -120,7 +144,6 @@ pathway_cc <- function (pathway_list, gene_network_adj,
       return(tmp)
     }, mc.cores = mc_cores_cc)
     cc_data <- do.call(rbind, cc_data)
-    #cc_data <- cc_data[which(cc_data$score >0),]
     
     perm <- mclapply(1:length(pct), function(k) {
       tmp <- pct[[k]]$perm
@@ -135,3 +158,4 @@ pathway_cc <- function (pathway_list, gene_network_adj,
   }
   
 }
+

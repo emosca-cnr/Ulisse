@@ -4,7 +4,8 @@
 #' @param min_size minimum gene set size
 #' @param max_size maximum gene set size
 #' @export
-#' 
+
+
 filter_gsl <- function(gsl, universe, min_size=5, max_size=500){
   
   ans <- lapply(gsl, function(x) x[x %in% universe])

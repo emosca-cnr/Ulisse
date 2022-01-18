@@ -7,7 +7,8 @@
 calc_gs_perm(rll, perm, gs)
 }
 \arguments{
-\item{rll}{numeric matrix of genes-by-ranking criteria; each column contains numeric values; rownames are mandatory}
+\item{rll}{numeric matrix of genes-by-ranking criteria; 
+each column contains numeric values; rownames are mandatory}
 
 \item{perm}{vector of permuted names}
 

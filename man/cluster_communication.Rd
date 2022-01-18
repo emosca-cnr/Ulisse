@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_communication.R
 \name{cluster_communication}
 \alias{cluster_communication}
-\title{Caluclate communication between two clusters}
+\title{Function to caluclate communication between two clusters}
 \usage{
 cluster_communication(
   DEG_list,
@@ -14,7 +14,8 @@ cluster_communication(
 )
 }
 \arguments{
-\item{DEG_list}{a gene list composed by a vector for both clusters. The vector should be a weight vector named by gene}
+\item{DEG_list}{a gene list composed by a vector for both clusters. 
+The vector should be a weight vector named by gene}
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
@@ -26,6 +27,48 @@ cluster_communication(
 
 \item{mc_cores_perm}{number of threads to be used to calcualte permutation}
 }
+\value{
+The function returns a list of two objects:
+\enumerate{
+\item communications_info: a data.frame with the detailed description of the communication between the two clusters
+\itemize{
+\item cl1, cl2: name of the two clusters (derived from the name of the list in `DEG_list`)
+\item cl1_gene, cl2_gene: genes that are ligand or receptor in cl1 or cl2 that partecipate to the communication
+\item cl1_type, cl2_type: type of the gene in cl1/cl2 that participate in the communication. Can be ligand, receptor
+or ligand/receptor if the gene is present in both `ligand` and `receptor` vectors and it is supposed it behave 
+as a ligand 
+in some conditions and as a receptors in others
+\item score: the score of the communication between the two genes in cl1 and cl2, claculated considering their weights
+}
+\item {cc_communications}: a data.frame with the communication score
+\itemize{
+\item cl1, cl2: names of the two clusters
+\item ccc_score: communication score calculated on all the interacting ligand/receptor genes in the two clusters
+\item ngenes_cl1, ngenes_cl2: number of genes in cl1 and cl2, respectively, that participate to the communication score
+\item nlink: number of links beteewn the genes in cl1 and cl2
+\item p_value: empirical p-value calculated by using the permutation approcah
+}
+}
+}
 \description{
-Caluclate communication between two clusters
+cluster_communication calculates a score for the communication between the two provided clusters
+}
+\details{
+The `gene_network_adj` is modified by using `ligand` and `receptor` information to remove the  
+ligand-ligand and receptor-receptor interactions. Then, CT formula is used to calculate a score for the communication 
+between the two clusters considering only the genes listed in the `DEG_list` and their weights. The same approach is 
+applied also to the `k` permuted version of `gene_network_adj` to calculate the p-value.
+}
+\examples{
+cl1 <- rep(1, 4)
+names(cl1) <- c( "A", "B", "C", "D")
+cl2 <- rep(1, 4)
+names(cl2) <- c( "E", "F", "G", "H")
+DEG_list <- list("cl1" = cl1, "cl2" = cl2)
+adj <- matrix(data = sample(c(0,1), 8*8, replace = T), nrow = 8, ncol = 8, 
+dimnames = list(LETTERS[1:8], LETTERS[1:8]))
+ligand <- c("A", "F", "C", "H", "G")
+receptor <- c("E", "B", "G", "D", "F")
+cc <- cluster_communication(DEG_list = DEG_list, gene_network_adj = adj, ligand = ligand, 
+receptor = receptor)
 }

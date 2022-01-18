@@ -2,12 +2,12 @@
 % Please edit documentation in R/pathway_cross_talk.R
 \name{pathway_cross_talk}
 \alias{pathway_cross_talk}
-\title{Caluclate cross-talks between pathways}
+\title{Function to caluclate cross-talks between pathways}
 \usage{
 pathway_cross_talk(
   pathway_list,
   gene_network_adj,
-  weight = attr_v$Sp,
+  weight,
   mc_cores_pct = 2,
   mc_cores_perm = 1,
   k = 9
@@ -18,14 +18,42 @@ pathway_cross_talk(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
+\item{weight}{an vector of weights for each gene in gene_network_adj}
+
 \item{mc_cores_pct}{numebr of threads to be used for pathway cross talk calculation}
 
+\item{mc_cores_perm}{number of thread to be used in permutations}
+
 \item{k}{number of permutation of the adjacency matrix}
-
-\item{wight}{an ordered weight vertex vector}
-
-\item{mc_cores_permutation}{number of thread to be used in permutations}
+}
+\value{
+The function returns a table with:
+\itemize{
+ \item pathway_1, pathway_2: the pathway pair considered
+ \item pct: the CT value
+ \item ngenes_pathway_1, ngenes_pathway_2: number of genes involved in `pathway_1` and `pathway_2`, respectively
+ \item nlink: number of links between the genes in `pathway_1` and `pathway_2`
+ \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
+ \item p_value: p-value score calcualted by using the permutation approach
+ \item eFDR: empirical FDR
+}
 }
 \description{
-Caluclate cross-talks between pathways
+Calculates cross-talk between all pathway pairs that show a link between their exclusive genes
+}
+\details{
+The function defines a subset of the `gene_network_adj` for each pathway pair, 
+ with the exclusive genes of a pathway in the rows and the exclusive genes of the other in the columns. 
+ Only the pathway pairs that show a link in these subset will be considered. Then, the CT is calcluated, 
+ as described in the paper. This approach is applied to the original adjacency matrix and to all its permuted versions.
+ The CT values and the permuted CT are then used to calculated the empirical p-value and the FDR score
+}
+\examples{
+ 
+ ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
+ adj <- matrix(data = sample(c(0,1), 6*6, replace = T), nrow = 6, 
+ ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+ wgt <- rep(1, 6)
+ pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, 
+  mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 }

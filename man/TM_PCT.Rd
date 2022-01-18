@@ -2,16 +2,16 @@
 % Please edit documentation in R/TM_PCT.R
 \name{TM_PCT}
 \alias{TM_PCT}
-\title{Caluclate cross-talks between pathways}
+\title{Function to caluclates cross-talks between pathways of differente gene communities}
 \usage{
 TM_PCT(
   pathway_list,
   gene_network_adj,
-  membership = attr_v$comm_id,
+  membership,
   mc_cores_pct = 2,
   mc_cores_perm = 2,
   mc_cores_tm = 2,
-  weight = attr_v$Sp,
+  weight,
   k = 9
 )
 }
@@ -20,18 +20,54 @@ TM_PCT(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{membership}{an ordered vector of vertex membership to a topological community}
+\item{membership}{membership of the gene in gene_network_adj to topological communities}
 
-\item{mc_cores_pct}{numebr of threads to be used to calculate cross talk between different communities}
+\item{mc_cores_pct}{numebr of threads to be used to calculate cross talk}
 
 \item{mc_cores_perm}{numebr of threads to be used to calcualte permutation}
 
 \item{mc_cores_tm}{number of threads to be used to calcualte TM-PCT on different communities combination}
 
-\item{k}{number of permutation of the adjacency matrix}
+\item{weight}{weights of the genes in gene_network_adj}
 
-\item{wight}{an ordered weight vertex vector}
+\item{k}{number of permutation of the adjacency matrix}
+}
+\value{
+The function returns a list of two object:
+\enumerate{
+ \item comm_pathway_list: the community pathway list used for TM-PCT calculation. Each list is named with the name 
+ of the gene community
+ \item {TM_PCT_res}: a data frame with
+\itemize{
+ \item commID_1, commID_2: community to which belongs the genes in `pathway_1` and `pathway_2`, respectively
+ \item pathway_1, pahtway_2: the pathway pair considered
+ \item score: TM-PCT score
+ \item ngenes_pathway_1, ngenes_pathway_2: number of genes involved in `pathway_1` and `pathway_2`, respectively
+ \item n_link: number of links between the pathways considered
+ \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
+ \item p_value: empirical p-value calculated by using the permutation approcah
+ \item eFDR: empirical FDR
+ }
+ }
 }
 \description{
-Caluclate cross-talks between pathways
+Calculates cross-talks between pathways composed by gene of different gene communities
+}
+\details{
+The function uses the `membership` data to reogranize the `pathway_list` as to obtain a list of 
+pathway list for each gene communities. In detail, gene will be grouped into communities and then grouped into pathways.
+At this point, the function calculates CT between each pathway pairs of different 
+communities that shows at least a link.
+This approach is applied also to the permuted version of the `gene_network_adj`. 
+CT and permutd CT are then used to calcualte `p-value` and `FDR`
+}
+\examples{
+ 
+ ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
+ adj <- matrix(data = sample(c(0,1), 6*6, replace = T), nrow = 6, 
+ ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
+ wgt <- rep(1, 6)
+ memb <- c(1, 1, 2, 2, 3, 3)
+ pct <- TM_PCT(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, membership = memb, 
+                mc_cores_tm = 1, mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 }
