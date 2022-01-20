@@ -61,11 +61,11 @@ of each cluster pair considering only the genes listed in the `DEG_list` and the
 applied also to the `k` permuted version of `gene_network_adj` to calculate the p-value and the FDR
 }
 \examples{
-cl1 <- rep(1, 4)
+cl1 <- rep(1, 3)
 names(cl1) <- c( "A", "B", "C")
-cl2 <- rep(1, 4)
+cl2 <- rep(1, 3)
 names(cl2) <- c("D", "E", "F")
-cl3 <- rep(1, 4)
+cl3 <- rep(1, 3)
 names(cl3) <- c("G", "H", "I")
 DEG_list <- list("cl1|cl2" = list("cl1" = cl1, "cl2" = cl2), 
 "cl2|cl3" = list("cl2" = cl2, "cl3" = cl3),
