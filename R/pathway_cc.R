@@ -117,7 +117,7 @@ pathway_cc <- function (pathway_list, gene_network_adj,
                       perm = perm_cc)
       zero <- cc_list$pathway_cc$ID[which(cc_list$pathway_cc$score == 0)]
       if(length(zero) != 0) {
-        cc_list$components_results$membership <- cc_list$components_results$membership[-which(cc_list$components_results$membership == zero)]
+        cc_list$components_results$membership <- cc_list$components_results$membership[-which(cc_list$components_results$membership %in% zero)]
         cc_list$pathway_cc <- cc_list$pathway_cc[which(cc_list$pathway_cc$score >0),]
         cc_list$perm <- lapply(cc_list$perm, function(l) {
           l <- l[-zero]
