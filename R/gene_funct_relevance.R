@@ -73,7 +73,7 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
         grDevices::jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20)
+             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
         plotrix::thigmophobe.labels(gene.data$nPTW,
                                     gene.data$nInteractors, 
                                     gene.data$gene, cex=0.5)
@@ -82,7 +82,7 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
         grDevices::jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20)
+             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
         grDevices::dev.off()
       }
       
@@ -91,7 +91,7 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
         grDevices::jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20)
+             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
         plotrix::thigmophobe.labels(gene.data$nPTW,
                                     gene.data$nInteractors, 
                                     gene.data$gene, cex=0.5)
@@ -100,7 +100,7 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
         grDevices::jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20)
+             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
         grDevices::dev.off()
       }
     }
