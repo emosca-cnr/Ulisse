@@ -86,7 +86,7 @@ multicl_communication <- function(DEG_list, gene_network_adj, k = 9, ligand = li
     x <- x[, "ccc_score", drop = F]
     return(x)
   }, mc.cores = mc_cores_perm)
-  p_val <- calc_p(p_list)
+  p_val <- as.vector(calc_p(p_list))
   
   out <- comm_list[[1]]
   out$p_value <- p_val

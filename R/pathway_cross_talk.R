@@ -114,7 +114,7 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
       x <- x[, "pct", drop = F]
       return(x)
     }, mc.cores = mc_cores_perm)
-    p_val <- calc_p(p_list)
+    p_val <- as.vector(calc_p(p_list))
     
     out <- pct[[1]]
     out$p_value <- p_val

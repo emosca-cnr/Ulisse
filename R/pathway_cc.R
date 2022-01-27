@@ -110,7 +110,7 @@ pathway_cc <- function (pathway_list, gene_network_adj,
       tmp <- cc_data[,3, drop=F]
       rownames(tmp) <- cc_data$ID
       perm_cc <- c(list(tmp), perm_cc)
-      cc_data$p_value <- calc_p(perm_cc)
+      cc_data$p_value <- as.vector(calc_p(perm_cc))
       
       cc_list <- list(components_results = cc,
                       pathway_cc = cc_data,

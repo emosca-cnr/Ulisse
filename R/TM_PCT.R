@@ -172,7 +172,7 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
         rownames(tmp) <- paste(pct$pathway_1, pct$pathway_2, sep = "|")
         p_list <- c(list(tmp), p_list)
         
-        p_val <- calc_p(p_list)
+        p_val <- as.vector(calc_p(p_list))
         out <- pct
         out$p_value <- p_val
         
