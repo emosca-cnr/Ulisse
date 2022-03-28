@@ -34,6 +34,7 @@
 #' gene_network_adj <- adj, weight = wgt, mc_cores_cc = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
+#' @import stringi
 #' @export
 
 
@@ -41,18 +42,16 @@ pathway_cc <- function (pathway_list, gene_network_adj,
                         weight, k=9, mc_cores_cc = 2, mc_cores_perm = 2
 ) {
   gene_network_adj <- sign(gene_network_adj)
-  perm_list <- mclapply(1:k, function(x) {
-    tmp <- matrix(as.numeric(gene_network_adj), ncol = ncol(gene_network_adj), 
-                  dimnames = list(sample(rownames(gene_network_adj), nrow(gene_network_adj))))
-    colnames(tmp) <- rownames(tmp)
-    return(tmp)
-  }, mc.cores = mc_cores_perm)
+  names(weight) <- rownames(gene_network_adj)
+  weight <- weight[weight !=0]
+  gene_network_adj[names(weight), names(weight)]
+  
   
   xx <- mclapply(pathway_list, function(x) {
-    idx <- which(rownames(gene_network_adj) %in% x)
-    return(gene_network_adj[idx,idx, drop = F])
+    tmp <- gene_network_adj[x, x, drop = F]
+    
+    return(tmp)
   }, mc.cores = mc_cores_cc)
-  names(weight) <- rownames(gene_network_adj)
   
   
   idx <- which(lapply(xx, function(n) sum(n)) !=0)
@@ -60,101 +59,78 @@ pathway_cc <- function (pathway_list, gene_network_adj,
     print("No pathway on which calculate CC")
     return("No pathway on which calculate CC")
   } else {
-    xx2 <- xx[idx]
+    xx <- xx[idx]
+    pathway_list <- pathway_list[idx]
     
-    xxPL <- mclapply(1:k, function(n){
-      mclapply(pathway_list[idx], function(x) {
-        idx <- which(rownames(perm_list[[n]]) %in% x)
-        return(perm_list[[n]][idx,idx, drop = F])
+    perm_list <- mclapply(1:k, function(x) {
+      tmp <- gene_network_adj
+      rownames(tmp) <- sample(rownames(tmp), nrow(tmp))
+      colnames(tmp) <- rownames(tmp)
+      out <- mclapply(pathway_list, function(x) {
+        tmp.2 <- tmp[x, x, drop = F]
+        
+        return(tmp.2)
       }, mc.cores = mc_cores_cc)
-    }, mc.cores = mc_cores_perm )
+    }, mc.cores = mc_cores_perm)
     
     
-    pct <- mclapply(1:length(xx2), function(x) {
-      
-      cc <- igraph::components(graph = igraph::graph_from_adjacency_matrix(as.matrix(xx2[[x]]),
+    
+    cc_out <- mclapply(1:length(xx), function(x) {
+      tab <- xx[[x]]
+      cc <- igraph::components(graph = igraph::graph_from_adjacency_matrix(tab,
                                                                            mode = "undirected"))
-      cc_data <- data.frame(pathway = rep(names(xx2)[x], cc$no),
-                            ID = 1:cc$no,
-                            score = rep(0, cc$no),
-                            n_gene = rep(0, cc$no),
-                            n_link = rep(0, cc$no), 
-                            gene = rep(0, cc$no),
-                            stringsAsFactors = F)
       
-      
-      for(j in 1:cc$no) {
-        cc_genes <- names(cc$membership[which(cc$membership==j)])
-        gene_network_adj_ijW <- sum(t(weight[cc_genes]) %*% as.matrix(xx2[[x]][cc_genes, cc_genes]))/2
-        gene_network_adj_ijW <- gene_network_adj_ijW/length(cc_genes)
-        cc_data$score[j] <- gene_network_adj_ijW
-        cc_data$n_gene[j] <- length(cc_genes)
-        cc_data$n_link[j] <- sum(xx2[[x]][cc_genes, cc_genes])/2
-        cc_data$gene[j] <- paste(cc_genes, collapse = ";")
-        
-        
-      }
-      perm_cc <- mclapply(1:length(xxPL), function(j) {
-        tmp <- matrix(data=0, nrow = nrow(cc_data), dimnames = list(cc_data$ID))
-        z = 1
-        for (k in cc_data$ID) {
-          cc_genes <- names(cc$membership[which(cc$membership==k)])
-          gene_network_adj_ijW <- sum(t(weight[cc_genes]) %*% as.matrix(xxPL[[j]][[x]][cc_genes, cc_genes]))
-          gene_network_adj_ijW <- gene_network_adj_ijW/length(cc_genes)
-          tmp[z,1] <- gene_network_adj_ijW
-          z = z+1
-        }
-        return(tmp)
-      }, mc.cores = mc_cores_perm)
-      
-      tmp <- cc_data[,3, drop=F]
-      rownames(tmp) <- cc_data$ID
-      perm_cc <- c(list(tmp), perm_cc)
-      cc_data$p_value <- as.vector(calc_p(perm_cc))
-      
-      cc_list <- list(components_results = cc,
-                      pathway_cc = cc_data,
-                      perm = perm_cc)
-      zero <- cc_list$pathway_cc$ID[which(cc_list$pathway_cc$score == 0)]
-      if(length(zero) != 0) {
-        cc_list$components_results$membership <- cc_list$components_results$membership[-which(cc_list$components_results$membership %in% zero)]
-        cc_list$pathway_cc <- cc_list$pathway_cc[which(cc_list$pathway_cc$score >0),]
-        cc_list$perm <- lapply(cc_list$perm, function(l) {
-          l <- l[-zero]
-          return(l)
-        })
-      }
-      
-      return(cc_list)
       
     },   mc.cores = mc_cores_cc)
-    names(pct) <- names(xx2)
     
+    all <- c(list(xx), perm_list)
     
-    
-    
-    cc_list <- mclapply(1:length(pct), function (k) {
-      tmp <- pct[[k]]$components_results$membership
+    out <- mclapply(1:(k+1), function(j) {
+      out.1 <- mclapply(1:length(pathway_list), function(z) {
+        tab <- all[[j]][[z]]
+        name.tab <- names(all[[j]])[z]
+        cc <- cc_out[[z]]
+        tmp <- lapply(1:cc$no, function(x){
+          cc_genes <- names(cc$membership[which(cc$membership==x)])
+          tab.tmp <- tab[cc_genes, cc_genes, drop = F]
+          score <- sum(t(weight[cc_genes]) %*% tab.tmp)/2
+          score <- score/length(cc_genes)
+          n_gene <- length(cc_genes)
+          n_link <- sum(tab.tmp)/2
+          gene.name <- stri_c(cc_genes, collapse = ";")
+          tab.out <- matrix(c(name.tab, x, score, n_gene, n_link, gene.name), nrow = 1)
+        })
+        tmp <- do.call(rbind, tmp)
+        colnames(tmp) <- c("pathway", "ID", "score", "n_gene", "n_link", "gene")
+        return(tmp)
+      })
+      out.1 <- do.call(rbind, out.1)
+    })
+    idx <- out[[1]][, "score"]== 0
+    out <- lapply(out, function(x) {
+      x <- x[!idx,]
+      return(x)
+    })
+    p_list <- mclapply(out, function(x) {
+      tmp <- matrix(as.numeric(x[,"score"]), ncol = 1)
+      rownames(tmp) <- x[, 1]
       return(tmp)
-    }, mc.cores = mc_cores_cc)
-    names(cc_list) <- names(xx2)
+    }, mc.cores = mc_cores_perm)
+    p_val <- calc_p(p_list)
     
-    cc_data <- mclapply(1:length(pct), function(k) {
-      tmp <- pct[[k]]$pathway_cc
-      return(tmp)
-    }, mc.cores = mc_cores_cc)
-    cc_data <- do.call(rbind, cc_data)
     
-    perm <- mclapply(1:length(pct), function(k) {
-      tmp <- pct[[k]]$perm
-      return(tmp)
-    }, mc.cores = mc_cores_cc)
+    cc_list <- lapply(cc_out, function(x) {
+      x <- x$membership
+      return(x)
+    })
     
-    cc_data$eFDR <- eFDR(real_values = as.vector(unlist(cc_data$score)), 
-                         all_values = as.vector(unlist(perm)))
-    
+    eFDR <- eFDR(real_values = as.vector(unlist(p_list[[1]])), 
+                 all_values = as.vector(unlist(p_list)))
+    out <- data.frame(out[[1]], stringsAsFactors = F)
+    out$p_value <- p_val[,1]
+    out$FDR <- eFDR
     return(list(membership = cc_list, 
-                pathway_cc = cc_data))
+                pathway_cc = out))
   }
   
 }

@@ -30,6 +30,7 @@
 #'   mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
+#' @import stringi
 #' @export
 pathway_cross_talk <- function (pathway_list, gene_network_adj, 
                                 weight, 
@@ -37,15 +38,20 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
                                 k = 9) {
   gene_network_adj <- sign(gene_network_adj)
   names(weight) <- rownames(gene_network_adj)
+  weight <- weight[weight !=0]
+  gene_network_adj[names(weight), names(weight)]
   
   comb_p <- expand.grid(names(pathway_list), names(pathway_list))
-  g <- graph_from_edgelist(as.matrix(comb_p), directed = F)
-  g <- igraph::simplify(g, remove.multiple = T, remove.loops = T)
-  comb_p <- as_edgelist(g)
+  comb_p <- graph_from_edgelist(as.matrix(comb_p), directed = F)
+  comb_p <- igraph::simplify(comb_p, remove.multiple = T, remove.loops = T)
+  comb_p <- as_edgelist(comb_p)
+  
   xx <- mclapply(1:nrow(comb_p),  function (x) {
     
-    idx_1 <- as.character(pathway_list[[comb_p[x,1]]][!pathway_list[[comb_p[x,1]]] %in% pathway_list[[comb_p[x,2]]]])
-    idx_2 <- as.character(pathway_list[[comb_p[x,2]]][!pathway_list[[comb_p[x,2]]] %in% pathway_list[[comb_p[x,1]]]])
+    g.1 <- pathway_list[[comb_p[x,1]]]
+    g.2 <- pathway_list[[comb_p[x,2]]]
+    idx_1 <- as.character(g.1[!g.1 %in% g.2])
+    idx_2 <- as.character(g.2[!g.2 %in% g.1])
     
     tmp <- gene_network_adj[idx_1, idx_2, drop = F]
     return( tmp) 
@@ -59,66 +65,71 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
     return("no available PCT")
     
   } else {
-    xx2 <- xx[idx]
+    xx <- xx[idx]
     comb_p <- comb_p[idx,]
     
     perm_list <- mclapply(1:k, function(x) {
-      tmp <- matrix(as.numeric(gene_network_adj), ncol = ncol(gene_network_adj), 
-                    dimnames = list(sample(rownames(gene_network_adj), nrow(gene_network_adj))))
+      tmp <- gene_network_adj
+      rownames(tmp) <- sample(rownames(tmp), nrow(tmp))
       colnames(tmp) <- rownames(tmp)
-      return(tmp)
+      
+      xxPL <- mclapply(1:length(xx),  function (j) {
+        g.1 <- rownames(xx[[j]])
+        g.2 <- colnames(xx[[j]])
+        
+        tmp <- tmp[g.1, g.2, drop = F]
+        
+        return( tmp) 
+      }, mc.cores = mc_cores_pct)
+      return(xxPL)
     }, mc.cores = mc_cores_perm
     )
-    xxPL <- mclapply(1:k, function(j) mclapply(1:nrow(comb_p),  function (x) {
-      
-      idx_1 <- as.character(pathway_list[[comb_p[x,1]]][!pathway_list[[comb_p[x,1]]] %in% pathway_list[[comb_p[x,2]]]])
-      idx_2 <- as.character(pathway_list[[comb_p[x,2]]][!pathway_list[[comb_p[x,2]]] %in% pathway_list[[comb_p[x,1]]]])
-      
-      tmp <- perm_list[[j]][idx_1, idx_2, drop = F]
-      
-      return( tmp) 
-    }, mc.cores = mc_cores_pct
-    ), mc.cores = mc_cores_perm)
-    all_pct <- c(list(xx2), xxPL)
+    
+    all_pct <- c(list(xx), perm_list)
+    rm(xx, perm_list)
     
     pct <- mclapply(1:(k+1), function(j) {
       tmp <-  mclapply(1:length(all_pct[[j]]), function(x) {
+        g.1 <- rownames(tmp)
+        g.2 <- colnames(tmp)
+        gene_network_adj_ijW <- t(weight[g.1]) %*% as.matrix(tmp)
+        gene_network_adj_ijW <- gene_network_adj_ijW %*% weight[g.2, drop = F]
+        row.col.idx <- which(tmp == 1, arr.ind = T)
+        row.n <- g.1[row.col.idx[,1]]
+        row.n <- row.n[row.n %in% names(weight)]
+        col.n <- g.2[row.col.idx[,2]]
+        col.n <- col.n[col.n %in% names(weight)]
         
-        gene_network_adj_ijW <- t(weight[rownames(all_pct[[j]][[x]])]) %*% as.matrix(all_pct[[j]][[x]])
-        gene_network_adj_ijW <- gene_network_adj_ijW %*% weight[colnames(all_pct[[j]][[x]])]
-        row.col.idx <- which(all_pct[[j]][[x]] == 1, arr.ind = T)
-        row.n <- rownames(all_pct[[j]][[x]])[row.col.idx[,1]]
-        row.n <- unique(row.n[which(row.n %in% names(weight>0))])
-        col.n <- colnames(all_pct[[j]][[x]])[row.col.idx[,2]]
-        col.n <- unique(col.n[which(col.n %in% names(weight>0))])
+        #mat.out <- matrix(data = NA, nrow = 1, ncol = 8)
+        mat.out <- array(data = NA, dim = 8)
+        mat.out[1] = comb_p[x,1]
+        mat.out[2] = comb_p[x,2]
+        mat.out[3] = gene_network_adj_ijW
+        mat.out[4] = length(row.n)
+        mat.out[5] = length(col.n)
+        mat.out[6] = sum(tmp)
+        mat.out[7] = stri_c(row.n, collapse = ";")
+        mat.out[8] = stri_c(col.n, collapse = ";")
         
-        gene_network_adj_ijW <- data.frame(pathway_1 = comb_p[x,1],
-                                           pathway_2 = comb_p[x,2],
-                                           pct = gene_network_adj_ijW,
-                                           ngenes_pathway1 = length(row.n),
-                                           ngenes_pathway2 = length(col.n),
-                                           nlink = sum(all_pct[[j]][[x]][which(weight[rownames(all_pct[[j]][[x]])] >0), which(weight[colnames(all_pct[[j]][[x]])] > 0)]),
-                                           gene_pathway1 = paste(row.n, collapse = ";"),
-                                           gene_pathway2 = paste(col.n, collapse = ";"),
-                                           stringsAsFactors = F)
-        
-        
+        return(mat.out)
       },   mc.cores = mc_cores_pct)
       ans <- do.call(rbind, tmp)
-      
+      colnames(ans) <- c("pathway_1", "pathway_2", "pct", "ngenes_pathway1",
+                         "ngenes_pathway2", "nlink","weight_pathway1", 
+                         "weight_pathway2", "gene_pathway1", "gene_pathway2")
       return(ans)
     }, mc.cores = mc_cores_perm
     )
+    
     p_list <- mclapply(pct, function(x) {
-      rownames(x) <- paste(x$pathway_1, x$pathway_2, sep = "|")
-      x <- x[, "pct", drop = F]
-      return(x)
+      tmp <- matrix(as.numeric(x[,"pct"]), ncol = 1)
+      rownames(tmp) <- paste(x[,1], x[,2], sep = "|")
+      return(tmp)
     }, mc.cores = mc_cores_perm)
-    p_val <- as.vector(calc_p(p_list))
+    p_val <- calc_p(p_list)
     
-    out <- pct[[1]]
-    out$p_value <- p_val
-    
+    out <- data.frame(pct[[1]], stringsAsFactors = F)
+    out$p_value <- as.vector(p_val)
     out$eFDR <- eFDR(real_values = as.vector(unlist(p_list[[1]])), all_values = as.vector(unlist(p_list)))
     return(out)
     

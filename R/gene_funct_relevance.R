@@ -37,22 +37,17 @@
 gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_names =T) {
   
   ptw.sign <- unique(c(pct$pathway_1, pct$pathway_2))
-  genes <- unique(c(unlist(strsplit(pct$gene_pathway1, ";", fixed = T)),
-                    unlist(strsplit(pct$gene_pathway2, ";", fixed = T))))
-  gene.data <- data.frame(matrix(data=0, nrow = length(genes), ncol = 5, 
-                                 dimnames = list(NULL, c("gene", "nPTW", "nInteractors", "pathway", "interactors"))),
-                          stringsAsFactors = F)
-  gene.data$gene <- genes
+  gene1 <- unlist(strsplit(pct$gene_pathway1, ";", fixed = T))
+  gene2 <- unlist(strsplit(pct$gene_pathway2, ";", fixed = T))
+  genes <- unique(c(gene1, gene2))
   adj <- sign(adj)
-  #adjF <- adj[which(rownames(adj) %in% as.character(genes)), which(colnames(adj) %in% as.character(genes))]
-  for(i in 1:length(genes)) {
-    idx_1 <- grep(genes[i], pct$gene_pathway1)
-    idx_2 <- grep(genes[i], pct$gene_pathway2)
+  
+  gene.data <- mclapply(genes, function(i) {
+    idx_1 <- grep(i, pct$gene_pathway1)
+    idx_2 <- grep(i, pct$gene_pathway2)
     nPTW <- length(unique(c(pct$pathway_2[idx_1], pct$pathway_1[idx_2])))
     ptw <- paste(unique(c(pct$pathway_2[idx_1], pct$pathway_1[idx_2])), collapse = ";")
     
-    gene.data[i,2] <- nPTW
-    gene.data[i,4] <- ptw
     shr <- unique(c(unlist(strsplit(pct$gene_pathway1[idx_1], ";", fixed = T)),
                     unlist(strsplit(pct$gene_pathway2[idx_2], ";", fixed = T))))
     wlnk <- unique(c(unlist(strsplit(pct$gene_pathway1[idx_2], ";", fixed = T)),
@@ -61,54 +56,59 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
     if(length(idx) > 0) {
       wlnk <- wlnk[-idx]
     }
-    nInter <- adj[which(rownames(adj) == genes[i]), which(colnames(adj) %in% wlnk), drop = F]
-    gene.data[i, 5] <- paste(colnames(nInter)[nInter>0], collapse = ";")
+    nInter <- adj[rownames(adj) == i, colnames(adj) %in% wlnk, drop = F]
+    interactors <- paste(colnames(nInter)[nInter>0], collapse = ";")
     nInter <- sum(nInter)
-    gene.data[i,3] <- nInter
-  }
-  gene.data <- gene.data[which(gene.data$nPTW > 0),]
+    tmp <- matrix(c(i, nPTW, nInter, ptw, interactors), nrow = 1)
+    return(tmp)
+  })
+  gene.data <- do.call(rbind, gene.data)
+  colnames(gene.data) <- c("gene", "nPTW", "nInteractors", "pathway", "interactors")
+  gene.data <- data.frame(gene.data, stringsAsFactors = F)
+  
+  gene.data <- gene.data[gene.data$nPTW > 0,]
   if(to_plot == T) {
     if(is.null(file_name)) {
       if(plot_names == T) {
-        grDevices::jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
+        jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
+             pch=20)
         plotrix::thigmophobe.labels(gene.data$nPTW,
                                     gene.data$nInteractors, 
                                     gene.data$gene, cex=0.5)
-        grDevices::dev.off()
+        dev.off()
       } else {
-        grDevices::jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
+        jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
-        grDevices::dev.off()
+             pch=20)
+        dev.off()
       }
       
     } else {
       if(plot_names == T) {
-        grDevices::jpeg(file_name, width = 200, height = 200,
+        jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
+             pch=20)
         plotrix::thigmophobe.labels(gene.data$nPTW,
                                     gene.data$nInteractors, 
                                     gene.data$gene, cex=0.5)
-        grDevices::dev.off()
+        dev.off()
       } else {
-        grDevices::jpeg(file_name, width = 200, height = 200,
+        jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
         plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
-             pch=20,  xlab = "Functional diversity", ylab ="Interactor diversity")
-        grDevices::dev.off()
+             pch=20)
+        dev.off()
       }
     }
-
+    
   } else {
     NULL
   }
-
+  
   return(gene.data)
   
 }
