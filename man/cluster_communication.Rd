@@ -6,7 +6,7 @@
 \usage{
 cluster_communication(
   cl_list,
-  gene_network_adj = g.adj,
+  gene_network_adj,
   k = 9,
   mc_cores_perm = 1,
   mc_cores_ccc = 1

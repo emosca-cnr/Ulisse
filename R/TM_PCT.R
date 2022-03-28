@@ -39,9 +39,9 @@
 #'  pct <- TM_PCT(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, membership = memb, 
 #'                 mc_cores_tm = 1, mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
-#' @import gtools
+#' @importFrom gtools permutations
 #' @import kit
-#' @import stringi
+#' @importFrom stringi stri_c
 #' @export
 
 TM_PCT <- function (pathway_list, gene_network_adj, membership, 

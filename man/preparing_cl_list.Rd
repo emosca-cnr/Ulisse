@@ -4,13 +4,7 @@
 \alias{preparing_cl_list}
 \title{Function to prepare cluster list for `cluster_communication()`}
 \usage{
-preparing_cl_list(
-  mtx,
-  clusters = data$seurat_clusters,
-  mean_t = 1,
-  cell_t = 5,
-  universe
-)
+preparing_cl_list(mtx, clusters, mean_t = 1, cell_t = 5, universe)
 }
 \arguments{
 \item{mtx}{the gene-by-cell matrix used in single cell data analysis}

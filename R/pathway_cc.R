@@ -34,7 +34,7 @@
 #' gene_network_adj <- adj, weight = wgt, mc_cores_cc = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
-#' @import stringi
+#' @importFrom stringi stri_c
 #' @export
 
 

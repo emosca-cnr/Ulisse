@@ -70,38 +70,42 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
   if(to_plot == T) {
     if(is.null(file_name)) {
       if(plot_names == T) {
-        jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
+        grDevices::jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        graphics::plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
-        plotrix::thigmophobe.labels(gene.data$nPTW,
-                                    gene.data$nInteractors, 
+        thigmophobe.labels(as.numeric(gene.data$nPTW),
+                                    as.numeric(gene.data$nInteractors), 
                                     gene.data$gene, cex=0.5)
-        dev.off()
+        grDevices::dev.off()
       } else {
-        jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
+        grDevices::jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        graphics::plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
-        dev.off()
+        grDevices::dev.off()
       }
       
     } else {
       if(plot_names == T) {
-        jpeg(file_name, width = 200, height = 200,
+        grDevices::jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        graphics::plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
-        plotrix::thigmophobe.labels(gene.data$nPTW,
-                                    gene.data$nInteractors, 
+       thigmophobe.labels(as.numeric(gene.data$nPTW),
+                                    as.numeric(gene.data$nInteractors), 
                                     gene.data$gene, cex=0.5)
-        dev.off()
+        grDevices::dev.off()
       } else {
-        jpeg(file_name, width = 200, height = 200,
+        grDevices::jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        graphics::plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
-        dev.off()
+        grDevices::dev.off()
       }
     }
     

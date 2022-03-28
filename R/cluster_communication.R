@@ -42,10 +42,10 @@
 #' }
 #' @import igraph
 #' @import parallel
-#' @import stringi
+#' @importFrom stringi stri_c
 #' @export
 
-cluster_communication <- function(cl_list, gene_network_adj=g.adj, k = 9, 
+cluster_communication <- function(cl_list, gene_network_adj, k = 9, 
                                   mc_cores_perm = 1, mc_cores_ccc = 1) {
   
   gene_network_adj <- sign(gene_network_adj)

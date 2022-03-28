@@ -19,7 +19,7 @@
 #' frequency of over-threshold expression of the genes in the cluster, named by the respective genes
 
 
-preparing_cl_list <- function(mtx, clusters = data$seurat_clusters, mean_t=1, 
+preparing_cl_list <- function(mtx, clusters, mean_t=1, 
                               cell_t = 5, universe) {
   mtx <- as.matrix(mtx)
   

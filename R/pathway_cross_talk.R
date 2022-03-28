@@ -30,7 +30,7 @@
 #'   mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
-#' @import stringi
+#' @importFrom stringi stri_c
 #' @export
 pathway_cross_talk <- function (pathway_list, gene_network_adj, 
                                 weight, 
@@ -66,7 +66,7 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
     
   } else {
     xx <- xx[idx]
-    comb_p <- comb_p[idx,]
+    comb_p <- comb_p[idx,, drop = F]
     
     perm_list <- mclapply(1:k, function(x) {
       tmp <- gene_network_adj
@@ -90,6 +90,7 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
     
     pct <- mclapply(1:(k+1), function(j) {
       tmp <-  mclapply(1:length(all_pct[[j]]), function(x) {
+        tmp <- all_pct[[j]][[x]]
         g.1 <- rownames(tmp)
         g.2 <- colnames(tmp)
         gene_network_adj_ijW <- t(weight[g.1]) %*% as.matrix(tmp)
@@ -108,8 +109,10 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
         mat.out[4] = length(row.n)
         mat.out[5] = length(col.n)
         mat.out[6] = sum(tmp)
-        mat.out[7] = stri_c(row.n, collapse = ";")
-        mat.out[8] = stri_c(col.n, collapse = ";")
+        mat.out[7] = sum(weight[g.1])
+        mat.out[8] = sum(weight[g.2])
+        mat.out[9] = stri_c(row.n, collapse = ";")
+        mat.out[10] = stri_c(col.n, collapse = ";")
         
         return(mat.out)
       },   mc.cores = mc_cores_pct)
