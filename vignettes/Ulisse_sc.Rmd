@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, echo = FALSE, message = FALSE, warning=FALSE}
+```{r setup, echo = FALSE, message = FALSE, warning=FALSE, eval=TRUE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -94,8 +94,8 @@ meta[1:5,]
 meta <- read.csv("sc_data/metadata.csv", sep = ",", stringsAsFactors = F)
 meta[1:5,] %>%
   kable(format = "html", col.names = colnames(meta[1:5,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -181,8 +181,8 @@ cl_ct$communications_info[1:5,]
 cl_ct <- readRDS("sc_data/clCC_clusters.Rds")
 cl_ct$communications_info[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$communications_info[1:5,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -194,8 +194,8 @@ cl_ct$cc_communications[1:5,]
 
 cl_ct$cc_communications[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$cc_communications[1:5,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -275,8 +275,8 @@ cl_ct$communications_info[1:5,]
 cl_ct <- readRDS("sc_data/cl_CCC_TY.Rds")
 cl_ct$communications_info[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$communications_info[1:5,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -287,8 +287,8 @@ cl_ct$cc_communications[1:5,]
 ```{r CCC_TY2, eval=TRUE, echo=FALSE}
 cl_ct$cc_communications[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$cc_communications[1:5,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 

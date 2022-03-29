@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, echo = FALSE, message = FALSE, warning=FALSE}
+```{r setup, echo = FALSE, message = FALSE, warning=FALSE, eval=TRUE}
 library(pander)
 library(knitr)
 library(rmarkdown)
@@ -121,8 +121,8 @@ ptw <- readRDS("bulk_data/ptw.Rds")
 
 ptw$msigdb_output[1:10,] %>%
   kable(format = "html", col.names = colnames(ptw$msigdb_output[1:10,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -152,8 +152,8 @@ pct$p_value <- as.vector(pct$p_value)
 rownames(pct) <- c()
 pct[1:10,] %>%
   kable(format = "html", col.names = colnames(pct[1:10,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 
 #paged_table(data.frame(pct[1:3,], stringsAsFactors = F)) 
@@ -218,8 +218,8 @@ funct_rel[1:10,]
 funct_rel <- readRDS("bulk_data/funct_rel.Rds")
 funct_rel[1:10,] %>%
   kable(format = "html", col.names = colnames(funct_rel[1:10,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   column_spec(4, width = "5cm") %>%
   kableExtra::scroll_box(width = "100%")
 
@@ -267,8 +267,8 @@ pct_CC$pathway_cc$p_value <- as.vector(pct_CC$pathway_cc$p_value)
 rownames(pct_CC$pathway_cc) <- c()
 pct_CC$pathway_cc[1:10,] %>%
   kable(format = "html", col.names = colnames(pct_CC$pathway_cc[1:3,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 
 ```
@@ -337,8 +337,8 @@ tm_pct$TM_PCT_res[1:10,]
 tm_pct$TM_PCT_res$p_value <- as.vector(tm_pct$TM_PCT_res$p_value)
 tm_pct$TM_PCT_res[1:10,] %>%
   kable(format = "html", col.names = colnames(tm_pct$TM_PCT_res[1:10,])) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::kable_minimal() %>%
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 
 ```
