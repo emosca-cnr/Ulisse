@@ -47,5 +47,5 @@ ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 wgt <- rep(1, 6)
 pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, 
   mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
-funct_rel <- gene_funct_relevance(pct, adj)
+funct_rel <- gene_funct_relevance(pct, adj, to_plot=FALSE)
 }

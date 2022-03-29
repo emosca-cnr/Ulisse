@@ -1,23 +1,24 @@
 Package: Ulisse
 Type: Package
-Title: Tools for Pathway Analysis
-Version: 1.2.4
-Date: 2021-11-29
+Title: Pathway, pathway cross-talk and cell-cell communication 
+Version: 1.2.5
+Date: 2022-03-28
 Authors@R: 
     c(person(given = "Alice",
            family = "Chiodi",
            role = c("aut"),
            email = "alice.chiodi@itb.cnr.it",
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           comment = c(ORCID = "0000-0001-6646-4471")),
     person(given = "Ettore",
            family = "Mosca",
            role = c("aut", "cre"),
            email = "ettore.mosca@itb.cnr.it",
-           comment = c(ORCID = "YOUR-ORCID-ID")))
+           comment = c(ORCID = "0000-0002-3102-5150")))
 Maintainer: Ettore Mosca <ettore.mosca@itb.cnr.it>
-Description: Methods for Pathway Analysis.
+Description: Ulisse implements functions for pathway analysis, pathway cross-talk analysis and cell-cell communication analysis.
 License: GPL-3
 LazyData: TRUE
+VignetteBuilder: knitr
 RoxygenNote: 7.1.2
 Imports:
   igraph,
@@ -30,6 +31,11 @@ Imports:
   qvalue,
   viridis,
   plotrix,
-  TCGAbiolinks
+  TCGAbiolinks,
+  stringi
 Depends:
-  R (>= 3.2.1)
+  R (>= 3.5.0)
+Suggests: 
+  rmarkdown,
+  knitr
+

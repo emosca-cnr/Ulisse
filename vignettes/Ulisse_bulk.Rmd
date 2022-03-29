@@ -164,7 +164,7 @@ pct[1:10,] %>%
 
 PCT results can be filtered to maintain only the significative. Then, the results can be visualized as a network or as an heatmap
 
-```{r, include=TRUE, message=FALSE, warning=FALSE}
+```{r, include=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
 library(ComplexHeatmap)
 library(circlize)
 ```
