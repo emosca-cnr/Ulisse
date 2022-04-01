@@ -40,7 +40,7 @@
 #' @importFrom reshape2 acast
 #' @import Matrix
 #' @export
-pathway_cross_talk <- function (pathway_list, gene_network_adj, 
+pathway_cross_talk <- function (pathway_list, gene_network_adj, genes, 
                                 weight, 
                                 mc_cores_pct = 2, mc_cores_perm = 1, 
                                 k = 9) {
@@ -115,13 +115,13 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
     all.v <- unlist(perm_list)
     all.v <- c(as.numeric(pct[, 6]), all.v)
     link_FDR <- eFDR(real_values = as.numeric(pct[, 6]), all_values = all.v, mc.cores = mc_cores_pct)
-    p_bh <- p.adjust(pct[, 9], method = "BH")
+    p_bh <- stats::p.adjust(pct[, 9], method = "BH")
     pct <- cbind(pct[,1:9], link_FDR, p_bh,  pct[, 10:11])
     colnames(pct) <- c("pathway_1", "pathway_2", "pct", "ngenes_pathway1",
                        "ngenes_pathway2", "nlink","weight_pathway1", 
                        "weight_pathway2", "p_value_link", "FDR_link", "p_adj_BH", "gene_pathway1", "gene_pathway2")
     pct <- data.frame(pct, stringsAsFactors = F)
-    return(out)
+    return(pct)
     
     
   }

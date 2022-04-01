@@ -96,7 +96,7 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
   all.v <- unlist(perm_list)
   all.v <- c(ans[,6], all.v)
   link_FDR <- eFDR(real_values = ans[,6], all_values = all.v, mc.cores = mc_cores_ccc)
-  p_val_BH <- p.adjust(ans[,7], method = "BH")
+  p_val_BH <- stats::p.adjust(ans[,7], method = "BH")
   ans <- cbind(ans[, 1:7], link_FDR, p_val_BH, ans[,8:11])
   
   colnames(ans) <- c("cl1", "cl2", "ccc_score", "ngenes_cl1", "ngenes_cl2",

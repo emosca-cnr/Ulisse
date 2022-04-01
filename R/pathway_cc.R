@@ -27,7 +27,7 @@
 #' ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 #' wgt <- rep(1, 6)
 #' p_cc <- pathway_cc(pathway_list = ptw_list, 
-#' gene_network_adj <- adj, weight = wgt, mc_cores_cc = 1)
+#' gene_network_adj = adj, weight = wgt, mc_cores_cc = 1)
 #' @import parallel
 #' @import igraph
 #' @importFrom stringi stri_c
@@ -36,6 +36,7 @@
 
 pathway_cc <- function (pathway_list, gene_network_adj,
                         weight, mc_cores_cc = 2) {
+  genes <- rownames(gene_network_adj)
   if(is.null(weight) ) {
     weight <- rep(1, length(genes))
     names(weight) <- genes

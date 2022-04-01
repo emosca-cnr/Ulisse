@@ -31,7 +31,9 @@ Imports:
   viridis,
   plotrix,
   TCGAbiolinks,
-  stringi
+  stringi,
+  Matrix,
+  reshape2
 Depends:
   R (>= 3.5.0)
 Suggests: 

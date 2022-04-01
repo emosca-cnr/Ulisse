@@ -34,7 +34,7 @@
 #'  wgt <- rep(1, 6)
 #'  memb <- c(1, 1, 2, 2, 3, 3)
 #'  pct <- TM_PCT(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, membership = memb, 
-#'                 mc_cores_tm = 1, mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
+#'                 mc_cores_tm = 1, mc_cores_pct = 1, mc_cores_perm = 1)
 #' @import parallel
 #' @importFrom gtools permutations
 #' @import kit
@@ -44,6 +44,7 @@
 TM_PCT <- function (pathway_list, gene_network_adj, membership, 
                     mc_cores_pct = 2, mc_cores_tm = 2,
                     weight) {
+  genes <- rownames(gene_network_adj)
   if(is.null(weight) ) {
     weight <- rep(1, length(genes))
     names(weight) <- genes
@@ -141,7 +142,7 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
     res <- do.call(rbind, res)
     res <- data.frame(res, stringsAsFactors = F)
     out <- list(comm_pathway_list = mem_ptwL, TM_PCT_res = res)
-    return(res)
+    return(out)
   }
   
 }

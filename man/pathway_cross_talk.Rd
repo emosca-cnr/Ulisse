@@ -7,6 +7,7 @@
 pathway_cross_talk(
   pathway_list,
   gene_network_adj,
+  genes,
   weight,
   mc_cores_pct = 2,
   mc_cores_perm = 1,
