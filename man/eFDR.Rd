@@ -4,7 +4,7 @@
 \alias{eFDR}
 \title{empirical False Discovery Rate}
 \usage{
-eFDR(real_values, all_values, mc.cores = 1)
+eFDR(real_values, all_values, mc.cores = 1, correct.max = TRUE)
 }
 \arguments{
 \item{real_values}{vactor of real (observed) values}
@@ -12,6 +12,8 @@ eFDR(real_values, all_values, mc.cores = 1)
 \item{all_values}{vactor of all values (real + permuted) values}
 
 \item{mc.cores}{number of cores}
+
+\item{correct.max}{logical, to decide if to correct the maximum values to 1 or not}
 }
 \description{
 empirical False Discovery Rate

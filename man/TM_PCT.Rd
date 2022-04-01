@@ -9,10 +9,8 @@ TM_PCT(
   gene_network_adj,
   membership,
   mc_cores_pct = 2,
-  mc_cores_perm = 2,
   mc_cores_tm = 2,
-  weight,
-  k = 9
+  weight
 )
 }
 \arguments{
@@ -24,13 +22,10 @@ TM_PCT(
 
 \item{mc_cores_pct}{numebr of threads to be used to calculate cross talk}
 
-\item{mc_cores_perm}{numebr of threads to be used to calcualte permutation}
-
 \item{mc_cores_tm}{number of threads to be used to calcualte TM-PCT on different communities combination}
 
-\item{weight}{weights of the genes in gene_network_adj}
-
-\item{k}{number of permutation of the adjacency matrix}
+\item{weight}{weights of the genes in gene_network_adj. If not provided, the function assigns to each gene
+a weight of 1}
 }
 \value{
 The function returns a list of two object:
@@ -44,9 +39,9 @@ The function returns a list of two object:
  \item score: TM-PCT score
  \item ngenes_pathway_1, ngenes_pathway_2: number of genes involved in `pathway_1` and `pathway_2`, respectively
  \item n_link: number of links between the pathways considered
+ \item weight_pathway1, weight_pathway2: cumulative weights of the genes involved in CT
+ in `pathway_1` and `pathway_2`
  \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
- \item p_value: empirical p-value calculated by using the permutation approcah
- \item eFDR: empirical FDR
  }
  }
 }
@@ -58,8 +53,6 @@ The function uses the `membership` data to reogranize the `pathway_list` as to o
 pathway list for each gene communities. In detail, gene will be grouped into communities and then grouped into pathways.
 At this point, the function calculates CT between each pathway pairs of different 
 communities that shows at least a link.
-This approach is applied also to the permuted version of the `gene_network_adj`. 
-CT and permutd CT are then used to calcualte `p-value` and `FDR`
 }
 \examples{
  

@@ -4,22 +4,28 @@
 #'  with the exclusive genes of a pathway in the rows and the exclusive genes of the other in the columns. 
 #'  Only the pathway pairs that show a link in these subset will be considered. Then, the CT is calcluated, 
 #'  as described in the paper. This approach is applied to the original adjacency matrix and to all its permuted versions.
-#'  The CT values and the permuted CT are then used to calculated the empirical p-value and the FDR score
+#'  The permutations are obtained by random sampling genes from the adjacency matrix for each pathway.
+#'  The p-value and FDR are calculated on the number of links, without considering the weights of the genes.
+#'  We also provide a corrected p-value using BH method.
 #' @param pathway_list a named list of genes grouped into pathways
-#' @param gene_network_adj gene network adjacency matrix
-#' @param weight an vector of weights for each gene in gene_network_adj
+#' @param gene_network_adj adjacency matrix of the whole gene network considered (can be a sparseMatrix)
+#' @param weight an vector of weights for each gene the pathway list. If not provided, the function assigns to each gene
+#' a weight of 1
 #' @param mc_cores_pct numebr of threads to be used for pathway cross talk calculation
 #' @param mc_cores_perm number of thread to be used in permutations
-#' @param k number of permutation of the adjacency matrix
+#' @param k number of permutation 
 #' @return The function returns a table with:
 #' \itemize{
 #'  \item pathway_1, pathway_2: the pathway pair considered
 #'  \item pct: the CT value
 #'  \item ngenes_pathway_1, ngenes_pathway_2: number of genes involved in `pathway_1` and `pathway_2`, respectively
 #'  \item nlink: number of links between the genes in `pathway_1` and `pathway_2`
+#'  \item: weight_pathway1, weight_pathway2: cumulative weights of the genes involved in the 
+#'  cross-talk between pathway 1 and 2
+#'  \item p_value_link: p-value score calcualted by using the permutation approach
+#'  \item FDR_link: empirical FDR
+#'  \item p_adj_BH: `p-value_link` adjusted using BH method
 #'  \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
-#'  \item p_value: p-value score calcualted by using the permutation approach
-#'  \item eFDR: empirical FDR
 #' }
 #' @examples  
 #'  ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
@@ -31,15 +37,22 @@
 #' @import parallel
 #' @import igraph
 #' @importFrom stringi stri_c
+#' @importFrom reshape2 acast
+#' @import Matrix
 #' @export
 pathway_cross_talk <- function (pathway_list, gene_network_adj, 
                                 weight, 
                                 mc_cores_pct = 2, mc_cores_perm = 1, 
                                 k = 9) {
+  if(is.null(weight) ) {
+    weight <- rep(1, length(genes))
+    names(weight) <- genes
+  } 
+  if(!is(gene_network_adj, "sparseMatrix" )) {
+    gene_network_adj <- as(gene_network_adj, "dgCMatrix")
+  }
   gene_network_adj <- sign(gene_network_adj)
-  names(weight) <- rownames(gene_network_adj)
-  weight <- weight[weight !=0]
-  gene_network_adj[names(weight), names(weight)]
+  sub_adj_mt <- gene_network_adj[as.character(genes), as.character(genes), drop = F]
   
   comb_p <- expand.grid(names(pathway_list), names(pathway_list))
   comb_p <- graph_from_edgelist(as.matrix(comb_p), directed = F)
@@ -50,15 +63,16 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
     
     g.1 <- pathway_list[[comb_p[x,1]]]
     g.2 <- pathway_list[[comb_p[x,2]]]
-    idx_1 <- as.character(g.1[!g.1 %in% g.2])
-    idx_2 <- as.character(g.2[!g.2 %in% g.1])
+    idx_1 <- g.1[!g.1 %in% g.2]
+    idx_2 <- g.2[!g.2 %in% g.1]
     
-    tmp <- gene_network_adj[idx_1, idx_2, drop = F]
-    return( tmp) 
+    tmp <- sub_adj_mt[idx_1, idx_2, drop = F]
+    out <- list(tmp, idx_1, idx_2)
+    return( out) 
   }, mc.cores = mc_cores_pct
   )
   
-  idx <- which(mclapply(xx, function(n) sum(n, na.rm = T), mc.cores = mc_cores_pct) !=0)
+  idx <- which(mclapply(xx, function(n) sum(n[[1]], na.rm = T), mc.cores = mc_cores_pct) !=0)
   
   if(length(idx) == 0) {
     print("no available PCT")
@@ -67,73 +81,46 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj,
   } else {
     xx <- xx[idx]
     comb_p <- comb_p[idx,, drop = F]
+    len1 <- array(unlist(mclapply(xx, function(n) length(n[[2]]), mc.cores = mc_cores_pct)), 
+                  dim = c(length(xx), 1))
+    len2 <- array(unlist(mclapply(xx, function(n) length(n[[3]]), mc.cores = mc_cores_pct)), 
+                  dim = c(length(xx), 1))
+    comb_p_len <- matrix(cbind(len1, len2), ncol = 2)
+    unq_comb_p_len <- unique(comb_p_len)
+    perm_list <- mclapply(1:nrow(unq_comb_p_len), function(x) {
+      n.1 <- unq_comb_p_len[x, 1]
+      n.2 <- unq_comb_p_len[x, 2]
+      out <- perm_link(r = n.1, c = n.2, gene_network_adj, core = mc_cores_perm, k, hash = T)
+      return(out)
+    }, mc.cores = mc_cores_pct)
     
-    perm_list <- mclapply(1:k, function(x) {
-      tmp <- gene_network_adj
-      rownames(tmp) <- sample(rownames(tmp), nrow(tmp))
-      colnames(tmp) <- rownames(tmp)
-      
-      xxPL <- mclapply(1:length(xx),  function (j) {
-        g.1 <- rownames(xx[[j]])
-        g.2 <- colnames(xx[[j]])
-        
-        tmp <- tmp[g.1, g.2, drop = F]
-        
-        return( tmp) 
-      }, mc.cores = mc_cores_pct)
-      return(xxPL)
-    }, mc.cores = mc_cores_perm
-    )
+    unq_comb_p_len <- data.frame(unq_comb_p_len)
+    unq_comb_p_len$var <- 1:nrow(unq_comb_p_len)
+    unq_comb_p_len <- acast(unq_comb_p_len, X1 ~ X2, value.var = "var")
     
-    all_pct <- c(list(xx), perm_list)
-    rm(xx, perm_list)
+    pct <- mclapply(1:length(xx), function(x) {
+      tab <- xx[[x]][[1]]
+      n.1 <- length(xx[[x]][[2]])
+      n.2 <- length(xx[[x]][[3]])
+      nlink <- matrix(sum(tab))
+      idx <- unq_comb_p_len[as.character(n.1), as.character(n.2)]
+      perm_l <- c(list(nlink), perm_list[[idx]])
+      p_val <- calc_p(perm_l)
+      ct <- cross_talk(mat = tab, weight = weight)
+      out <- array(c(comb_p[x, 1], comb_p[x, 2], ct[1:6], as.vector(p_val), ct[7:8]), dim = c(1, 11))
+      return(out)
+    },   mc.cores = mc_cores_pct)
     
-    pct <- mclapply(1:(k+1), function(j) {
-      tmp <-  mclapply(1:length(all_pct[[j]]), function(x) {
-        tmp <- all_pct[[j]][[x]]
-        g.1 <- rownames(tmp)
-        g.2 <- colnames(tmp)
-        gene_network_adj_ijW <- t(weight[g.1]) %*% as.matrix(tmp)
-        gene_network_adj_ijW <- gene_network_adj_ijW %*% weight[g.2, drop = F]
-        row.col.idx <- which(tmp == 1, arr.ind = T)
-        row.n <- g.1[row.col.idx[,1]]
-        row.n <- row.n[row.n %in% names(weight)]
-        col.n <- g.2[row.col.idx[,2]]
-        col.n <- col.n[col.n %in% names(weight)]
-        
-        #mat.out <- matrix(data = NA, nrow = 1, ncol = 8)
-        mat.out <- array(data = NA, dim = 8)
-        mat.out[1] = comb_p[x,1]
-        mat.out[2] = comb_p[x,2]
-        mat.out[3] = gene_network_adj_ijW
-        mat.out[4] = length(row.n)
-        mat.out[5] = length(col.n)
-        mat.out[6] = sum(tmp)
-        mat.out[7] = sum(weight[g.1])
-        mat.out[8] = sum(weight[g.2])
-        mat.out[9] = stri_c(row.n, collapse = ";")
-        mat.out[10] = stri_c(col.n, collapse = ";")
-        
-        return(mat.out)
-      },   mc.cores = mc_cores_pct)
-      ans <- do.call(rbind, tmp)
-      colnames(ans) <- c("pathway_1", "pathway_2", "pct", "ngenes_pathway1",
-                         "ngenes_pathway2", "nlink","weight_pathway1", 
-                         "weight_pathway2", "gene_pathway1", "gene_pathway2")
-      return(ans)
-    }, mc.cores = mc_cores_perm
-    )
-    
-    p_list <- mclapply(pct, function(x) {
-      tmp <- matrix(as.numeric(x[,"pct"]), ncol = 1)
-      rownames(tmp) <- paste(x[,1], x[,2], sep = "|")
-      return(tmp)
-    }, mc.cores = mc_cores_perm)
-    p_val <- calc_p(p_list)
-    
-    out <- data.frame(pct[[1]], stringsAsFactors = F)
-    out$p_value <- as.vector(p_val)
-    out$eFDR <- eFDR(real_values = as.vector(unlist(p_list[[1]])), all_values = as.vector(unlist(p_list)))
+    pct <- do.call(rbind, pct)
+    all.v <- unlist(perm_list)
+    all.v <- c(as.numeric(pct[, 6]), all.v)
+    link_FDR <- eFDR(real_values = as.numeric(pct[, 6]), all_values = all.v, mc.cores = mc_cores_pct)
+    p_bh <- p.adjust(pct[, 9], method = "BH")
+    pct <- cbind(pct[,1:9], link_FDR, p_bh,  pct[, 10:11])
+    colnames(pct) <- c("pathway_1", "pathway_2", "pct", "ngenes_pathway1",
+                       "ngenes_pathway2", "nlink","weight_pathway1", 
+                       "weight_pathway2", "p_value_link", "FDR_link", "p_adj_BH", "gene_pathway1", "gene_pathway2")
+    pct <- data.frame(pct, stringsAsFactors = F)
     return(out)
     
     

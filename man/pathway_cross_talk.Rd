@@ -16,15 +16,16 @@ pathway_cross_talk(
 \arguments{
 \item{pathway_list}{a named list of genes grouped into pathways}
 
-\item{gene_network_adj}{gene network adjacency matrix}
+\item{gene_network_adj}{adjacency matrix of the whole gene network considered (can be a sparseMatrix)}
 
-\item{weight}{an vector of weights for each gene in gene_network_adj}
+\item{weight}{an vector of weights for each gene the pathway list. If not provided, the function assigns to each gene
+a weight of 1}
 
 \item{mc_cores_pct}{numebr of threads to be used for pathway cross talk calculation}
 
 \item{mc_cores_perm}{number of thread to be used in permutations}
 
-\item{k}{number of permutation of the adjacency matrix}
+\item{k}{number of permutation}
 }
 \value{
 The function returns a table with:
@@ -33,9 +34,12 @@ The function returns a table with:
  \item pct: the CT value
  \item ngenes_pathway_1, ngenes_pathway_2: number of genes involved in `pathway_1` and `pathway_2`, respectively
  \item nlink: number of links between the genes in `pathway_1` and `pathway_2`
+ \item: weight_pathway1, weight_pathway2: cumulative weights of the genes involved in the 
+ cross-talk between pathway 1 and 2
+ \item p_value_link: p-value score calcualted by using the permutation approach
+ \item FDR_link: empirical FDR
+ \item p_adj_BH: `p-value_link` adjusted using BH method
  \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
- \item p_value: p-value score calcualted by using the permutation approach
- \item eFDR: empirical FDR
 }
 }
 \description{
@@ -46,7 +50,9 @@ The function defines a subset of the `gene_network_adj` for each pathway pair,
  with the exclusive genes of a pathway in the rows and the exclusive genes of the other in the columns. 
  Only the pathway pairs that show a link in these subset will be considered. Then, the CT is calcluated, 
  as described in the paper. This approach is applied to the original adjacency matrix and to all its permuted versions.
- The CT values and the permuted CT are then used to calculated the empirical p-value and the FDR score
+ The permutations are obtained by random sampling genes from the adjacency matrix for each pathway.
+ The p-value and FDR are calculated on the number of links, without considering the weights of the genes.
+ We also provide a corrected p-value using BH method.
 }
 \examples{
  

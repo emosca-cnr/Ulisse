@@ -16,9 +16,9 @@ cluster_communication(
 \item{cl_list}{the output of `preparing_cl_list()` or a gene list composed by a vector for each cluster where each vector is
 a named gene rank or weight vector.}
 
-\item{gene_network_adj}{gene network adjacency matrix}
+\item{gene_network_adj}{adjacency matrix of the whole gene network}
 
-\item{k}{number of permutation of the adjacency matrix}
+\item{k}{number of permutation}
 
 \item{mc_cores_perm}{number of threads to be used to calcualte permutation}
 
@@ -39,8 +39,11 @@ The function returns a list of two objects:
 \item ccc_score: communication score calculated on all the interacting ligand/receptor genes in the two clusters
 \item ngenes_cl1, ngenes_cl2: number of genes in cl1 and cl2, respectively, that participate to the communication score
 \item nlink: number of links beteewn the genes in cl1 and cl2
-\item p_value: empirical p-value calculated by using the permutation approcah
-\item eFDR: false discovery rate (FDR)
+\item p_value_link: empirical p-value calculated by using the permutation approcah
+\item FDR_link: empirical false discovery rate
+\item p_adj_BH: `p-value_link` correctd by using BH method
+\item gene_weight_cl1, gene_weight_cl2: cumulative weights of the genes involved in the 
+communication in cluster 1 and 2
 \item genes_cl1, genes_cl2: list of the genes involved in the communication in the clusters
 }
 }
@@ -50,9 +53,10 @@ cluster_communication calculates a score for the communication between all the p
 in the cluster list provided
 }
 \details{
-Firstly, `k` permuted version of  `gene_network_adj` are created. Then, CT formula is used to 
-calculate a score for the communication between all possible cluster pairs. The same approach is 
-applied also to the `k` permuted version of `gene_network_adj` to calculate the p-value and FDR
+The CT formula is used to calculate a score for the communication between all possible cluster pairs. 
+The same approach is applied also to `k` permuted version of each cluster, obtained by random sampling of genes
+in `gene_network_adj`. The p-value and FDR are the calculated by comparing the number of links between each 
+cluster pairs and their permuted versions
 }
 \examples{
 \dontrun{
