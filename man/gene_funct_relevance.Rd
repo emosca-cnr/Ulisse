@@ -41,6 +41,7 @@ of a cross-talk of interest; the interactor diversity is the number of different
 that contribute to the formation of a cross-talk
 }
 \examples{
+ \dontrun{
 ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
 adj <- matrix(data = sample(c(0,1), 6*6, replace = TRUE), nrow = 6, 
 ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
@@ -48,4 +49,5 @@ wgt <- rep(1, 6)
 pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, 
 genes = LETTERS[1:6], mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 funct_rel <- gene_funct_relevance(pct, adj, to_plot=FALSE)
+}
 }
