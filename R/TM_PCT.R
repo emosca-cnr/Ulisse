@@ -34,7 +34,7 @@
 #'  wgt <- rep(1, 6)
 #'  memb <- c(1, 1, 2, 2, 3, 3)
 #'  pct <- TM_PCT(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, membership = memb, 
-#'                 mc_cores_tm = 1, mc_cores_pct = 1, mc_cores_perm = 1)
+#'                 mc_cores_tm = 1, mc_cores_pct = 1)
 #' @import parallel
 #' @importFrom gtools permutations
 #' @import kit

@@ -126,7 +126,7 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
   colnames(ct_info) <- c("cl1", "cl1_gene", "cl2", "cl2_gene", "score")
   ct_info <- data.frame(ct_info, stringsAsFactors = F)
   
-  return(list(communications_info = ct_info, cc_communications= out))
+  return(list(communications_info = ct_info, cc_communications= ans))
 }
 
 

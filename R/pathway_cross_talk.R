@@ -11,6 +11,7 @@
 #' @param gene_network_adj adjacency matrix of the whole gene network considered (can be a sparseMatrix)
 #' @param weight an vector of weights for each gene the pathway list. If not provided, the function assigns to each gene
 #' a weight of 1
+#' @param genes target gene to be used for PCT calculation
 #' @param mc_cores_pct numebr of threads to be used for pathway cross talk calculation
 #' @param mc_cores_perm number of thread to be used in permutations
 #' @param k number of permutation 
