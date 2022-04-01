@@ -22,7 +22,7 @@
 #' \item interactors: list of names of the genes counted in `nInteractors` spearated by `;`
 #' }
 #' @examples 
-#'  \dontrun{
+#' \dontrun{
 #' ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
 #' adj <- matrix(data = sample(c(0,1), 6*6, replace = TRUE), nrow = 6, 
 #' ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
