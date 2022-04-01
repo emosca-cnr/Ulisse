@@ -32,8 +32,8 @@
 #'  ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
 #'  adj <- matrix(data = sample(c(0,1), 20*20, replace = TRUE), nrow = 6, 
 #'  ncol = 6, dimnames = list(LETTERS[1:20], LETTERS[1:20]))
-#'  pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = NULL, genes = LETTERS[1:6]
-#'   mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
+#'  pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = NULL, 
+#'  genes = LETTERS[1:6], mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
 #' @importFrom stringi stri_c
