@@ -19,6 +19,8 @@ pathway_cross_talk(
 
 \item{gene_network_adj}{adjacency matrix of the whole gene network considered (can be a sparseMatrix)}
 
+\item{genes}{target gene to be used for PCT calculation}
+
 \item{weight}{an vector of weights for each gene the pathway list. If not provided, the function assigns to each gene
 a weight of 1}
 
