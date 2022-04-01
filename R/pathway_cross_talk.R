@@ -30,10 +30,9 @@
 #' }
 #' @examples  
 #'  ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
-#'  adj <- matrix(data = sample(c(0,1), 6*6, replace = TRUE), nrow = 6, 
-#'  ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
-#'  wgt <- rep(1, 6)
-#'  pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, 
+#'  adj <- matrix(data = sample(c(0,1), 20*20, replace = TRUE), nrow = 6, 
+#'  ncol = 6, dimnames = list(LETTERS[1:20], LETTERS[1:20]))
+#'  pct <- pathway_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, weight = NULL, genes = LETTERS[1:6]
 #'   mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 #' @import parallel
 #' @import igraph
@@ -42,7 +41,7 @@
 #' @import Matrix
 #' @export
 pathway_cross_talk <- function (pathway_list, gene_network_adj, genes, 
-                                weight, 
+                                weight =NULL, 
                                 mc_cores_pct = 2, mc_cores_perm = 1, 
                                 k = 9) {
   if(is.null(weight) ) {
