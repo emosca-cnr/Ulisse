@@ -17,6 +17,7 @@
 #' to be considered in subsequent analysis
 #' @return The function returns a gene list composed by a vector for each cluster provided. Each vector is composed by the
 #' frequency of over-threshold expression of the genes in the cluster, named by the respective genes
+#' @export
 
 
 preparing_cl_list <- function(mtx, clusters, mean_t=1, 
