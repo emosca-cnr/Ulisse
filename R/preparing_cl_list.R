@@ -37,7 +37,7 @@ preparing_cl_list <- function(mtx, clusters, mean_t=1,
     names(tmp2) <- rownames(tmp)
     cl_list <- c(cl_list, list(tmp2))
   }
-  names(cl_list) <- paste("cl", cl, sep = "_")
+  names(cl_list) <- cl
   cl_list <- lapply(cl_list, function(x) x[names(x) %in% universe])
   return(cl_list)
 }
