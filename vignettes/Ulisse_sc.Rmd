@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, echo = FALSE, message = FALSE, warning=FALSE, eval=TRUE}
+```{r setup, echo = FALSE, message = FALSE, warning=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -51,8 +51,6 @@ intercell_net <- import_intercell_network(interactions_param = list("datasets" =
                                           receiver_param = list(
                                             categories =c('receptor')), 
                                           entity_types = "protein")
-ligand <- unique(intercell_net$source_genesymbol)
-receptor <- unique(intercell_net$target_genesymbol)
 g.intercell <- unique(intercell_net[,c("source_genesymbol", "target_genesymbol")])
 g.intercell <- graph_from_edgelist(as.matrix(g.intercell), 
                                    directed = F)
@@ -61,7 +59,7 @@ g.intercell <- graph_from_edgelist(as.matrix(g.intercell),
 ## Pre-processing with Seurat pipeline
 To explain the functioning of the CCC calculation implemented in Ulisse we will use one of the samples sequenced by Wu et al. (2021, DOI: 10.1038/s41588-021-00911-1). In this study, the authors analyse 21 single cell samples obtained from tumors. The samples contain tumoral as well as normal cells surrounding the tumor.
 The data can be downloaded at https://singlecell.broadinstitute.org/single_cell/study/SCP1039 or at GEO website under accession GSE176078. In particular, we will study CCC in sample CID44991, but the pipeline can be applied to any sample of the study. We will use the matrix, barcodes and genes data of the sample, together with the metadata, that provides cell annotation. With this data we will be able to study the communication not only between clusters, but also between cell types.
-After downloading the data, we must load the 10X data into R and analyse them. We will use Seurat pipeline to import the 10X file, create the Seurat object to then normalize and scale the data, reduce the dimensionality by using the PCA and UMAP for graphical representation; clustering is done via graph-based approach. Prior to create the Seurat object, we filter the count matrix as to remove the low expressed genes (present in minus than 5 cells).
+After downloading the data, we must upload the 10X data into R and analyse them. We will use Seurat pipeline to import the 10X file, create the Seurat object to then normalize and scale the data, reduce the dimensionality by using the PCA and UMAP for graphical representation; clustering is done via graph-based approach. Prior to create the Seurat object, we filter the count matrix as to remove the low expressed genes (present in less than 5 cells).
 ```{r preprocessingNot1, eval=FALSE}
 data <- ReadMtx(mtx = "CID44991/count_matrix_sparse.mtx", 
                 cells = "CID44991/count_matrix_barcodes.tsv",
@@ -75,7 +73,6 @@ data <- RunPCA(data)
 data <- FindNeighbors(data, dims = 1:10)
 data <- FindClusters(data, resolution = 0.5)
 data <- RunUMAP(data, dims = 1:10)
-data$seurat_clusters <- paste(rep("cl", length(data$seurat_clusters)), data$seurat_clusters, sep = "_")
 DimPlot(data, reduction = "umap", group.by = "seurat_clusters", label = T)
 
 ```
@@ -94,12 +91,12 @@ meta[1:5,]
 meta <- read.csv("sc_data/metadata.csv", sep = ",", stringsAsFactors = F)
 meta[1:5,] %>%
   kable(format = "html", col.names = colnames(meta[1:5,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
-After uploading the metadata, we can plot the UMAP by cell type. As is possible to see, there is not an exact match between cell type island and clusters, as in the original papers the authors used another package to pre-process the data. It will be thus interesting to observe the differences between CCC in clusters and cell types.
+After uploading the metadata, we can plot the UMAP by cell type. 
 
 ```{r preprocessingNot3, eval=FALSE}
 data@meta.data <- cbind(data@meta.data, meta[match(rownames(data@meta.data), meta$X),])
@@ -112,12 +109,56 @@ DimPlot(data, reduction = "umap", group.by = "celltype_major", label = T)
 include_graphics("sc_data/umap_cell_type.jpeg")
 ```
 
+As is possible to see, there is not an exact match between cell type islands and clusters, as in the original papers the authors used another package to pre-process the data. However, by watching the distribution of the cell types, we can annotate our clusters. As multiple clsuters can belong to the same cell type, it will be thus interesting to observe the differences between CCC in clusters and cell types.
+
+```{r preprocessingNot4, eval=F}
+
+cluster_cell <- data.frame(table(data$seurat_clusters, data$celltype_major), stringsAsFactors = F)
+cluster_cell <- reshape2::acast(cluster_cell, Var1 ~ Var2)
+cluster_cell <- cluster_cell/rowSums(cluster_cell)
+
+cluster_cell
+
+```
+
+```{r preprocessing4, eval=T, echo=F}
+tab <- read.delim("sc_data/cluster_cellTy.txt", stringsAsFactors = F, header = T, row.names = 1)
+tab %>%
+  kable(format = "html", col.names = colnames(tab)) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::scroll_box(width = "100%")
+```
+
+However, we can annotate the clusters by assigning to each one the most frequent cell type present. As multiple clusters have the same cell type, it will be thus interesting to observe the differences between CCC in clusters and cell types.
+
+```{r preprocessingNot5, eval=F}
+top_cl_cell <- which(cluster_cell>=0.7, arr.ind = T)
+
+top_cl_cell[,1] <- rownames(cluster_cell)[top_cl_cell[,1]]
+top_cl_cell[,2] <- colnames(cluster_cell)[as.numeric(top_cl_cell[, 2])]
+top_cl_cell
+```
+
+```{r preprocessing5, eval=T, echo=FALSE}
+idx <- which(tab>=0.7, arr.ind = T)
+
+idx[,1] <- rownames(tab)[idx[,1]]
+idx[,2] <- colnames(tab)[as.numeric(idx[, 2])]
+rownames(idx) <- NULL
+
+idx %>%
+  kable(format = "html", col.names = colnames(idx)) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kableExtra::scroll_box(width = "100%")
+```
 ## CLUSTER CCC
 We will fist study CCC between clusters, to then use the same approach to study CCC between cell types.
 
 ### Ranked gene list
-For CCC analysis we will need a ranked gene list for each cluster. These will be obtained from the normalized count matrix. `preparing_cl_list()` takes as an inputs: the normalized gene counts matrix (`mtx`), the cluster affiliation of each cell in the count matrix (`clusters`), and a vector with the gene of interest (`universe`), together with two threshold (`mean_t` and `cell_t`) to filter the data and remove noise and false negatives. The function uses `mean_t` to binarize the normalized expression matrix: if the gene in a cell has a value equal or higher of that threshold is set to 1, 0 otherwise. Subsequently the function uses the binarized expression matrix to calculate the frequency of over-threshold expression in each cluster on the genes that pass the threshold in a number of cell equal or higher to `cell_t`. The function returns a gene list for each cluster composed by the frequency for each gene, filtered to maintain only the ones in `universe`, that in this case are the one present in the LR network.
-We suggest identifying `mean_t` considering the mean expression of each gene calculated on non-zero values. Instead, `cell_t` should be set considering the filtering used to remove low expressed genes at the beginning of the Seurat pipeline.
+For CCC analysis we will need a ranked gene list for each cluster. These will be obtained from the normalized count matrix. `preparing_cl_list()` takes as an inputs: the normalized gene counts matrix (`mtx`), the cluster affiliation of each cell in the count matrix (`clusters`), and a vector with the gene of interest (`universe`), together with two threshold (`mean_t` and `cell_t`) to filter the data and remove noise and false negatives. The function uses `mean_t` identify highly expresssed genes in the normalized expression matrix: if the gene in a cell has a value equal or higher of that threshold is set to 1, 0 otherwise. Subsequently the function uses the binarized expression matrix to calculate for each gene in each cluster the frequency of being highly expressed in at least `cell_t` cells. The function returns a gene list for each cluster composed by the frequency for each gene, filtered to maintain only the ones in `universe`, that in this case are the one present in the LR network.
+We suggest identifying `mean_t` considering the mean expression of each gene calculated on non-zero values. Instead, `cell_t` can be set considering the filtering used to remove low expressed genes at the beginning of the Seurat pipeline.
 We will then first identify `mean_t`, to then use `preparing_cl_list()` to obtain the gene lists needed for CCC calculation.
 
 ```{r mean_gNOT, eval=FALSE}
@@ -160,8 +201,8 @@ head(cl_list[[1]])
 
 ### Cluster-Cluster Communication
 Now we have all the data to calculate communication between clusters. We firstly need to filter the LR network to maintain only the genes of interest, to then use the corresponding adjacency matrix for CCC calculation.
-In `cluster_communication()` the CCC score is statistically evaluated by calculating an empirical p-value by using a permutation-based approach. This approach creates `k` permutated version of the adjacency matrix by changing randomly the order of the gene names on the rows (and equally in the columns), to maintain the structure of the network. Then CCC calculation is done using the real matrix and all the permutated ones. Thus, the number of permutated versions of the adjacency matrix that have to be used is controlled by the parameter `k` in the function. In this case we use 49 permutated matrices together with the real one, which correspond to a total of 50 matrix, and thus the minimal p-value that can be observed is 1/50. The other values of the function, which are `mc_cores_perm` and `mc_cores_ccc` controls the parallelization of the function in CCC calculation and permutation, respectively. Be aware that `mc_cores_perm` multiplies `mc_cores_ccc`. Parallelization is useful to reduce the computational time needed for the calculation but improves the amount of memory needed. 
-The function returns two outputs, the first (`communication_info`) is a table with the detailed description of the gene communication between the two clusters: the name of the clusters communicating, the respective genes occurring and the score of their communication. The second output (`cc_communications`) is a table with the names of the clusters, the cumulative CCC score between the two clusters, the number and the names of the genes involved and the number of the links occurring, the empirical p-value and the FDR.
+In `cluster_communication()` the number of communication between two clusters is statistically evaluated by calculating an empirical p-value by using a permutation-based approach. This approach creates `k` permutated version of gene lists of the two clusters by random sampling the same number of gene present in the two lists and calculating the number of interaction present. The number of permutatio that have to be done for p-value calculation of the p-value is controlled by the parameter `k` in the function. In this case we use 49 permutation that, together with the real one, correspond to a total of 50 matrix, and thus the minimal p-value that can be observed is 1/50. The other values of the function, which are `mc_cores_perm` and `mc_cores_ccc` controls the parallelization of the function in CCC calculation and permutation, respectively. Be aware that `mc_cores_perm` multiplies `mc_cores_ccc`. Parallelization is useful to reduce the computational time needed for the calculation but improves the amount of memory needed. 
+The function returns two outputs, the first (`communication_info`) is a table with the detailed description of the gene communication between the two clusters: the name of the clusters communicating, the respective genes occurring and the score of their communication. The second output (`cc_communications`) is a table with the names of the clusters, the cumulative CCC score between the two clusters, the number and the names of the genes involved and the number of the links occurring, the empirical p-value, the empirical FDR and the Benjamini-Hochberg FDR.
 
 ```{r CCC_CLnot1, eval=FALSE}
 cl_gene <- unique(unlist(lapply(cl_list, names)))
@@ -181,8 +222,8 @@ cl_ct$communications_info[1:5,]
 cl_ct <- readRDS("sc_data/clCC_clusters.Rds")
 cl_ct$communications_info[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$communications_info[1:5,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -194,8 +235,8 @@ cl_ct$cc_communications[1:5,]
 
 cl_ct$cc_communications[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$cc_communications[1:5,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -205,7 +246,7 @@ The CCC score obtained as output of `cluster_communication()` can be used to bui
 ```{r CCC_CLnetNOT, eval=FALSE}
 
 CCC_net <- clCC[[2]]
-CCC_net <- CCC_net[which(CCC_net$p_value <= 0.1),]
+CCC_net <- CCC_net[which(CCC_net$p_value_link <= 0.05),]
 CCC.g <- graph_from_edgelist(as.matrix(CCC_net[,1:2]), directed = FALSE)
 CCC.g <- set.edge.attribute(CCC.g, name = "ccc_score", value = CCC_net$ccc_score)
 CCC.adj <- as_adjacency_matrix(CCC.g, sparse = F, attr = "ccc_score")
@@ -275,8 +316,8 @@ cl_ct$communications_info[1:5,]
 cl_ct <- readRDS("sc_data/cl_CCC_TY.Rds")
 cl_ct$communications_info[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$communications_info[1:5,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -287,8 +328,8 @@ cl_ct$cc_communications[1:5,]
 ```{r CCC_TY2, eval=TRUE, echo=FALSE}
 cl_ct$cc_communications[1:5,] %>%
   kable(format = "html", col.names = colnames(cl_ct$cc_communications[1:5,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -298,7 +339,7 @@ The significative CCC score obtained can again be used to build a Cell-Cell Comm
 ```{r CCC_TYnetNOT, eval=FALSE}
 
 CCC_net <- clCC[[2]]
-CCC_net <- CCC_net[which(CCC_net$p_value <= 0.1),]
+CCC_net <- CCC_net[which(CCC_net$p_value_link <= 0.05),]
 CCC.g <- graph_from_edgelist(as.matrix(CCC_net[,1:2]), directed = FALSE)
 CCC.g <- set.edge.attribute(CCC.g, name = "ccc_score", value = CCC_net$ccc_score)
 CCC.adj <- as_adjacency_matrix(CCC.g, sparse = F, attr = "ccc_score")

@@ -122,7 +122,19 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj, genes,
     colnames(pct) <- c("pathway_1", "pathway_2", "pct", "ngenes_pathway1",
                        "ngenes_pathway2", "nlink","weight_pathway1", 
                        "weight_pathway2", "p_value_link", "FDR_link", "p_adj_BH", "gene_pathway1", "gene_pathway2")
-    pct <- data.frame(pct, stringsAsFactors = F)
+    pct <- data.frame(pathway_1 = pct[, 1], 
+                      pathway_2 = pct[, 2], 
+                      pct = as.numeric(pct[, 3]), 
+                      ngenes_pathway1 = as.numeric(pct[, 4]), 
+                      ngenes_pathway2 = as.numeric(pct[, 5]), 
+                      nlink = as.numeric(pct[, 6]), 
+                      weight_pathway1 = as.numeric(pct[, 7]), 
+                      weight_pathway2 = as.numeric(pct[, 8]), 
+                      p_value_link = as.numeric(pct[, 9]), 
+                      FDR_link = as.numeric(pct[, 10]), 
+                      p_adj_BH = as.numeric(pct[, 11]), 
+                      gene_pathway1 = pct[, 12], 
+                      gene_pathway2 = pct[, 13], stringsAsFactors = F)
     return(pct)
     
     

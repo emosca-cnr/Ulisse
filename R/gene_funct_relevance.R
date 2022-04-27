@@ -13,6 +13,7 @@
 #' @param file_name file name of the plot, if NULL the plot will be saved in the working 
 #' directory as "gene_functional_relevance.jpeg"
 #' @param plot_names logical, indicating whether to print gene names in the functional relevance plot
+#' @param n_cores number of cores to be use to parallelize gene functional relevance analysis
 #' @return The function returns a data.frame with:
 #' \itemize{
 #' \item gene: the gene analysed
@@ -37,7 +38,7 @@
 
 
 
-gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_names =T) {
+gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_names =T, n_cores = 1) {
   
   ptw.sign <- unique(c(pct$pathway_1, pct$pathway_2))
   gene1 <- unlist(strsplit(pct$gene_pathway1, ";", fixed = T))
@@ -59,15 +60,20 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
     if(length(idx) > 0) {
       wlnk <- wlnk[-idx]
     }
-    nInter <- adj[rownames(adj) == i, colnames(adj) %in% wlnk, drop = F]
+    nInter <- adj[which(rownames(adj) == i), which(colnames(adj) %in% wlnk), drop = F]
     interactors <- paste(colnames(nInter)[nInter>0], collapse = ";")
     nInter <- sum(nInter)
     tmp <- matrix(c(i, nPTW, nInter, ptw, interactors), nrow = 1)
     return(tmp)
-  })
+  }, mc.cores = n_cores)
   gene.data <- do.call(rbind, gene.data)
   colnames(gene.data) <- c("gene", "nPTW", "nInteractors", "pathway", "interactors")
-  gene.data <- data.frame(gene.data, stringsAsFactors = F)
+  gene.data <- data.frame(gene = gene.data[, 1],
+                          nPTW = as.numeric(gene.data[, 2]), 
+                          nInteractors = as.numeric(gene.data[, 3]),
+                          pathway = gene.data[, 4],
+                          interactors = gene.data[, 5],
+                          stringsAsFactors = F)
   
   gene.data <- gene.data[gene.data$nPTW > 0,]
   if(to_plot == T) {
@@ -75,7 +81,8 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
       if(plot_names == T) {
         jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
         plotrix::thigmophobe.labels(gene.data$nPTW,
                                     gene.data$nInteractors, 
@@ -84,7 +91,8 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
       } else {
         jpeg("gene_functional_relevance.jpeg", width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
         dev.off()
       }
@@ -93,7 +101,8 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
       if(plot_names == T) {
         jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
         plotrix::thigmophobe.labels(gene.data$nPTW,
                                     gene.data$nInteractors, 
@@ -102,7 +111,8 @@ gene_funct_relevance <- function(pct, adj, to_plot = T, file_name = NULL, plot_n
       } else {
         jpeg(file_name, width = 200, height = 200,
              res = 300, units = "mm")
-        plot(jitter(gene.data$nPTW, factor = 0.5), jitter(gene.data$nInteractors, factor = 0.5),
+        plot(jitter(as.numeric(gene.data$nPTW), factor = 0.5), 
+             jitter(as.numeric(gene.data$nInteractors), factor = 0.5),
              pch=20)
         dev.off()
       }

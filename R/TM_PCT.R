@@ -55,12 +55,8 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
     gene_network_adj <- as(gene_network_adj, "dgCMatrix")
   }
   gene_network_adj <- sign(gene_network_adj)
-  names(weight) <- rownames(gene_network_adj)
-  names(membership) <- rownames(gene_network_adj)
   weight <- weight[weight !=0]
-  gene_network_adj <- gene_network_adj[names(weight), names(weight)]
-  membership <- membership[names(weight)]
-  
+   
   unqMem <- unique(membership)
   mem_ptwL <- mclapply(unqMem, function(z) {
     tmp <- lapply(pathway_list, function(x) x <- x[x %in% rownames(gene_network_adj)[membership == z]])
@@ -142,7 +138,18 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
     }, mc.cores = mc_cores_tm)
     
     res <- do.call(rbind, res)
-    res <- data.frame(res, stringsAsFactors = F)
+    res <- data.frame(commID_1 = res[, 1],
+                      pathway_1 = res[, 2], 
+                      commID_2 = res[, 3], 
+                      pathway_2 = res[, 4], 
+                      pct = as.numeric(res[, 5]), 
+                      ngenes_pathway1 = as.numeric(res[, 6]), 
+                      ngenes_pathway2 = as.numeric(res[, 7]), 
+                      nlink = as.numeric(res[, 8]), 
+                      weight_pathway1 = as.numeric(res[, 9]), 
+                      weight_pathway2 = as.numeric(res[, 10]), 
+                      gene_pathway1 = res[, 11], 
+                      gene_pathway2 = res[, 12], stringsAsFactors = F)
     out <- list(comm_pathway_list = mem_ptwL, TM_PCT_res = res)
     return(out)
   }

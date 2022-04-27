@@ -72,7 +72,7 @@ pathway_cc <- function (pathway_list, gene_network_adj,
       tab <- xx[[x]]
       cc <- igraph::components(graph = igraph::graph_from_adjacency_matrix(tab,
                                                                            mode = "undirected"))
-      
+      return(cc)
       
     },   mc.cores = mc_cores_cc)
     
@@ -97,6 +97,12 @@ pathway_cc <- function (pathway_list, gene_network_adj,
     out <- do.call(rbind, out)
     idx <- out[, "score"]== 0
     out <- out[!idx,]
+    out <- data.frame(pathway = out[,1],
+                      ID = out[, 2],
+                      score = as.numeric(out[,3]),
+                      n_gene = as.numeric(out[,4]),
+                      n_link = as.numeric(out[,5]),
+                      gene = out[,5], stringsAsFactors = F)
     
     cc_list <- lapply(cc_out, function(x) {
       x <- x$membership

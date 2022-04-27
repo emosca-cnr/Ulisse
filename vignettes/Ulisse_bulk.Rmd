@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, echo = FALSE, message = FALSE, warning=FALSE, eval=TRUE}
+```{r setup, echo = FALSE, message = FALSE, warning=FALSE}
 library(pander)
 library(knitr)
 library(rmarkdown)
@@ -40,11 +40,13 @@ library(TCGAbiolinks)
 library(STRINGdb)
 library(igraph)
 library(reshape2)
+library(org.Hs.eg.db)
 ```
+
 As an example, dataset we will use breast cancer mutational data obtained from TCGA, that we will use to obtain the ranked gene list. The biological network will be obtained from STRING database.
 
 ### Ranked gene list
-To obtain the needed ranked gene list we will split the TCGA data as to have a matrix with the genes in the rows and the samples in the columns. This matrix will have a 1 if the gene is mutated in that sample and a 0 otherwise. By making the mean we will obtain the frequency of mutation identified for each gene in the samples, and we will use this value as a rank.
+To obtain the needed ranked gene list we will split the TCGA data to obtain a matrix with the genes in the rows, the samples in the columns and filled with the number of mutation observed for each gene. By making the mean we will obtain the frequency of mutation identified for each gene in the samples, and we will use this value as a rank. In detail, we will study the cross-talks of the top 200 genes.
 ```{r not_to_run_downloadTCGAdata, eval=FALSE}
 query <- GDCquery(project = "TCGA-BRCA", 
                   data.category = "Simple Nucleotide Variation",
@@ -60,18 +62,26 @@ data <- TCGAbiolinks::GDCprepare(query,
 ```
 
 ```{r preparing_ranked_glNOT, eval=FALSE}
+data <- data[!data$Entrez_Gene_Id == 0,]
 data <- data.frame(table(data$Entrez_Gene_Id, data$Tumor_Sample_Barcode), stringsAsFactors = F)
-data <- data.frame(acast(data, Var1 ~ Var2), stringsAsFactors = F)
+data <- data.frame(reshape2::acast(data, Var1 ~ Var2), stringsAsFactors = F)
 data$mean <- rowMeans(data)
 data <- data[order(data$mean, decreasing = T),]
-data <- data[1:200,]
+
 rank_gl <- data.frame(gene = rownames(data),
                       rank = data$mean,
                       stringsAsFactors = F)
+
+hs <- org.Hs.eg.db
+to_convert <- select(hs, keys=rank_gl$gene, columns = "SYMBOL", keytype = "ENTREZID")
+rank_gl$gene_symbol <- to_convert$SYMBOL[match(rank_gl$gene, to_convert$ENTREZID)]
+
+target_rank_gl <- rank_gl[1:200,]
+
 ```
 
 ### Biological network
-We obtain the biological network from STRINGdb and the filter it to maintain only the 200 genes of interest
+We obtain the biological network from STRINGdb and the filter it to maintain only the genes present in the downloaded data.
 
 ```{r preparing_networkNot, eval=FALSE}
 string_db <- STRINGdb$new( version="11.0", 
@@ -83,15 +93,13 @@ PPI <- unique(string_db$get_interactions(rank_gl$STRING_id))
 PPI.g <- graph_from_edgelist(as.matrix(PPI[,1:2]), directed = F)
 ```
 
-Now we have the biological network of the 200 genes of interest. However, it is formatted with STRING identifiers, so we need to convert it in something compatible with the names of the gene in the ranked gene list. We will convert both to gene symbol. As is possible to see, there are more genes in the ranked gene list than in the network. The missing genes are singletons that does not have inks with the other and are thus not represented in the edge list. Moreover, these genes do not give any information that can be used in CT calculations, so it is correct to ignore them
+Now we have the biological network of all the genes in the study. However, the gene names are formatted with STRING identifiers, so we need to convert it to gene symbol. As is possible to see, there are more genes in the ranked gene list than in the network. The missing genes are singletons that does not have links and are thus not represented in the edge list. These genes do not give any information that can be used in CT calculations, so it is correct to ignore them
 
 ```{r convert_entrezid_symbol, message=FALSE, eval=FALSE}
-library(org.Hs.eg.db)
-hs <- org.Hs.eg.db
 
 rank_gl <- rank_gl[which(rank_gl$STRING_id %in% V(PPI.g)$name),]
-to_convert <- select(hs, keys=rank_gl$gene, columns = "SYMBOL", keytype = "ENTREZID")
 rank_gl$gene_symbol <- to_convert$SYMBOL[match(rank_gl$gene, to_convert$ENTREZID)]
+rank_gl <- rank_gl[which(rank_gl$STRING_id %in% V(PPI.g)$name),]
 
 V(PPI.g)$name <- rank_gl$gene_symbol[match(V(PPI.g)$name, rank_gl$STRING_id)]
 PPI.g
@@ -105,13 +113,13 @@ PPI.g
 
 ### Pathway Data
 Now we have the two inputs prepared. We need to download the pathway database and group our gene of interest into pathways.
-To do so we will use the `pathway_data` function that download the data of a defined database from MSigDB, group the genes into pathway and returns only the ones that are composed by at least `min_size` and maximum `max_size` genes. In this case we will download KEGG database and use the default for the other parameters. The function will return the result of the MSigDBR function to download the pathway and the pathway list
+To do so we will use the `pathway_data` function that download the data of a defined database from MSigDB, group the genes into pathway and returns only the pathways that are composed by at least `min_size` and maximum `max_size` genes. In this case we will download KEGG database and use the default for the other parameters. The function will return the result of the MSigDBR function to download the pathway and the pathway list
 
 ```{r obtaining_pathway_dataNOT, eval=FALSE}
 ptw <- pathway_data(species = "Homo sapiens", 
                     subcategory = "CP:KEGG", 
-                    type = "gene_symbol", 
-                    gene = rank_gl$gene_symbol )
+                    type = "gene_symbol", min_size = 1, max_size = 500, 
+                    gene = target_rank_gl$gene_symbol)
 
 ptw$msigdb_output[1:10,]
 ```
@@ -121,8 +129,8 @@ ptw <- readRDS("bulk_data/ptw.Rds")
 
 ptw$msigdb_output[1:10,] %>%
   kable(format = "html", col.names = colnames(ptw$msigdb_output[1:10,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 ```
 
@@ -131,18 +139,17 @@ ptw$path_list[1:3]
 ```
 
 ## Pathway Cross-talk
-Now we have all the needed input for calculating PCT. The network will be provided to `pathway_cross_talk` function as an adjacency matrix. The rank (or weights) of the genes should be provided to the function as a vector of values associated to the genes ordered with the same order of the adjacency matrix. PCT calculation can be parallelized by increasing the `mc_cores_pct` and `mc_cores_perm` values: the first parallelize the calculation of the PCT on the pathways, the second parallelize all the calculation over the permutated version of the adjacency matrix, thus multiply the `mc_cores_pct` in some part of the function. The number of permutations `k` corresponds to the number of permutated versions of the matrix that are needed, together with the original matrix, for the calculation of p-value and FDR. Here we set the number to 9, which means that the p-value and FDR are calculated on 9 permutated matrices + the original one, so 10 matrix in total (and thus the minimal p-vale will be 0.10)
-As a short example we will use no parallelization and only 9 permutations. 
+Now we have all the needed input for calculating PCT. The biological network will be provided to `pathway_cross_talk` function as an adjacency matrix. The rank (or weights) of the target genes should be provided to the function as a named vector of values associated to the genes. PCT calculation can be parallelized by increasing the `mc_cores_pct` and `mc_cores_perm` values: the first parallelize the calculation of the PCT on the pathways, the second parallelize all the calculation over the permutated version of the adjacency matrix, thus multiply the `mc_cores_pct` in some part of the function. The number of permutations `k` corresponds to the number of permutated versions of the matrix that are needed, together with the original matrix, for the calculation of p-value and FDR. Here we set the number to 49, which means that the p-value and FDR are calculated on 49 permutated matrices + the original one, so 50 matrix in total (and thus the minimal p-vale will be 0.02)
+As a short example we will use no parallelization and only 49 permutations. 
 
 ```{r pctNot, results="asis", eval=FALSE}
 adj.m <- as_adjacency_matrix(PPI.g, sparse = F)
-rank_gl <- rank_gl[match(rownames(adj.m), rank_gl$gene_symbol),]
-
-pct <- pathway_cross_talk(pathway_list = ptw$path_list, 
-                          gene_network_adj = adj.m, 
-                          weight = rank_gl$rank, 
-                          mc_cores_pct = 1, 
-                          mc_cores_perm = 1, k = 9)
+wgt <- target_rank_gl$rank
+names(wgt) <- target_rank_gl$gene_symbol
+pct <- pathway_cross_talk(pathway_list = ptw$path_list, gene_network_adj = adj.m, 
+                          genes = target_rank_gl$gene_symbol,
+                          weight = wgt, mc_cores_pct = 1, 
+                          mc_cores_perm = 1, k = 49)
 pct[1:10,]
 ```
 
@@ -152,11 +159,9 @@ pct$p_value <- as.vector(pct$p_value)
 rownames(pct) <- c()
 pct[1:10,] %>%
   kable(format = "html", col.names = colnames(pct[1:10,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
-
-#paged_table(data.frame(pct[1:3,], stringsAsFactors = F)) 
 
 ```
 
@@ -164,14 +169,14 @@ pct[1:10,] %>%
 
 PCT results can be filtered to maintain only the significative. Then, the results can be visualized as a network or as an heatmap
 
-```{r, include=TRUE, message=FALSE, warning=FALSE, eval=FALSE}
+```{r, include=TRUE, message=FALSE, warning=FALSE}
 library(ComplexHeatmap)
 library(circlize)
 ```
 
 
 ```{r PCT_visualizationNOT, eval=FALSE}
-pct <- pct[which(pct$p_value <= 0.1),]
+pct <- pct[which(pct$p_value <= 0.05),]
 
 pct.n <- graph_from_edgelist(as.matrix(pct[,1:2]), directed = F)
 E(pct.n)$pct <- pct$pct
@@ -210,7 +215,7 @@ The significative results of PCT can be used for gene functional relevance analy
 By turning the argument `to_plot` to `TRUE`, the function saves a plot named as default `gene_functional_relevance.jpeg` in the working directory
 
 ```{r Funct_relNot, results="asis", eval=FALSE}
-funct_rel <-gene_funct_relevance(pct = pct, adj = adj.m, to_plot = F)
+funct_rel <- gene_funct_relevance(pct = pct, adj = adj.m, to_plot = F)
 funct_rel[1:10,]
 ```
 
@@ -218,8 +223,8 @@ funct_rel[1:10,]
 funct_rel <- readRDS("bulk_data/funct_rel.Rds")
 funct_rel[1:10,] %>%
   kable(format = "html", col.names = colnames(funct_rel[1:10,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   column_spec(4, width = "5cm") %>%
   kableExtra::scroll_box(width = "100%")
 
@@ -239,15 +244,14 @@ include_graphics("bulk_data/REACTOME_funct_rel.jpeg")
 ```
 
 ## Sub-pathway CT
-Gene interacts inside the pathways and groups into connected components (CC), or group of genes more interconnected between them than to the other genes in the network. In this case, each connected components correspond to genes with a similar biological function. In som studies may be important to identify if there are some connected components that are enriched of gene of interest. `pathway_cc` assign a score to each CC and uses a permutation approach to identify the significative ones. As for `pathway_cross_talk`, `mc_cores_cc` and `mc_cores_perm` are the parameter to control the parallelization of the calculation of the CC score and the permutations for the statistical evaluation, respectively.
+Gene interacts inside the pathways and groups into connected components (CC), or group of genes more interconnected between them than to the other genes in the network. In this case, each connected components correspond to genes with a similar biological function. It may be important to study the CC of pathways of interest, that may be the pathways that contains the target genes of the study or the ones involved in significative PCTs. `pathway_cc` assign a score to each CC. Similarly to `pathway_cross_talk`, `mc_cores_cc` control the parallelization of the calculation of the CC score.
 The function returns a list of two elements: the first are the details of the CC present in each pathway and the second a table with the result of the sub-pathway analysis
+
 ```{r CC_Not, results="asis", eval=FALSE}
 pct_CC <- pathway_cc(pathway_list = ptw$path_list, 
                      gene_network_adj = adj.m,
                      weight = rank_gl$rank, 
-                     k = 9,
-                     mc_cores_cc = 1, 
-                     mc_cores_perm = 1)
+                     mc_cores_cc = 1)
 pct_CC$membership[1:3]
 ```
 
@@ -263,22 +267,24 @@ pct_CC$pathway_cc[1:10,]
 
 
 ```{r CC2, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
-pct_CC$pathway_cc$p_value <- as.vector(pct_CC$pathway_cc$p_value)
 rownames(pct_CC$pathway_cc) <- c()
 pct_CC$pathway_cc[1:10,] %>%
   kable(format = "html", col.names = colnames(pct_CC$pathway_cc[1:3,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 
 ```
 
 ## TM-PCT
 
-It is possible to study in a network if there are some communities of vertices where the vertices are more connected between them than to the rest of the network. In biological network it is said that these communities correspond to genes that have similar biological function. We decided to develop `TM_PCT` as to be able to study how the pathways build on the gene communities interact. Community pathways should represent the part of pathways that have a similar biological function, and with `TM_PCT` we can study how these interact. First, we need to identify the gene communities. We can use `find_communites` function to compare different algorithms
+It is possible to study in a network if there are some communities of vertices where the vertices are more connected between them than to the rest of the network. In biological network it is said that these communities correspond to genes that have similar biological function. By aligning the biological network to the target genes we can obtain the gene network, where the communities are composed by gene of interest grouped by biological functions. We can group the genes in the communities into pathways, which should represent the part of pathways that have a similar biological function. We decided to develop `TM_PCT` as to be able to study how the pathways build on these gene communities interact between communities. First, we need to subset the biological network to then identify the gene communities. We can use `find_communites` function to compare different algorithms
 
 ```{r gene_commNot, eval=FALSE}
-comm_det <- find_communities(PPI.g)
+sub.PPI <- induced.subgraph(PPI.g, vids = target_rank_gl$gene_symbol)
+sub.PPI <- induced.subgraph(sub.PPI, V(sub.PPI)$name[-which(igraph::degree(sub.PPI) ==0)])
+
+comm_det <- find_communities(sub.PPI)
 comm_det$info
 
 ```
@@ -289,20 +295,20 @@ comm_det$info
 
 ```
 
-Considering the output of `find_communities`, the best algorithm to choose is the one with highest modularity and the lowest number of communities. Here we choose to use fastgreedy
+Considering the output of `find_communities`, the best algorithm to choose is the one with highest modularity and the lowest number of communities. Here we choose to use fastgreedy.
 
 ```{r comm_detect, eval=FALSE}
 comm <- comm_det$comm$fastgreedy
 comm_m <- membership(comm)
-PPI.g <- set_vertex_attr(PPI.g, "comm_id", value =  comm_m[match(names(V(PPI.g)), names(comm_m))])
+sub.PPI <- set_vertex_attr(sub.PPI, "comm_id", value =  comm_m[match(names(V(sub.PPI)), names(comm_m))])
 
-comm_mF <- factor(comm_m, levels = min(comm_m):max(comm_m)) #to control graphical parameters
+comm_m <- factor(comm_m, levels = min(comm_m):max(comm_m)) #to control graphical parameters
 pal = rainbow(max(comm_m))
-plot(PPI.g, 
+plot(sub.PPI, 
      vertex.color=pal[as.numeric(comm_m)], 
      vertex.label=NA, 
      vertex.size=6)
-legend("bottomleft", fill = pal, legend = levels(comm_mF), cex = 0.75)
+legend("bottomleft", fill = pal, legend = levels(comm_m), cex = 0.75)
 
 ```
 
@@ -310,17 +316,18 @@ legend("bottomleft", fill = pal, legend = levels(comm_mF), cex = 0.75)
 include_graphics("bulk_data/BRCA_TCGA_gene_net_communities.jpeg")
 ```
 
-Now we have all the inputs needed for TM-PCT. As before, `mc_cores_pct`, `mc_cores_perm` and `mc_cores_tm` controls the parallelization of the calculation of TM-PCT score in pathway pairs, in the permutations and combinations of communities, respectively. `tm_pct` function returns a list of two object, the first is a pathway list for each community, the secondo a table with the results of TM-PCT calculation
+Now we have all the inputs needed for TM-PCT. As before, `mc_cores_pct` and `mc_cores_tm` controls the parallelization of the calculation of TM-PCT score in pathway pairs and combinations of communities, respectively. `tm_pct` function returns a list of two object, the first is a pathway list for each community, the secondo a table with the results of TM-PCT calculation
+
 ```{r TM_PCTNOT, results="asis", eval=FALSE}
-att.vertex <- vertex_attr(PPI.g)
+sub.adj.m <- as.matrix(adj.m[names(V(sub.PPI)), names(V(sub.PPI))])
+
 tm_pct <- TM_PCT(pathway_list = ptw$path_list, 
-                 gene_network_adj = adj.m,
-                 membership = as.vector(att.vertex$comm_id),
-                 weight = rank_gl$rank, 
+                 gene_network_adj = as.matrix(sub.adj.m),
+                 membership = comm_m,
+                 weight = sub_wgt, 
                  mc_cores_pct = 1, 
-                 mc_cores_perm = 1, 
-                 mc_cores_tm = 1, 
-                 k = 9)
+                 mc_cores_tm = 1)
+
 tm_pct[["comm_pathway_list"]][["1"]][1:3]
 ```
 
@@ -337,8 +344,8 @@ tm_pct$TM_PCT_res[1:10,]
 tm_pct$TM_PCT_res$p_value <- as.vector(tm_pct$TM_PCT_res$p_value)
 tm_pct$TM_PCT_res[1:10,] %>%
   kable(format = "html", col.names = colnames(tm_pct$TM_PCT_res[1:10,])) %>%
-  kableExtra::kable_minimal() %>%
-  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed")) %>%
+  kable_minimal() %>%
+  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
   kableExtra::scroll_box(width = "100%")
 
 ```

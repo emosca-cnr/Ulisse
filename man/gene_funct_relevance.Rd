@@ -4,7 +4,14 @@
 \alias{gene_funct_relevance}
 \title{Function to calculate gene functional relevance}
 \usage{
-gene_funct_relevance(pct, adj, to_plot = T, file_name = NULL, plot_names = T)
+gene_funct_relevance(
+  pct,
+  adj,
+  to_plot = T,
+  file_name = NULL,
+  plot_names = T,
+  n_cores = 1
+)
 }
 \arguments{
 \item{pct}{the data.frame obtained as a result of `pathway_corss_talk()`}
@@ -17,6 +24,8 @@ gene_funct_relevance(pct, adj, to_plot = T, file_name = NULL, plot_names = T)
 directory as "gene_functional_relevance.jpeg"}
 
 \item{plot_names}{logical, indicating whether to print gene names in the functional relevance plot}
+
+\item{n_cores}{number of cores to be use to parallelize gene functional relevance analysis}
 }
 \value{
 The function returns a data.frame with:

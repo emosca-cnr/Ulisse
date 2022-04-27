@@ -102,7 +102,20 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
   colnames(ans) <- c("cl1", "cl2", "ccc_score", "ngenes_cl1", "ngenes_cl2",
                      "nlink","p_value_link", "link_FDR", "p_adj_BH", "gene_weight_cl1", 
                      "gene_weight_cl2", "genes_cl1", "genes_cl2")
-  ans <- data.frame(ans, stringsAsFactors = F)
+  ans <- data.frame(cl1 = ans[, 1], 
+                    cl2 = ans[, 2], 
+                    ccc_score = as.numeric(ans[, 3]), 
+                    ngenes_cl1 = as.numeric(ans[, 4]), 
+                    ngenes_cl2 = as.numeric(ans[, 5]),
+                    nlink = as.numeric(ans[, 6]), 
+                    p_value_link = as.numeric(ans[, 7]), 
+                    link_FDR = as.numeric(ans[, 8]), 
+                    p_adj_BH = as.numeric(ans[, 9]), 
+                    gene_weight_cl1 = as.numeric(ans[, 10]), 
+                    gene_weight_cl2 = as.numeric(ans[, 11]), 
+                    genes_cl1 = ans[, 12], 
+                    genes_cl2 = ans[, 13], 
+                    stringsAsFactors = F)
   
   ct_info <- parallel::mclapply(1:nrow(comb_p), function(z) {
     cl1 <- cl_list[[comb_p[z, 1]]]
@@ -124,7 +137,12 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
   },mc.cores = mc_cores_ccc)
   ct_info <- do.call(rbind, ct_info)
   colnames(ct_info) <- c("cl1", "cl1_gene", "cl2", "cl2_gene", "score")
-  ct_info <- data.frame(ct_info, stringsAsFactors = F)
+  ct_info <- data.frame(cl1 = ct_info[, 1],
+                        cl1_gene = ct_info[, 2],
+                        cl2 = ct_info[, 3],
+                        cl2_gene = ct_info[, 4],
+                        score = as.numeric(ct_info[, 5]),
+                        stringsAsFactors = F)
   
   return(list(communications_info = ct_info, cc_communications= ans))
 }
