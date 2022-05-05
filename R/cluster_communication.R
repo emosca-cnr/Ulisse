@@ -65,86 +65,110 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
   l_cl_list <- lengths(cl_list)
   names(l_cl_list) <- names(cl_list)
   
-  perm_list <- mclapply(1:nrow(comb_p), function(x) {
-    n.1 <- l_cl_list[comb_p[x,1]]
-    n.2 <- l_cl_list[comb_p[x,1]]
-    out <- perm_link(r = n.1, c = n.2, gene_network_adj, core = mc_cores_perm, k, hash = F)
-    return(out)
-  }, mc.cores = mc_cores_ccc)
-  
-  
-  ans <- parallel::mclapply(1:nrow(comb_p), function(z) {
-    g.1 <- cl_list[[comb_p[z, 1]]]
+  sub_adj <- mclapply(1:nrow(comb_p), function(x) {
+    g.1 <- cl_list[[comb_p[x, 1]]]
     n.g1 <- as.character(names(g.1))
     n.1 <- length(g.1)
-    g.2 <- cl_list[[comb_p[z, 2]]]
+    g.2 <- cl_list[[comb_p[x, 2]]]
     n.g2 <- as.character(names(g.2))
     n.2 <- length(g.2)
     
     tab <- gene_network_adj[n.g1, n.g2]
-    nlink <- matrix(sum(tab))
-    perm_l <- perm_list[[z]]
-    all_perm <- c(list(nlink), perm_l)
-    p_val <- calc_p(all_perm)
-    ct <- cross_talk(mat = tab, weight = c(g.1, g.2))
-    out <- array(c(comb_p[z, 1], comb_p[z, 2], ct[1:4], as.vector(p_val), ct[5:8]), dim = c(1, 11))
-    
-    return(out)
-  }, mc.cores = mc_cores_perm)
+    return(tab)
+  })
   
-  ans <- do.call(rbind, ans)
-  all.v <- unlist(perm_list)
-  all.v <- c(ans[,6], all.v)
-  link_FDR <- eFDR(real_values = ans[,6], all_values = all.v, mc.cores = mc_cores_ccc)
-  p_val_BH <- stats::p.adjust(ans[,7], method = "BH")
-  ans <- cbind(ans[, 1:7], link_FDR, p_val_BH, ans[,8:11])
+  idx <- which(mclapply(sub_adj, function(n) sum(n, na.rm = T), mc.cores = mc_cores_ccc) !=0)
   
-  colnames(ans) <- c("cl1", "cl2", "ccc_score", "ngenes_cl1", "ngenes_cl2",
-                     "nlink","p_value_link", "link_FDR", "p_adj_BH", "gene_weight_cl1", 
-                     "gene_weight_cl2", "genes_cl1", "genes_cl2")
-  ans <- data.frame(cl1 = ans[, 1], 
-                    cl2 = ans[, 2], 
-                    ccc_score = as.numeric(ans[, 3]), 
-                    ngenes_cl1 = as.numeric(ans[, 4]), 
-                    ngenes_cl2 = as.numeric(ans[, 5]),
-                    nlink = as.numeric(ans[, 6]), 
-                    p_value_link = as.numeric(ans[, 7]), 
-                    link_FDR = as.numeric(ans[, 8]), 
-                    p_adj_BH = as.numeric(ans[, 9]), 
-                    gene_weight_cl1 = as.numeric(ans[, 10]), 
-                    gene_weight_cl2 = as.numeric(ans[, 11]), 
-                    genes_cl1 = ans[, 12], 
-                    genes_cl2 = ans[, 13], 
-                    stringsAsFactors = F)
+  if(length(idx) == 0 ) {
+    print("No CCC available")
+    return("No CCC available")
+  } else {
+    
+    sub_adj <- sub_adj[idx]
+    comb_p <- comb_p[idx,]
+    perm_list <- mclapply(1:nrow(comb_p), function(x) {
+      n.1 <- l_cl_list[comb_p[x,1]]
+      n.2 <- l_cl_list[comb_p[x,2]]
+      out <- perm_link(r = n.1, c = n.2, gene_network_adj, core = mc_cores_perm, k, hash = F)
+      return(out)
+    }, mc.cores = mc_cores_ccc)
+    
+    
+    ans <- parallel::mclapply(1:nrow(comb_p), function(z) {
+      g.1 <- cl_list[[comb_p[z, 1]]]
+      n.g1 <- as.character(names(g.1))
+      n.1 <- length(g.1)
+      g.2 <- cl_list[[comb_p[z, 2]]]
+      n.g2 <- as.character(names(g.2))
+      n.2 <- length(g.2)
+      
+      tab <- gene_network_adj[n.g1, n.g2]
+      nlink <- matrix(sum(tab))
+      perm_l <- perm_list[[z]]
+      all_perm <- c(list(nlink), perm_l)
+      p_val <- calc_p(all_perm)
+      ct <- cross_talk(mat = tab, weight = c(g.1, g.2))
+      out <- array(c(comb_p[z, 1], comb_p[z, 2], ct[1:4], as.vector(p_val), ct[5:8]), dim = c(1, 11))
+      
+      return(out)
+    }, mc.cores = mc_cores_perm)
+    
+    ans <- do.call(rbind, ans)
+    all.v <- unlist(perm_list)
+    all.v <- c(ans[,6], all.v)
+    link_FDR <- eFDR(real_values = ans[,6], all_values = all.v, mc.cores = mc_cores_ccc)
+    p_val_BH <- stats::p.adjust(ans[,7], method = "BH")
+    ans <- cbind(ans[, 1:7], link_FDR, p_val_BH, ans[,8:11])
+    
+    colnames(ans) <- c("cl1", "cl2", "ccc_score", "ngenes_cl1", "ngenes_cl2",
+                       "nlink","p_value_link", "link_FDR", "p_adj_BH", "gene_weight_cl1", 
+                       "gene_weight_cl2", "genes_cl1", "genes_cl2")
+    ans <- data.frame(cl1 = ans[, 1], 
+                      cl2 = ans[, 2], 
+                      ccc_score = as.numeric(ans[, 3]), 
+                      ngenes_cl1 = as.numeric(ans[, 4]), 
+                      ngenes_cl2 = as.numeric(ans[, 5]),
+                      nlink = as.numeric(ans[, 6]), 
+                      p_value_link = as.numeric(ans[, 7]), 
+                      link_FDR = as.numeric(ans[, 8]), 
+                      p_adj_BH = as.numeric(ans[, 9]), 
+                      gene_weight_cl1 = as.numeric(ans[, 10]), 
+                      gene_weight_cl2 = as.numeric(ans[, 11]), 
+                      genes_cl1 = ans[, 12], 
+                      genes_cl2 = ans[, 13], 
+                      stringsAsFactors = F)
+    
+    ct_info <- parallel::mclapply(1:nrow(comb_p), function(z) {
+      cl1 <- cl_list[[comb_p[z, 1]]]
+      ncl1 <- names(cl1)
+      cl2 <- cl_list[[comb_p[z, 2]]]
+      ncl2 <- names(cl2)
+      mat <- gene_network_adj[ncl1, ncl2, drop = F]
+      
+      row.col.idx <- which(mat == 1, arr.ind = T)
+      
+      score = cl1[rownames(row.col.idx)] * cl2[colnames(mat)[row.col.idx[,2]]]
+      cl1 = rep(comb_p[z, 1], nrow(row.col.idx))
+      cl1_gene = rownames(row.col.idx)
+      cl2 = rep(comb_p[z, 2], nrow(row.col.idx))
+      cl2_gene = colnames(mat)[row.col.idx[,2]]
+      
+      cl_ct <- matrix(c(cl1, cl1_gene, cl2, cl2_gene, score), nrow = nrow(row.col.idx))
+      return(cl_ct)
+    },mc.cores = mc_cores_ccc)
+    ct_info <- do.call(rbind, ct_info)
+    colnames(ct_info) <- c("cl1", "cl1_gene", "cl2", "cl2_gene", "score")
+    ct_info <- data.frame(cl1 = ct_info[, 1],
+                          cl1_gene = ct_info[, 2],
+                          cl2 = ct_info[, 3],
+                          cl2_gene = ct_info[, 4],
+                          score = as.numeric(ct_info[, 5]),
+                          stringsAsFactors = F)
+    
+    return(list(communications_info = ct_info, cc_communications= ans))
+  }
   
-  ct_info <- parallel::mclapply(1:nrow(comb_p), function(z) {
-    cl1 <- cl_list[[comb_p[z, 1]]]
-    ncl1 <- names(cl1)
-    cl2 <- cl_list[[comb_p[z, 2]]]
-    ncl2 <- names(cl2)
-    mat <- gene_network_adj[ncl1, ncl2, drop = F]
-    
-    row.col.idx <- which(mat == 1, arr.ind = T)
-    
-    score = cl1[rownames(row.col.idx)] * cl2[colnames(mat)[row.col.idx[,2]]]
-    cl1 = rep(comb_p[z, 1], nrow(row.col.idx))
-    cl1_gene = rownames(row.col.idx)
-    cl2 = rep(comb_p[z, 2], nrow(row.col.idx))
-    cl2_gene = colnames(mat)[row.col.idx[,2]]
-    
-    cl_ct <- matrix(c(cl1, cl1_gene, cl2, cl2_gene, score), nrow = nrow(row.col.idx))
-    return(cl_ct)
-  },mc.cores = mc_cores_ccc)
-  ct_info <- do.call(rbind, ct_info)
-  colnames(ct_info) <- c("cl1", "cl1_gene", "cl2", "cl2_gene", "score")
-  ct_info <- data.frame(cl1 = ct_info[, 1],
-                        cl1_gene = ct_info[, 2],
-                        cl2 = ct_info[, 3],
-                        cl2_gene = ct_info[, 4],
-                        score = as.numeric(ct_info[, 5]),
-                        stringsAsFactors = F)
   
-  return(list(communications_info = ct_info, cc_communications= ans))
 }
 
 
