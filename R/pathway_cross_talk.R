@@ -117,11 +117,7 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj, genes,
     all.v <- unlist(perm_list)
     all.v <- c(as.numeric(pct[, 6]), all.v)
     link_FDR <- eFDR(real_values = as.numeric(pct[, 6]), all_values = all.v, mc.cores = mc_cores_pct)
-    p_bh <- stats::p.adjust(pct[, 9], method = "BH")
-    pct <- cbind(pct[,1:9], link_FDR, p_bh,  pct[, 10:11])
-    colnames(pct) <- c("pathway_1", "pathway_2", "pct", "ngenes_pathway1",
-                       "ngenes_pathway2", "nlink","weight_pathway1", 
-                       "weight_pathway2", "p_value_link", "FDR_link", "p_adj_BH", "gene_pathway1", "gene_pathway2")
+    p_bh <- stats::p.adjust(as.numeric(pct[, 9]), method = "BH")
     pct <- data.frame(pathway_1 = pct[, 1], 
                       pathway_2 = pct[, 2], 
                       pct = as.numeric(pct[, 3]), 
@@ -131,10 +127,11 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj, genes,
                       weight_pathway1 = as.numeric(pct[, 7]), 
                       weight_pathway2 = as.numeric(pct[, 8]), 
                       p_value_link = as.numeric(pct[, 9]), 
-                      FDR_link = as.numeric(pct[, 10]), 
-                      p_adj_BH = as.numeric(pct[, 11]), 
-                      gene_pathway1 = pct[, 12], 
-                      gene_pathway2 = pct[, 13], stringsAsFactors = F)
+                      FDR_link = link_FDR, 
+                      p_adj_BH = p_bh, 
+                      gene_pathway1 = pct[, 10], 
+                      gene_pathway2 = pct[, 11], stringsAsFactors = F)
+    
     return(pct)
     
     

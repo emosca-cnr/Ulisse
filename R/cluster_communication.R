@@ -115,14 +115,9 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
     
     ans <- do.call(rbind, ans)
     all.v <- unlist(perm_list)
-    all.v <- c(ans[,6], all.v)
-    link_FDR <- eFDR(real_values = ans[,6], all_values = all.v, mc.cores = mc_cores_ccc)
-    p_val_BH <- stats::p.adjust(ans[,7], method = "BH")
-    ans <- cbind(ans[, 1:7], link_FDR, p_val_BH, ans[,8:11])
-    
-    colnames(ans) <- c("cl1", "cl2", "ccc_score", "ngenes_cl1", "ngenes_cl2",
-                       "nlink","p_value_link", "link_FDR", "p_adj_BH", "gene_weight_cl1", 
-                       "gene_weight_cl2", "genes_cl1", "genes_cl2")
+    all.v <- c(as.numeric(ans[,6]), all.v)
+    link_FDR <- eFDR(real_values = as.numeric(ans[,6]), all_values = all.v, mc.cores = mc_cores_ccc)
+    p_val_BH <- stats::p.adjust(as.numeric(ans[,7]), method = "BH")
     ans <- data.frame(cl1 = ans[, 1], 
                       cl2 = ans[, 2], 
                       ccc_score = as.numeric(ans[, 3]), 
@@ -130,12 +125,12 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
                       ngenes_cl2 = as.numeric(ans[, 5]),
                       nlink = as.numeric(ans[, 6]), 
                       p_value_link = as.numeric(ans[, 7]), 
-                      link_FDR = as.numeric(ans[, 8]), 
-                      p_adj_BH = as.numeric(ans[, 9]), 
-                      gene_weight_cl1 = as.numeric(ans[, 10]), 
-                      gene_weight_cl2 = as.numeric(ans[, 11]), 
-                      genes_cl1 = ans[, 12], 
-                      genes_cl2 = ans[, 13], 
+                      link_FDR = link_FDR, 
+                      p_adj_BH = p_val_BH, 
+                      gene_weight_cl1 = as.numeric(ans[, 8]), 
+                      gene_weight_cl2 = as.numeric(ans[, 9]), 
+                      genes_cl1 = ans[, 10], 
+                      genes_cl2 = ans[, 11], 
                       stringsAsFactors = F)
     
     ct_info <- parallel::mclapply(1:nrow(comb_p), function(z) {

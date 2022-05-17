@@ -25,9 +25,13 @@ pathway_data <- function (species, category = NULL, subcategory = NULL, type = "
   msig <- msigdbr::msigdbr(species = species, category = category, 
                            subcategory = subcategory)
   if (type == "gene_symbol") {
+    msig <- msig[, c("gene_symbol", "gs_name")]
+    msig <- unique(msig)
     msig_list <- split(x = msig$gene_symbol, f = msig$gs_name)
   }
   else if (type == "entrez_gene") {
+    msig <- msig[, c("entrez_gene", "gs_name")]
+    msig <- unique(msig)
     msig_list <- split(x = msig$entrez_gene, f = msig$gs_name)
   }
   output <- list(msigdb_output = msig, path_list = msig_list)
