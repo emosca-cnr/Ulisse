@@ -30,9 +30,10 @@ preparing_cl_list <- function(mtx, clusters, mean_t=1,
   cl <- unique(clusters)
   cl_list <- list()
   for (i in cl) {
+    print(i)
     cell <- colnames(mtx)[clusters == i]
-    tmp <- mtx[, cell]
-    tmp <- tmp[rowSums(tmp) >= cell_t,]
+    tmp <- mtx[, cell, drop = F]
+    tmp <- tmp[rowSums(tmp) >= cell_t,, drop = F]
     tmp2 <- rowMeans(tmp)
     names(tmp2) <- rownames(tmp)
     cl_list <- c(cl_list, list(tmp2))

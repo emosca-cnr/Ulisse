@@ -8,9 +8,10 @@ TM_PCT(
   pathway_list,
   gene_network_adj,
   membership,
+  genes,
+  weight,
   mc_cores_pct = 2,
-  mc_cores_tm = 2,
-  weight
+  mc_cores_tm = 2
 )
 }
 \arguments{
@@ -18,14 +19,16 @@ TM_PCT(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{membership}{membership of the gene in gene_network_adj to topological communities}
+\item{membership}{named vector with the membership of the gene in gene_network_adj to topological communities}
 
-\item{mc_cores_pct}{numebr of threads to be used to calculate cross talk}
-
-\item{mc_cores_tm}{number of threads to be used to calcualte TM-PCT on different communities combination}
+\item{genes}{vector with the gene of interest to be used for TM-PCT calculation}
 
 \item{weight}{weights of the genes in gene_network_adj. If not provided, the function assigns to each gene
 a weight of 1}
+
+\item{mc_cores_pct}{number of threads to be used to calculate cross talk}
+
+\item{mc_cores_tm}{number of threads to be used to calcualte TM-PCT on different communities combination}
 }
 \value{
 The function returns a list of two object:

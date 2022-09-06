@@ -5,6 +5,7 @@
 #'  as described in the article.
 #' @param pathway_list a named list of genes grouped into pathways
 #' @param gene_network_adj adjacency matrix of the whole gene network considered
+#' @param genes vector with the gene of interest to be used for pathway cc calculation
 #' @param weight weights of the genes in pathway list. If not provided, the function assign to each gene
 #' a weight of 1
 #' @param mc_cores_cc numebr of threads to be used for cc calculation
@@ -36,9 +37,11 @@
 #' @export
 
 
-pathway_cc <- function (pathway_list, gene_network_adj,
+pathway_cc <- function (pathway_list, gene_network_adj, genes, 
                         weight, mc_cores_cc = 2) {
-  genes <- rownames(gene_network_adj)
+  genes <- as.character(genes)
+  genes <- genes[genes %in% rownames(gene_network_adj)]
+  pathway_list <- lapply(pathway_list, function(x) x <- as.character(x))
   if(is.null(weight) ) {
     weight <- rep(1, length(genes))
     names(weight) <- genes
@@ -48,11 +51,10 @@ pathway_cc <- function (pathway_list, gene_network_adj,
   }
   gene_network_adj <- sign(gene_network_adj)
   weight <- weight[weight !=0]
-  sub_adj_mt <- gene_network_adj[as.character(names(weight)), as.character(names(weight)), drop = F]
+  sub_adj_mt <- gene_network_adj[genes, genes, drop = F]
   
   
   xx <- mclapply(pathway_list, function(x) {
-    x <- as.character(x)
     tmp <- sub_adj_mt[x, x, drop = F]
     
     return(tmp)

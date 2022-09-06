@@ -7,6 +7,7 @@
 gene_funct_relevance(
   pct,
   adj,
+  only_diff = T,
   to_plot = T,
   file_name = NULL,
   plot_names = T,
@@ -14,9 +15,12 @@ gene_funct_relevance(
 )
 }
 \arguments{
-\item{pct}{the data.frame obtained as a result of `pathway_corss_talk()`}
+\item{pct}{the data.frame obtained as a result of `pathway_cross_talk()`}
 
-\item{adj}{the adjacency matrix used as an input in `pathway_corss_talk()`}
+\item{adj}{the adjacency matrix used as an input in `pathway_cross_talk()`}
+
+\item{only_diff}{logical, indicating if the calculation of the interactor diversity should include only the genes 
+with which the gene of interest never share a pathway}
 
 \item{to_plot}{logical, indicating whether to save the plot of functional relevance}
 

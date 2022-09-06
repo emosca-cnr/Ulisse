@@ -21,8 +21,8 @@ pathway_cross_talk(
 
 \item{genes}{target gene to be used for PCT calculation}
 
-\item{weight}{an vector of weights for each gene the pathway list. If not provided, the function assigns to each gene
-a weight of 1}
+\item{weight}{a named vector of weights for each gene in the pathway list. 
+If not provided, the function assigns to each gene a weight of 1}
 
 \item{mc_cores_pct}{numebr of threads to be used for pathway cross talk calculation}
 

@@ -8,8 +8,9 @@
 #' @param gene_network_adj gene network adjacency matrix
 #' @param weight weights of the genes in gene_network_adj. If not provided, the function assigns to each gene
 #' a weight of 1
-#' @param membership membership of the gene in gene_network_adj to topological communities
-#' @param mc_cores_pct numebr of threads to be used to calculate cross talk 
+#' @param membership named vector with the membership of the gene in gene_network_adj to topological communities
+#' @param genes vector with the gene of interest to be used for TM-PCT calculation
+#' @param mc_cores_pct number of threads to be used to calculate cross talk 
 #' @param mc_cores_tm number of threads to be used to calcualte TM-PCT on different communities combination
 #' @return The function returns a list of two object:
 #' \enumerate{
@@ -43,10 +44,11 @@
 #' @importFrom stringi stri_c
 #' @export
 
-TM_PCT <- function (pathway_list, gene_network_adj, membership, 
-                    mc_cores_pct = 2, mc_cores_tm = 2,
-                    weight) {
-  genes <- rownames(gene_network_adj)
+TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight, 
+                    mc_cores_pct = 2, mc_cores_tm = 2) {
+  genes <- as.character(genes)
+  genes <- genes[genes %in% rownames(gene_network_adj)]
+  pathway_list <- lapply(pathway_list, function(x) x <- as.character(x))
   if(is.null(weight) ) {
     weight <- rep(1, length(genes))
     names(weight) <- genes
@@ -56,10 +58,11 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
   }
   gene_network_adj <- sign(gene_network_adj)
   weight <- weight[weight !=0]
+  sub_adj_mt <- gene_network_adj[genes, genes, drop = F]
    
   unqMem <- unique(membership)
   mem_ptwL <- mclapply(unqMem, function(z) {
-    tmp <- lapply(pathway_list, function(x) x <- x[x %in% rownames(gene_network_adj)[membership == z]])
+    tmp <- lapply(pathway_list, function(x) x <- x[x %in% rownames(sub_adj_mt)[membership == z]])
     tmp <- tmp[lengths(tmp) != 0]
   }, mc.cores = mc_cores_tm
   )
@@ -77,7 +80,7 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
     idx_1 <- as.character(g.1[!g.1 %in% g.2])
     idx_2 <- as.character(g.2[!g.2 %in% g.1])
     
-    tmp <- gene_network_adj[idx_1, idx_2, drop = F]
+    tmp <- sub_adj_mt[idx_1, idx_2, drop = F]
     
     return( tmp) 
   }, mc.cores = mc_cores_pct
@@ -102,7 +105,7 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership,
       xxCC <- mclapply(1:nrow(comb_p),  function (x) {
         idx_1 <- as.character(ptw_listCC1[[comb_p[x,1]]])
         idx_2 <- as.character(ptw_listCC2[[comb_p[x,2]]])
-        tmp <- gene_network_adj[idx_1, idx_2, drop = F]
+        tmp <- sub_adj_mt[idx_1, idx_2, drop = F]
         
         return( tmp) 
       }, mc.cores = mc_cores_pct)

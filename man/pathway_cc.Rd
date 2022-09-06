@@ -4,12 +4,14 @@
 \alias{pathway_cc}
 \title{Function to caluclate sub-components pathway score}
 \usage{
-pathway_cc(pathway_list, gene_network_adj, weight, mc_cores_cc = 2)
+pathway_cc(pathway_list, gene_network_adj, genes, weight, mc_cores_cc = 2)
 }
 \arguments{
 \item{pathway_list}{a named list of genes grouped into pathways}
 
 \item{gene_network_adj}{adjacency matrix of the whole gene network considered}
+
+\item{genes}{vector with the gene of interest to be used for pathway cc calculation}
 
 \item{weight}{weights of the genes in pathway list. If not provided, the function assign to each gene
 a weight of 1}

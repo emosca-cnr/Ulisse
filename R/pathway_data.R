@@ -22,19 +22,18 @@
 
 pathway_data <- function (species, category = NULL, subcategory = NULL, type = "gene_symbol", genes,
                           min_size=1, max_size=500 ) {
-  msig <- msigdbr::msigdbr(species = species, category = category, 
+  msig_out <- msigdbr::msigdbr(species = species, category = category, 
                            subcategory = subcategory)
   if (type == "gene_symbol") {
-    msig <- msig[, c("gene_symbol", "gs_name")]
+    msig <- msig_out[, c("gene_symbol", "gs_name")]
     msig <- unique(msig)
     msig_list <- split(x = msig$gene_symbol, f = msig$gs_name)
-  }
-  else if (type == "entrez_gene") {
-    msig <- msig[, c("entrez_gene", "gs_name")]
+  } else if (type == "entrez_gene") {
+    msig <- msig_out[, c("entrez_gene", "gs_name")]
     msig <- unique(msig)
     msig_list <- split(x = msig$entrez_gene, f = msig$gs_name)
   }
-  output <- list(msigdb_output = msig, path_list = msig_list)
+  output <- list(msigdb_output = msig_out, path_list = msig_list)
   
   output$path_list <- Ulisse::filter_gsl(gsl = output$path_list, universe = genes, 
                                          min_size = min_size, max_size = max_size)

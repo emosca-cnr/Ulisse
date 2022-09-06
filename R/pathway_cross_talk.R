@@ -9,8 +9,8 @@
 #'  We also provide a corrected p-value using BH method.
 #' @param pathway_list a named list of genes grouped into pathways
 #' @param gene_network_adj adjacency matrix of the whole gene network considered (can be a sparseMatrix)
-#' @param weight an vector of weights for each gene the pathway list. If not provided, the function assigns to each gene
-#' a weight of 1
+#' @param weight a named vector of weights for each gene in the pathway list. 
+#' If not provided, the function assigns to each gene a weight of 1
 #' @param genes target gene to be used for PCT calculation
 #' @param mc_cores_pct numebr of threads to be used for pathway cross talk calculation
 #' @param mc_cores_perm number of thread to be used in permutations
@@ -46,6 +46,10 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj, genes,
                                 weight =NULL, 
                                 mc_cores_pct = 2, mc_cores_perm = 1, 
                                 k = 9) {
+  genes <- as.character(genes)
+  genes <- genes[genes %in% rownames(gene_network_adj)]
+  pathway_list <- lapply(pathway_list, function(x) x <- as.character(x))
+  pathway_list <- lapply(pathway_list, function(x) x <- x[x %in% genes])
   if(is.null(weight) ) {
     weight <- rep(1, length(genes))
     names(weight) <- genes
@@ -54,7 +58,7 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj, genes,
     gene_network_adj <- as(gene_network_adj, "dgCMatrix")
   }
   gene_network_adj <- sign(gene_network_adj)
-  sub_adj_mt <- gene_network_adj[as.character(genes), as.character(genes), drop = F]
+  sub_adj_mt <- gene_network_adj[genes, genes, drop = F]
   
   comb_p <- expand.grid(names(pathway_list), names(pathway_list))
   comb_p <- graph_from_edgelist(as.matrix(comb_p), directed = F)
