@@ -24,6 +24,8 @@
 #' @param row_annotation_name,column_annotation_name name to be used as a title for the legend of the row/column annotation
 #' @param pal_row_annotation,pal_column_annotation vector of colors to be used to color the annotation. If NULL, the 
 #' function uses `rainbow()` palette
+#' @param row_name_side,col_name_side if the name of the row(column) annotation should be put at the "bottom" or "top" ("left" or "right") 
+#' of the annotation
 #' @param file_out name used to save the jpeg file. If not provided, the plot will be saved as "CT_heatmap.jpeg"
 #' @param width,height,res,units graphical value of `jpeg()` function
 #' @return the function produce the plot saved with the name passed to `file_out` and also returns the adjacency matrix 
@@ -31,17 +33,17 @@
 #' @importFrom grDevices rainbow dev.off jpeg
 #' @importFrom circlize colorRamp2
 #' @import igraph
-#' @import complexHeatmap
+#' @import ComplexHeatmap
 #' @export
 
 
 ct_heatmap <- function(ct, color_by = "pct", color = NULL, color_level = NULL, legend_side = "left",
                        community = F, pal_community = NULL, 
-                       row_annotation = NULL, row_annotation_name = "row_anno", pal_row_annotation = NULL, 
-                       column_annotation = NULL, column_annotation_name = "col_anno", pal_column_annotation = NULL,
+                       row_annotation = NULL, row_annotation_name = "row_anno", pal_row_annotation = NULL, row_name_side = "bottom",
+                       column_annotation = NULL, column_annotation_name = "col_anno", pal_column_annotation = NULL, col_name_side = "left",
                        file_out = NULL, width = 200, height = 200, res = 300, units = "mm", ...) {
   
-  ct.g <- graph_from_data_frame(ct)
+  ct.g <- graph_from_data_frame(ct, directed = F)
   adj.ct <- as_adjacency_matrix(ct.g, sparse = F, attr = color_by)
   
   ct_column <- grep("pct|ccc_score", colnames(ct))
@@ -50,7 +52,7 @@ ct_heatmap <- function(ct, color_by = "pct", color = NULL, color_level = NULL, l
   #communities
   if(is.logical(community)) {
     if(community) {
-      community <- fastgreedy.community(ct.g, weights = ct_column)
+      community <- fastgreedy.community(ct.g, weights = edge_attr(ct.g)[[ct_column]])
     } else {
       community <- NULL
     }
@@ -75,34 +77,58 @@ ct_heatmap <- function(ct, color_by = "pct", color = NULL, color_level = NULL, l
   }
   
   #row annotation
-  df.row <- data.frame(names(row_annotation), row_annotation, stringsAsFactors = F)
-  colnames(df.row) <- c("name", row_annotation_name)
-  if(is.null(pal_row_annotation)) {
-    pal_row_annotation <- rainbow(length(unique(row_annotation)))
-  }
-  names(pal_row_annotation) <- unique(names(row_annotation))
-  pal_row <- list(pal_row_annotation)
-  names(pal_row) <- row_annotation_name
-  if(!is.null(community)) {
-    df.row$community <- comm_ct_mem[df.row$name]
-    pal_row <- c(pal_row, list(pal_community))
-    names(pal_row) <- c(row_annotation_name, "community")
+  if(!is.null(row_annotation)) {
+    df.row <- data.frame(names(row_annotation), row_annotation, stringsAsFactors = F)
+    colnames(df.row) <- c("name", row_annotation_name)
+    if(is.null(pal_row_annotation)) {
+      pal_row_annotation <- rainbow(length(unique(row_annotation)))
+    }
+    names(pal_row_annotation) <- unique(names(row_annotation))
+    pal_row <- list(pal_row_annotation)
+    names(pal_row) <- row_annotation_name
+    if(!is.null(community)) {
+      df.row$community <- comm_ct_mem[df.row$name]
+      pal_row <- c(pal_row, list(pal_community))
+      names(pal_row) <- c(row_annotation_name, "community")
+    }
+  } else {
+    if(!is.null(community)) {
+      comm_ct_mem <- sort(comm_ct_mem)
+      adj.ct <- adj.ct[names(comm_ct_mem), names(comm_ct_mem)]
+      df.row <- data.frame(name = names(comm_ct_mem), community = comm_ct_mem)
+      pal_row <- list(community = pal_community)
+      
+    }
+    
   }
   
+  
   #column annotation
-  df.col <- data.frame(names(column_annotation), column_annotation, stringsAsFactors = F)
-  colnames(df.row) <- c("name", column_annotation_name)
-  if(is.null(pal_column_annotation)) {
-    pal_column_annotation <- rainbow(length(unique(column_annotation)))
+  if(!is.null(column_annotation)) {
+    df.col <- data.frame(names(column_annotation), column_annotation, stringsAsFactors = F)
+    colnames(df.row) <- c("name", column_annotation_name)
+    if(is.null(pal_column_annotation)) {
+      pal_column_annotation <- rainbow(length(unique(column_annotation)))
+    }
+    names(pal_column_annotation) <- unique(names(column_annotation))
+    pal_column <- list(pal_column_annotation)
+    names(pal_column) <- column_annotation_name
+    if(!is.null(community)) {
+      df.col$community <- comm_ct_mem[df.col$name]
+      pal_column <- c(pal_column, list(pal_community))
+      names(pal_column) <- c(column_annotation_name, "community")
+    }
+  } else {
+    if(!is.null(community)) {
+      comm_ct_mem <- sort(comm_ct_mem)
+      adj.ct <- adj.ct[names(comm_ct_mem), names(comm_ct_mem)]
+      df.col <- data.frame(name = names(comm_ct_mem), community = comm_ct_mem)
+      pal_column<- list(community = pal_community)
+      
+    }
+    
   }
-  names(pal_column_annotation) <- unique(names(column_annotation))
-  pal_column <- list(pal_column_annotation)
-  names(pal_column) <- column_annotation_name
-  if(!is.null(community)) {
-    df.col$community <- comm_ct_mem[df.col$name]
-    pal_column <- c(pal_column, list(pal_community))
-    names(pal_column) <- c(column_annotation_name, "community")
-  }
+  
   #file name 
   if(is.null(file_out)) {
     file_out <- "CT_heatmap.jpeg"
@@ -113,7 +139,7 @@ ct_heatmap <- function(ct, color_by = "pct", color = NULL, color_level = NULL, l
   }
   
   if(!is.null(color_by)) {
-    edge_att <- edge_attr(ct.g, name = edge_col_by)
+    edge_att <- edge_attr(ct.g, name = color_by)
     if(is.null(color_level)) {
       
       color_level <- c(min(edge_att), max(edge_att))
@@ -124,113 +150,162 @@ ct_heatmap <- function(ct, color_by = "pct", color = NULL, color_level = NULL, l
   
   #plotting--------------------
   
-  if(is.null(community)) {
-    if(is.null(column_annotation)) {
-      if(is.null(row_annotation)) {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      } else {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        row_ha <- rowAnnotation(df.row, col = pal_row)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     right_annotation = row_ha, 
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      }
+  if(is.null(column_annotation)) {
+    if(is.null(row_annotation)) {
+      jpeg(file_out, width = width, height = height, res=res, 
+           units=units)
+      h <- Heatmap(adj.ct, col = col_fun,
+                   heatmap_legend_param = list(title=color_by),
+                   ...)
+      draw(h, heatmap_legend_side = legend_side, merge_legend =T)
+      dev.off()
     } else {
-      if(is.null(row_annotation)) {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        col_ha <- columnAnnotation(df.col, col = pal_column)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     bottom_annotation = col_ha,
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      } else {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        row_ha <- rowAnnotation(df.row, col = pal_row)
-        col_ha <- columnAnnotation(df.col, col = pal_column)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     right_annotation = row_ha, 
-                     bottom_annotation = col_ha,
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      }
+      jpeg(file_out, width = width, height = height, res=res, 
+           units=units)
+      row_ha <- rowAnnotation(df.row, col = pal_row, annotation_name_side = row_name_side)
+      h <- Heatmap(adj.ct, col = col_fun,
+                   heatmap_legend_param = list(title=color_by),
+                   right_annotation = row_ha, 
+                   ...)
+      draw(h, heatmap_legend_side = legend_side, merge_legend =T)
+      dev.off()
     }
   } else {
-    if(is.null(column_annotation)) {
-      if(is.null(row_annotation)) {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        row_ha <- rowAnnotation(community = comm_ct_mem, col = list(community = pal_community))
-        col_ha <- columnAnnotation(community = comm_ct_mem, col = list(community = pal_community))
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     right_annotation = row_ha, 
-                     bottom_annotation = col_ha,
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      } else {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        row_ha <- rowAnnotation(df.row, col = pal_row)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     right_annotation = row_ha, 
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-       
-      }
+    if(is.null(row_annotation)) {
+      jpeg(file_out, width = width, height = height, res=res, 
+           units=units)
+      col_ha <- columnAnnotation(df.col, col = pal_column, annotation_name_side = col_name_side)
+      h <- Heatmap(adj.ct, col = col_fun,
+                   heatmap_legend_param = list(title=color_by),
+                   bottom_annotation = col_ha,
+                   ...)
+      draw(h, heatmap_legend_side = legend_side, merge_legend =T)
+      dev.off()
     } else {
-      if(is.null(row_annotation)) {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        col_ha <- columnAnnotation(df.col, col = pal_column)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     bottom_annotation = col_ha,
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      } else {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        row_ha <- rowAnnotation(df.row, col = pal_row)
-        col_ha <- columnAnnotation(df.col, col = pal_column)
-        h <- Heatmap(adj.ct, col = col_fun,
-                     heatmap_legend_param = list(title=color_by),
-                     right_annotation = row_ha, 
-                     bottom_annotation = col_ha,
-                     ...)
-        draw(h, heatmap_legend_side = legend_side)
-        dev.off()
-      }
+      jpeg(file_out, width = width, height = height, res=res, 
+           units=units)
+      row_ha <- rowAnnotation(df.row, col = pal_row, annotation_name_side = row_name_side)
+      col_ha <- columnAnnotation(df.col, col = pal_column, annotation_name_side = col_name_side)
+      h <- Heatmap(adj.ct, col = col_fun,
+                   heatmap_legend_param = list(title=color_by),
+                   right_annotation = row_ha, 
+                   bottom_annotation = col_ha,
+                   ...)
+      draw(h, heatmap_legend_side = legend_side, merge_legend =T)
+      dev.off()
     }
   }
-  if(!is.null(community)) {
-    return(list(matrix = adj.ct, community = community))
-  } else {
-    return(adj.ct)
-  }
-   
+  
 }
-
-
+#   if(is.null(community)) {
+#     if(is.null(column_annotation)) {
+#       if(is.null(row_annotation)) {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#       } else {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         row_ha <- rowAnnotation(df.row, col = pal_row)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      right_annotation = row_ha, 
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#       }
+#     } else {
+#       if(is.null(row_annotation)) {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         col_ha <- columnAnnotation(df.col, col = pal_column)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      bottom_annotation = col_ha,
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#       } else {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         row_ha <- rowAnnotation(df.row, col = pal_row)
+#         col_ha <- columnAnnotation(df.col, col = pal_column)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      right_annotation = row_ha, 
+#                      bottom_annotation = col_ha,
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#       }
+#     }
+#   } else {
+#     if(is.null(column_annotation)) {
+#       if(is.null(row_annotation)) {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         comm_ct_mem <- sort(comm_ct_mem)
+#         adj.ct <- adj.ct[names(comm_ct_mem), names(comm_ct_mem)]
+#         row_ha <- rowAnnotation(community = comm_ct_mem, col = list(community = pal_community), annotation_name_side = "bottom")
+#         col_ha <- columnAnnotation(community = comm_ct_mem, col = list(community = pal_community), annotation_name_side = "left")
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      right_annotation = row_ha, 
+#                      bottom_annotation = col_ha,
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side, annotation_legend_side = legend_side, merge_legend =T)
+#         dev.off()
+#       } else {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         row_ha <- rowAnnotation(df.row, col = pal_row)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      right_annotation = row_ha, 
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#        
+#       }
+#     } else {
+#       if(is.null(row_annotation)) {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         col_ha <- columnAnnotation(df.col, col = pal_column)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      bottom_annotation = col_ha,
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#       } else {
+#         jpeg(file_out, width = width, height = height, res=res, 
+#              units=units)
+#         row_ha <- rowAnnotation(df.row, col = pal_row)
+#         col_ha <- columnAnnotation(df.col, col = pal_column)
+#         h <- Heatmap(adj.ct, col = col_fun,
+#                      heatmap_legend_param = list(title=color_by),
+#                      right_annotation = row_ha, 
+#                      bottom_annotation = col_ha,
+#                      ...)
+#         draw(h, heatmap_legend_side = legend_side)
+#         dev.off()
+#       }
+#     }
+#   }
+#   if(!is.null(community)) {
+#     return(list(matrix = adj.ct, community = community))
+#   } else {
+#     return(adj.ct)
+#   }
+#    
+# }
+# 
+# 
 
 
 

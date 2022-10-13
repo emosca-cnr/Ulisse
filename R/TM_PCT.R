@@ -8,7 +8,8 @@
 #' @param gene_network_adj gene network adjacency matrix
 #' @param weight weights of the genes in gene_network_adj. If not provided, the function assigns to each gene
 #' a weight of 1
-#' @param membership named vector with the membership of the gene in gene_network_adj to topological communities
+#' @param membership named vector with the membership of the gene in gene_network_adj to topological communities. If set to NULL
+#' then the function calculates the communities by using fastgreedy algorithm
 #' @param genes vector with the gene of interest to be used for TM-PCT calculation
 #' @param mc_cores_pct number of threads to be used to calculate cross talk 
 #' @param mc_cores_tm number of threads to be used to calcualte TM-PCT on different communities combination
@@ -28,6 +29,7 @@
 #'  \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
 #'  }
 #'  }
+#'  If membership = NULL, then also the membership is returned
 #' @examples  
 #' \dontrun{
 #'  ptw_list <- list(ptwA = c("A", "B","C"), ptwB = c("D", "E", "F"), ptwC = c("A", "B", "E"))
@@ -59,6 +61,15 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
   gene_network_adj <- sign(gene_network_adj)
   weight <- weight[weight !=0]
   sub_adj_mt <- gene_network_adj[genes, genes, drop = F]
+  if(is.null(membership)) {
+    sub.g <- graph_from_adjacency_matrix(sub_adj_mt, mode = "undirected")
+    community <- fastgreedy.community(sub.g)
+    membership <- membership(community)
+    ret_memb <- T
+    
+  } else {
+    ret_memb <- F
+  }
    
   unqMem <- unique(membership)
   mem_ptwL <- mclapply(unqMem, function(z) {
@@ -153,8 +164,15 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
                       weight_pathway2 = as.numeric(res[, 10]), 
                       gene_pathway1 = res[, 11], 
                       gene_pathway2 = res[, 12], stringsAsFactors = F)
-    out <- list(comm_pathway_list = mem_ptwL, TM_PCT_res = res)
-    return(out)
+    
+    if(ret_memb) {
+      out <- list(membership = membership ,comm_pathway_list = mem_ptwL, TM_PCT_res = res)
+      return(out)
+    } else {
+      out <- list(comm_pathway_list = mem_ptwL, TM_PCT_res = res)
+      return(out)
+    }
+    
   }
   
 }

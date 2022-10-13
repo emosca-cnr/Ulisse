@@ -39,7 +39,7 @@
 
 
 comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, vertex_colors =NULL, vertex_value = NULL, legend_vertex=F,
-                                      edge_colors = NULL, edge_value = NULL, edge_breaks =NULL, legend_edge_col=T, 
+                                      edge_colors = NULL, edge_value = NULL, edge_breaks =1, legend_edge_col=T, 
                                       legend_edge_breaks = T, layout = NULL,
                                       width = 200, height = 200, res = 300, units = "mm", 
                                       x_vertex = -1.5, y_vertex = 0, 
@@ -48,14 +48,14 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
                                       xl_edge = -1.45, yb_edge = -0.9, xr_edge = -1.3, yt_edge = -0.6, ...) {
   
   res_list <- lapply(res_list, function(x) {
-    x$sample <- rep(1, nrow(x))
+    x$sample <- 1
     x <- graph_from_data_frame(x, directed = F)
-    V(x)$sample <- rep(1, length(V(x)$name))
+    V(x)$sample <- 1
     return(x)
   }
   )
   
-  union.g <- union(res_list[[1]], res_list[2:length(res_list)])
+  union.g <- igraph::union(res_list[[1]], res_list[2:length(res_list)])
   attr.union.g <- data.frame(edge.attributes(union.g), stringsAsFactors = F)
   
   idx <- grep("sample", colnames(attr.union.g))
@@ -63,49 +63,53 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
   
   E(union.g)$nsample <- attr.union.g$nsample
   
+  
   #building defaults and value to be plotted---------------
   #filename
   if(is.null(file_out)) {
     file_out <- "union_ct_network.jpeg"
   }
   #vertex color
-  if(!is.null(vertex_col_by)) {
-    if(vertex_col_by == "number") {
-      Vattr.union.g <- data.frame(vertex.attributes(union.g), stringsAsFactors = F)
+  if(is.null(vertex_col_by)) {
+    vertex_col_by <- "number" 
+  } 
+  if(vertex_col_by == "number") {
+    Vattr.union.g <- data.frame(vertex.attributes(union.g), stringsAsFactors = F)
+    
+    idx <- grep("sample", colnames(Vattr.union.g))
+    Vattr.union.g$nsample <- rowSums(Vattr.union.g[, idx], na.rm = T)
+    
+    V(union.g)$col_by <- Vattr.union.g$nsample
+    if(is.null(vertex_value)) {
       
-      idx <- grep("sample", colnames(Vattr.union.g))
-      Vattr.union.g$nsample <- rowSums(Vattr.union.g[, idx], na.rm = T)
-      
-      V(union.g)$col_by <- Vattr.union.g$nsample
-      if(is.null(vertex_value)) {
-        
-        vertex_value <- c(min(V(union.g)$col_by), max(V(union.g)$col_by))
-      }
-      
-      if(is.null(vertex_colors)) {
-        vertex_colors <- c("blue", "red")
-      }
-      vertex_cl <- colorRamp2(vertex_value, vertex_colors)
-      V(union.g)$color <- edge_cl(E(union.g)$nsample)
-    } else {
-      V(union.g)$col_by <- vertex_col_by[V(union.g)$name]
-      if(!is.null(vertex_color)) {
-        if(length(V(union.g)$name) > length(vertex_col_by)) {
-          print.warnings("Not enought colors provided for the vertices. Rainbow used instead")
-          vertex_color <- rainbow(length(V(union.g)$name))
-          names(vertex_color) <- unique(V(union.g)$name)
-        } 
-        names(vertex_color) <- unique(V(union.g)$name)
-      } else {
-        vertex_color <- rainbow(length(V(union.g)$name))
-        names(vertex_color) <- unique(V(union.g)$name)
-      }
-      V(union.g)$color <- vertex_color[V(union.g)$name]
+      vertex_value <- c(min(V(union.g)$col_by), max(V(union.g)$col_by))
     }
     
+    if(is.null(vertex_colors)) {
+      vertex_colors <- c("blue", "red")
+    }
+    if(vertex_value[1] == vertex_value[2]) {
+      V(union.g)$color <- "red"
+    } else {
+      vertex_cl <- colorRamp2(vertex_value, vertex_colors)
+      V(union.g)$color <- vertex_cl(V(union.g)$col_by)
+    }
     
+  } else {
+    V(union.g)$col_by <- vertex_col_by[V(union.g)$name]
+    if(!is.null(vertex_color)) {
+      if(length(V(union.g)$name) > length(vertex_col_by)) {
+        print.warnings("Not enought colors provided for the vertices. Rainbow used instead")
+        vertex_color <- rainbow(length(V(union.g)$name))
+        names(vertex_color) <- unique(V(union.g)$name)
+      } 
+      names(vertex_color) <- unique(V(union.g)$name)
+    } else {
+      vertex_color <- rainbow(length(V(union.g)$name))
+      names(vertex_color) <- unique(V(union.g)$name)
+    }
+    V(union.g)$color <- vertex_color[V(union.g)$name]
   }
-  
   #edges color
   if(is.null(edge_colors)) {
     edge_colors <- c("blue", "red")
@@ -116,7 +120,7 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
   }
   
   edge_cl <- colorRamp2(edge_value, edge_colors)
-  E(ct.g)$color <- edge_cl(E(union.g)$nsample)
+  E(union.g)$color <- edge_cl(E(union.g)$nsample)
   
   if(edge_breaks==1) {
     edge_breaks <- NULL
@@ -126,7 +130,7 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
   
   #layout
   if(is.null(layout)) {
-    lo_cl <- layout_with_fr(ct.g, weights = edge_att)
+    lo_cl <- layout_with_fr(union.g, weights = E(union.g)$nsample)
   } else {
     lo_cl <- layout
   }

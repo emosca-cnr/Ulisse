@@ -71,6 +71,8 @@ plot_network_CT <- function(ct, all = FALSE, p_val, FDR, ct_val, community, pal_
       ct_val <- min(ct[,ct_column], na.rm = T)
     }
     ct <- ct[ct$p_value_link <= p_val & ct$FDR_link <= FDR & ct[,ct_column] >= ct_val,]
+    ct$filt <- 1
+    legend_filt <- F
   } else if(all) {
     if(is.null(p_val)) {
       p_val <- max(ct$p_value_link, na.rm = T)
@@ -126,7 +128,7 @@ plot_network_CT <- function(ct, all = FALSE, p_val, FDR, ct_val, community, pal_
       edge_value <- c(min(edge_att), max(edge_att))
     }
   }
-  
+  n_breaks <- edge_breaks
   if(edge_breaks==1) {
     edge_breaks <- NULL
   } else {
@@ -134,7 +136,7 @@ plot_network_CT <- function(ct, all = FALSE, p_val, FDR, ct_val, community, pal_
       edge_breaks <- cut(edge_att, breaks = edge_breaks)
     } else {
       edge_att <- edge_attr(ct.g, name = ct_column)
-      edge_breaks <- cut(edge_att, breaks = edge_breaks)
+      edge_breaks <- cut(edge_att, breaks = edge_breaks, include.lowest = T, right = T)
     }
     
   }
@@ -150,288 +152,299 @@ plot_network_CT <- function(ct, all = FALSE, p_val, FDR, ct_val, community, pal_
   edge_cl <- colorRamp2(edge_value, edge_pal)
   E(ct.g)$color <- edge_cl(edge_att)
   
-  if(all) {
-    if(is.null(community)) {
-      if(is.null(edge_breaks)) {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          
-          
-          dev.off() 
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+  
+  if(is.null(community)) {
+    if(is.null(edge_breaks)) {
+      if(is.null(edge_col_by)) {
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
         }
+        
+        
+        dev.off() 
       } else {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.lty = E(ct.g)$filt,
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, edge.lty = E(ct.g)$filt,
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          dev.off()
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.col = E(ct.g)$color, edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
         }
+        if(legend_edge_col) {
+          color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+                       legend = c(round(edge_value[1], y = 3), round((edge_value[1] + edge_value[2])/2, y = 3), round(edge_value[2], y = 3)), 
+                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+                       gradient="y", align = "rb")
+        }
+        
+        dev.off()
       }
     } else {
-      if(is.null(edge_breaks)) {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, vertex.color=pal_community[as.character(comm_ct_mem)],
-               edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
-               edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+      if(is.null(edge_col_by)) {
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.lty = E(ct.g)$filt,
+             edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+        
+        if(legend_edge_breaks) {
+          tmp <- table(edge_breaks)
+          tmp <- tmp[tmp > 0]
+          legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +sort(as.numeric(unique(edge_breaks)))),
+                 legend = names(tmp), box.col = NA)
         }
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
+        }
+        
+        dev.off()
       } else {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.lty = E(ct.g)$filt, vertex.color=pal_community[as.character(comm_ct_mem)],
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
-               edge.width = (2+ as.numeric(edge_breaks)), edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          if(legend_filt) {
-            legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
-                   legend = c("Significative", "Not significative"), box.col = NA)
-          }
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.col = E(ct.g)$color, edge.lty = E(ct.g)$filt,
+             edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+        
+        if(legend_edge_breaks) {
+          tmp <- table(edge_breaks)
+          tmp <- tmp[tmp > 0]
+          legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +sort(as.numeric(unique(edge_breaks)))),
+                 legend = names(tmp), box.col = NA)
         }
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
+        }
+        
+        if(legend_edge_col) {
+          color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+                       legend = c(round(edge_value[1], y = 3), round((edge_value[1] + edge_value[2])/2, y = 3), round(edge_value[2], y = 3)), 
+                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+                       gradient="y", align = "rb")
+        }
+        dev.off()
       }
     }
   } else {
-    if(is.null(community)) {
-      if(is.null(edge_breaks)) {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, layout=lo_cl, ...)
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color,  layout=lo_cl, ...)
-          
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+    if(is.null(edge_breaks)) {
+      if(is.null(edge_col_by)) {
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, vertex.color=pal_community[as.character(comm_ct_mem)],
+             edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
+        if(legend_community) {
+          legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
         }
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
+        }
+        
+        dev.off()
       } else {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, 
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, 
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
+             edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
+        if(legend_community) {
+          legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
         }
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
+        }
+        if(legend_edge_col) {
+          color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+                       legend = c(round(edge_value[1], y = 3), round((edge_value[1] + edge_value[2])/2, y = 3), round(edge_value[2], y = 3)), 
+                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+                       gradient="y", align = "rb")
+        }
+        
+        dev.off()
       }
     } else {
-      if(is.null(edge_breaks)) {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, vertex.color=pal_community[as.character(comm_ct_mem)],
-               layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
-               layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+      if(is.null(edge_col_by)) {
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.lty = E(ct.g)$filt, vertex.color=pal_community[as.character(comm_ct_mem)],
+             edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+        if(legend_community) {
+          legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
         }
+        if(legend_edge_breaks) {
+          tmp <- table(edge_breaks)
+          tmp <- tmp[tmp > 0]
+          legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +sort(as.numeric(unique(edge_breaks)))),
+                 legend = names(tmp), box.col = NA)
+        }
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
+        }
+        
+        dev.off()
       } else {
-        if(is.null(edge_col_by)) {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, vertex.color=pal_community[as.character(comm_ct_mem)],
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          
-          dev.off()
-        } else {
-          jpeg(file_out, width = width, height = height, res=res, 
-               units=units)
-          plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
-               edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
-          if(legend_community) {
-            legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
-          }
-          if(legend_edge_breaks) {
-            legend(x = x_edge, y = y_edge, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
-                   legend = levels(edge_breaks), box.col = NA)
-          }
-          if(legend_edge_col) {
-            color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
-                         legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                         rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                         gradient="y", align = "rb")
-          }
-          
-          dev.off()
+        jpeg(file_out, width = width, height = height, res=res, 
+             units=units)
+        plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
+             edge.width = (2+ as.numeric(edge_breaks)), edge.lty = E(ct.g)$filt, layout=lo_cl, ...)
+        if(legend_community) {
+          legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
         }
+        if(legend_edge_breaks) {
+          tmp <- table(edge_breaks)
+          tmp <- tmp[tmp > 0]
+          legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +sort(as.numeric(unique(edge_breaks)))),
+                 legend = names(tmp), box.col = NA)
+        }
+        if(legend_filt) {
+          legend(x= x_filt, y = y_filt, col = "black", lty = c(1,3), lwd = 3,
+                 legend = c("Significative", "Not significative"), box.col = NA)
+        }
+        if(legend_edge_col) {
+          color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+                       legend = c(round(edge_value[1], y = 3), round((edge_value[1] + edge_value[2])/2, y = 3), round(edge_value[2], y = 3)), 
+                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+                       gradient="y", align = "rb")
+        }
+        
+        dev.off()
       }
     }
   }
   
+  # if(all) {
+  #   
+  # } else {
+  #   if(is.null(community)) {
+  #     if(is.null(edge_breaks)) {
+  #       if(is.null(edge_col_by)) {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, layout=lo_cl, ...)
+  #         
+  #         dev.off()
+  #       } else {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, edge.col = E(ct.g)$color,  layout=lo_cl, ...)
+  #         
+  #         if(legend_edge_col) {
+  #           color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+  #                        legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
+  #                        rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+  #                        gradient="y", align = "rb")
+  #         }
+  #         
+  #         dev.off()
+  #       }
+  #     } else {
+  #       if(is.null(edge_col_by)) {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, 
+  #              edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+  #         
+  #         if(legend_edge_breaks) {
+  #           legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +as.vector(as.numeric(cut(min(edge_att):max(edge_att), n_breaks)))),
+  #                  legend = levels(edge_breaks), box.col = NA)
+  #         }
+  #         
+  #         
+  #         dev.off()
+  #       } else {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, edge.col = E(ct.g)$color, 
+  #              edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+  #         
+  #         if(legend_edge_breaks) {
+  #           legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +as.vector(as.numeric(cut(min(edge_att):max(edge_att), n_breaks)))),
+  #                  legend = levels(edge_breaks), box.col = NA)
+  #         }
+  #         if(legend_edge_col) {
+  #           color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+  #                        legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
+  #                        rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+  #                        gradient="y", align = "rb")
+  #         }
+  #         
+  #         dev.off()
+  #       }
+  #     }
+  #   } else {
+  #     if(is.null(edge_breaks)) {
+  #       if(is.null(edge_col_by)) {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, vertex.color=pal_community[as.character(comm_ct_mem)],
+  #              layout=lo_cl, ...)
+  #         if(legend_community) {
+  #           legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
+  #         }
+  #         
+  #         dev.off()
+  #       } else {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
+  #              layout=lo_cl, ...)
+  #         if(legend_community) {
+  #           legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
+  #         }
+  #         
+  #         if(legend_edge_col) {
+  #           color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+  #                        legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
+  #                        rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+  #                        gradient="y", align = "rb")
+  #         }
+  #         
+  #         dev.off()
+  #       }
+  #     } else {
+  #       if(is.null(edge_col_by)) {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, vertex.color=pal_community[as.character(comm_ct_mem)],
+  #              edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+  #         if(legend_community) {
+  #           legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
+  #         }
+  #         if(legend_edge_breaks) {
+  #           legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +as.vector(as.numeric(cut(min(edge_att):max(edge_att), n_breaks)))),
+  #                  legend = levels(edge_breaks), box.col = NA)
+  #         }
+  #         
+  #         dev.off()
+  #       } else {
+  #         jpeg(file_out, width = width, height = height, res=res, 
+  #              units=units)
+  #         plot(ct.g, edge.col = E(ct.g)$color, vertex.color=pal_community[as.character(comm_ct_mem)],
+  #              edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
+  #         if(legend_community) {
+  #           legend(x = x_comm, y = y_comm, fill = pal_community, legend = names(pal_community))
+  #         }
+  #         if(legend_edge_breaks) {
+  #           legend(x = x_edge, y = y_edge, col = "black", lwd = (2 +as.vector(as.numeric(cut(min(edge_att):max(edge_att), n_breaks)))),
+  #                  legend = levels(edge_breaks), box.col = NA)
+  #         }
+  #         if(legend_edge_col) {
+  #           color.legend(xl = xl, yb = yb, xr = xr, yt = yt, 
+  #                        legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
+  #                        rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
+  #                        gradient="y", align = "rb")
+  #         }
+  #         
+  #         dev.off()
+  #       }
+  #     }
+  #   }
+  # }
+  # 
   #returning objects
   if(!is.null(community)) {
     return(list(layout = lo_cl, graph = ct.g, community = community))

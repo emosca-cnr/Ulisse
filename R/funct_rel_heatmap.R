@@ -17,7 +17,7 @@
 #' @importFrom grDevices dev.off jpeg
 #' @importFrom circlize colorRamp2
 #' @import igraph
-#' @import complexHeatmap
+#' @import ComplexHeatmap
 #' @export
 
 
@@ -40,6 +40,7 @@ funct_rel_heatmap <- function(pct, adj, target_g = NULL, target_ptw = NULL,
   }
   
   if(is.null(weight) ) {
+    genes <- rownames(adj)
     weight <- rep(1, length(genes))
     names(weight) <- genes
   } 
@@ -53,7 +54,7 @@ funct_rel_heatmap <- function(pct, adj, target_g = NULL, target_ptw = NULL,
     g2 <- unlist(strsplit(tmp$gene_pathway2, ";", fixed = T))
     sub.adj <- as.matrix(adj[g1, g2, drop = F])
     sub.adj <- reshape2::melt(sub.adj)
-    sub.adj$w <- weight[sub.adj$Var1] * weight[sub.adj$Var2]
+    sub.adj$w <- weight[as.character(sub.adj$Var1)] * weight[as.character(sub.adj$Var2)]
     sub.adj$Var1 <- paste(rep(tmp$pathway_1, nrow(sub.adj)), sub.adj$Var1, sep = "_")
     sub.adj$Var2 <- paste(rep(tmp$pathway_2, nrow(sub.adj)), sub.adj$Var2, sep = "_")
     return(sub.adj)

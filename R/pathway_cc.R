@@ -55,7 +55,9 @@ pathway_cc <- function (pathway_list, gene_network_adj, genes,
   
   
   xx <- mclapply(pathway_list, function(x) {
-    tmp <- sub_adj_mt[x, x, drop = F]
+    g_sub <- x[x %in% genes]
+    
+    tmp <- sub_adj_mt[g_sub, g_sub, drop = F]
     
     return(tmp)
   }, mc.cores = mc_cores_cc)

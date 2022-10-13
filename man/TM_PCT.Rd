@@ -19,7 +19,8 @@ TM_PCT(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{membership}{named vector with the membership of the gene in gene_network_adj to topological communities}
+\item{membership}{named vector with the membership of the gene in gene_network_adj to topological communities. If set to NULL
+then the function calculates the communities by using fastgreedy algorithm}
 
 \item{genes}{vector with the gene of interest to be used for TM-PCT calculation}
 
@@ -47,6 +48,7 @@ The function returns a list of two object:
  \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
  }
  }
+ If membership = NULL, then also the membership is returned
 }
 \description{
 Calculates cross-talks between pathways composed by gene of different gene communities

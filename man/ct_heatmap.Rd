@@ -15,9 +15,11 @@ ct_heatmap(
   row_annotation = NULL,
   row_annotation_name = "row_anno",
   pal_row_annotation = NULL,
+  row_name_side = "bottom",
   column_annotation = NULL,
   column_annotation_name = "col_anno",
   pal_column_annotation = NULL,
+  col_name_side = "left",
   file_out = NULL,
   width = 200,
   height = 200,
@@ -56,6 +58,9 @@ discrete variable}
 
 \item{pal_row_annotation, pal_column_annotation}{vector of colors to be used to color the annotation. If NULL, the 
 function uses `rainbow()` palette}
+
+\item{row_name_side, col_name_side}{if the name of the row(column) annotation should be put at the "bottom" or "top" ("left" or "right") 
+of the annotation}
 
 \item{file_out}{name used to save the jpeg file. If not provided, the plot will be saved as "CT_heatmap.jpeg"}
 

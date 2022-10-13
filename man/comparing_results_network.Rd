@@ -13,7 +13,7 @@ comparing_results_network(
   legend_vertex = F,
   edge_colors = NULL,
   edge_value = NULL,
-  edge_breaks = NULL,
+  edge_breaks = 1,
   legend_edge_col = T,
   legend_edge_breaks = T,
   layout = NULL,
