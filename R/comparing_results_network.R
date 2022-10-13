@@ -8,7 +8,7 @@
 #' @param file_out filename of the produced plot. If not provided the plot is saved as "union_ct_network.jpeg"
 #' @param vertex_col_by how to color the vertices. If set to `number` then the vertices are colored by the number of analyses in which is present. Otherwise 
 #' can be a named vector with a value for each pathway or cell in the results. If `NULL` no color vertices will be passed to `igraph.plot` function
-#' @param vertex_color colors to be sued for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
+#' @param vertex_colors colors to be sued for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
 #' then should be a vector of colors, one for each unique variable in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number`
 #' and rainbow palette for vector
 #' @param vertex_value value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses min and max
@@ -155,7 +155,7 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
       plot(union.g, edge.col = E(union.g)$color, 
            edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
       if(legend_edge_breaks) {
-        legend(x= x_edge_b, y = y_edge_, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
+        legend(x= x_edge_b, y = y_edge_b, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
                legend = levels(edge_breaks), box.col = NA)
       }
       if(legend_edge_col) {
@@ -196,7 +196,7 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
              edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
         
         if(legend_edge_breaks) {
-          legend(x= x_edge_b, y = x_edge_b, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
+          legend(x= x_edge_b, y = y_edge_b, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
                  legend = levels(edge_breaks), box.col = NA)
         }
         
@@ -223,7 +223,7 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
         plot(union.g, edge.col = E(union.g)$color, vertex.color=V(union.g)$color,
              layout=lo_cl, ...)
         if(legend_vertex) {
-          legend(x= x_vertex, y = x_vertex, fill = vertex_colors, legend = names(vertex_colors))
+          legend(x= x_vertex, y = y_vertex, fill = vertex_colors, legend = names(vertex_colors))
         }
         
         if(legend_edge_col) {
@@ -240,11 +240,11 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
              edge.width = (2+ as.numeric(edge_breaks)), layout=lo_cl, ...)
         
         if(legend_edge_breaks) {
-          legend(x= x_edge_b, y = x_edge_b, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
+          legend(x= x_edge_b, y = y_edge_b, col = "black", lwd = sort(unique(2+as.numeric(edge_breaks))),
                  legend = levels(edge_breaks), box.col = NA)
         }
         if(legend_vertex) {
-          legend(x= x_vertex, y = x_vertex, fill = vertex_colors, legend = names(vertex_colors))
+          legend(x= x_vertex, y = y_vertex, fill = vertex_colors, legend = names(vertex_colors))
         }
         
         if(legend_edge_col) {

@@ -65,6 +65,8 @@ of the annotation}
 \item{file_out}{name used to save the jpeg file. If not provided, the plot will be saved as "CT_heatmap.jpeg"}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
+
+\item{...}{further arguments passed down to ComplexHeatmap::Heatmap}
 }
 \value{
 the function produce the plot saved with the name passed to `file_out` and also returns the adjacency matrix 

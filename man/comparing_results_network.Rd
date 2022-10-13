@@ -44,6 +44,10 @@ comparing_results_network(
 \item{vertex_col_by}{how to color the vertices. If set to `number` then the vertices are colored by the number of analyses in which is present. Otherwise 
 can be a named vector with a value for each pathway or cell in the results. If `NULL` no color vertices will be passed to `igraph.plot` function}
 
+\item{vertex_colors}{colors to be sued for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
+then should be a vector of colors, one for each unique variable in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number`
+and rainbow palette for vector}
+
 \item{vertex_value}{value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses min and max}
 
 \item{legend_vertex}{logical, if to print the legend of the color on the vertices}
@@ -71,10 +75,6 @@ positioning in the plot. See `legend()` function for more details}
 and `legend_vertex` (when `vertex_col_by = "number"` ). See `color.legend()` and `rect()` functions for more details}
 
 \item{...}{further argument passed to `igraph.plot` function}
-
-\item{vertex_color}{colors to be sued for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
-then should be a vector of colors, one for each unique variable in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number`
-and rainbow palette for vector}
 }
 \value{
 the function produce the plot saved with the name passed to `file_out` and also returns the layout, and the igraph object used for plotting

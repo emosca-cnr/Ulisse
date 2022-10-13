@@ -28,6 +28,7 @@
 #' of the annotation
 #' @param file_out name used to save the jpeg file. If not provided, the plot will be saved as "CT_heatmap.jpeg"
 #' @param width,height,res,units graphical value of `jpeg()` function
+#' @param ... further arguments passed down to ComplexHeatmap::Heatmap
 #' @return the function produce the plot saved with the name passed to `file_out` and also returns the adjacency matrix 
 #' and the communities (if calculated)
 #' @importFrom grDevices rainbow dev.off jpeg

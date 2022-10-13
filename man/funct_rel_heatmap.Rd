@@ -9,7 +9,7 @@ funct_rel_heatmap(
   adj,
   target_g = NULL,
   target_ptw = NULL,
-  weight = wgth,
+  weight,
   n_cores = 1,
   file_name = NULL,
   colors = NULL,
@@ -33,6 +33,8 @@ funct_rel_heatmap(
 the presence/absence of the links (1-0)}
 
 \item{n_cores}{number of cores to be used by the function}
+
+\item{file_name}{file name of the plot. If not specified, it will be saved as "funct_rel_heatmap.jpeg"}
 
 \item{colors}{vector of two colors to be used in the heatmap. If not provided, the functions used ble and red}
 
