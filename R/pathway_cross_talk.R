@@ -112,7 +112,9 @@ pathway_cross_talk <- function (pathway_list, gene_network_adj, genes,
       idx <- unq_comb_p_len[as.character(n.1), as.character(n.2)]
       perm_l <- c(list(nlink), perm_list[[idx]])
       p_val <- calc_p(perm_l)
-      ct <- cross_talk(mat = tab, weight = weight)
+      wg1 <- weight[rownames(tab)]
+      wg2 <- weight[colnames(tab)]
+      ct <- cross_talk(mat = tab, weight = list(g1 = wg1, g2 = wg2))
       out <- array(c(comb_p[x, 1], comb_p[x, 2], ct[1:6], as.vector(p_val), ct[7:8]), dim = c(1, 11))
       return(out)
     },   mc.cores = mc_cores_pct)

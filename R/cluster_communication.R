@@ -107,7 +107,7 @@ cluster_communication <- function(cl_list, gene_network_adj, k = 9,
       perm_l <- perm_list[[z]]
       all_perm <- c(list(nlink), perm_l)
       p_val <- calc_p(all_perm)
-      ct <- cross_talk(mat = tab, weight = c(g.1, g.2))
+      ct <- cross_talk(mat = tab, weight = list(g1 = g.1, g2 =g.2))
       out <- array(c(comb_p[z, 1], comb_p[z, 2], ct[1:4], as.vector(p_val), ct[5:8]), dim = c(1, 11))
       
       return(out)

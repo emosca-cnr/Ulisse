@@ -19,13 +19,15 @@
 cross_talk <- function(mat, weight) {
   g.1 <- as.character(rownames(mat))
   g.2 <- as.character(colnames(mat))
-  matW <- t(weight[g.1]) %*% mat
-  matW <- matW %*% weight[g.2, drop = F]
+  wg.1 <- weight[["g1"]]
+  wg.2 <- weight[["g2"]]
+  matW <- t(wg.1[g.1]) %*% mat
+  matW <- matW %*% wg.2[g.2, drop = F]
   row.col.idx <- which(mat == 1, arr.ind = T)
   row.n <- funique(g.1[row.col.idx[,1]])
-  row.n <- row.n[row.n %in% names(weight)]
+  row.n <- row.n[row.n %in% names(wg.1)]
   col.n <- funique(g.2[row.col.idx[,2]])
-  col.n <- col.n[col.n %in% names(weight)]
+  col.n <- col.n[col.n %in% names(wg.2)]
   
   #mat.out <- matrix(data = NA, nrow = 1, ncol = 8)
   mat.out <- array(data = NA, dim = 8, dimnames = list(c("ct", "ngenes_1",
@@ -35,8 +37,8 @@ cross_talk <- function(mat, weight) {
   mat.out[2] = length(row.n)
   mat.out[3] = length(col.n)
   mat.out[4] = sum(mat)
-  mat.out[5] = sum(weight[g.1])
-  mat.out[6] = sum(weight[g.2])
+  mat.out[5] = sum(wg.1)
+  mat.out[6] = sum(wg.2)
   mat.out[7] = stri_c(row.n, collapse = ";")
   mat.out[8] = stri_c(col.n, collapse = ";")
   
