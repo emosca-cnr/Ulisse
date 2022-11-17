@@ -14,6 +14,7 @@
 #' @param colors vector of two colors to be used in the heatmap. If not provided, the functions used ble and red
 #' @param width,height,res,units graphical value of `jpeg()` function
 #' @param ... further arguments passed to `Heatmap` function
+#' @param file_name file name of the plot. If not specified, it will be saved as "funct_rel_heatmap.jpeg"
 #' @importFrom grDevices dev.off jpeg
 #' @importFrom circlize colorRamp2
 #' @import igraph
@@ -22,7 +23,7 @@
 
 
 funct_rel_heatmap <- function(pct, adj, target_g = NULL, target_ptw = NULL,
-                              weight = wgth, n_cores = 1, file_name = NULL, 
+                              weight , n_cores = 1, file_name = NULL, 
                               colors = NULL, width = 200, height = 200, res = 300, units = "mm", ...) {
   
   if(!is.null(target_g)) {

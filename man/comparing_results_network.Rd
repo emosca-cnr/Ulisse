@@ -7,11 +7,15 @@
 comparing_results_network(
   res_list,
   file_out,
-  colors = NULL,
-  value = NULL,
-  edge_width = T,
-  legend_col = T,
-  legend_edge_width = T,
+  vertex_col_by = NULL,
+  vertex_colors = NULL,
+  vertex_value = NULL,
+  legend_vertex = F,
+  edge_colors = NULL,
+  edge_value = NULL,
+  edge_breaks = 1,
+  legend_edge_col = T,
+  legend_edge_breaks = T,
   layout = NULL,
   width = 200,
   height = 200,
@@ -19,12 +23,16 @@ comparing_results_network(
   units = "mm",
   x_vertex = -1.5,
   y_vertex = 0,
-  x_edge_w = -1.5,
-  y_edge_w = -0.3,
-  xl = -1.45,
-  yb = -0.9,
-  xr = -1.3,
-  yt = -0.6,
+  x_edge_b = -1.5,
+  y_edge_b = -0.5,
+  xl_vertex = -1.45,
+  yb_vertex = -0.2,
+  xr_vertex = -1.3,
+  yt_vertex = -0.5,
+  xl_edge = -1.45,
+  yb_edge = -0.9,
+  xr_edge = -1.3,
+  yt_edge = -0.6,
   ...
 )
 }
@@ -33,31 +41,40 @@ comparing_results_network(
 
 \item{file_out}{filename of the produced plot. If not provided the plot is saved as "union_ct_network.jpeg"}
 
-\item{colors}{colors to be used for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
+\item{vertex_col_by}{how to color the vertices. If set to `number` then the vertices are colored by the number of analyses in which is present. Otherwise 
+can be a named vector with a value for each pathway or cell in the results. If `NULL` no color vertices will be passed to `igraph.plot` function}
+
+\item{vertex_colors}{colors to be sued for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
 then should be a vector of colors, one for each unique variable in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number`
 and rainbow palette for vector}
 
-\item{value}{value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses min and max}
+\item{vertex_value}{value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses min and max}
 
-\item{edge_width}{logical, if the edge width should change according to how much it is shared in the results list.}
+\item{legend_vertex}{logical, if to print the legend of the color on the vertices}
 
-\item{legend_col}{logical, if to plot the legend of the color of the edges and vertices}
+\item{edge_colors}{colors t be used for the edges. It should be a vector of two colors. If `NULL` the function uses blue to red}
 
-\item{legend_edge_width}{logical, if to plot the legend of the different interval used for edge width plotting}
+\item{edge_value}{vector of the two values to be used to create the gradient to color the edges. If not provided, 
+the function uses minimum and maximum}
+
+\item{edge_breaks}{number of breaks to be used to group values in `edge_col_by` and plot the edges with different 
+width. If set to 1, all the edges will have the same width}
+
+\item{legend_edge_col}{logical, if to plot the legend of the color of the edges}
+
+\item{legend_edge_breaks}{logical, if to plot the legend of the different interval used for edge width plotting}
 
 \item{layout}{layout to be used in igraph plotting. If not provided, the function calculates it}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
-\item{x_vertex, y_vertex, x_edge_w, y_edge_w}{x and y coordinates for `legend_vertex` (when a vector is passed to `vertex_col_by` ) and `legend_edge_breaks` 
+\item{x_vertex, y_vertex, x_edge_b, y_edge_b}{x and y coordinates for `legend_vertex` (when a vector is passed to `vertex_col_by` ) and `legend_edge_breaks` 
 positioning in the plot. See `legend()` function for more details}
 
-\item{xl, yb, xr, yt}{coordinates for the positioning of the gradient legend for `legend_col`. See `color.legend()` 
-and `rect()` functions for more details}
+\item{xl_vertex, yb_vertex, xr_vertex, yt_vertex, xl_edge, yb_edge, xr_edge, yt_edge}{coordinates for the positioning of the gradient legend for `legend_edge_col`
+and `legend_vertex` (when `vertex_col_by = "number"` ). See `color.legend()` and `rect()` functions for more details}
 
 \item{...}{further argument passed to `igraph.plot` function}
-
-\item{legend_vertex}{logical, if to print the legend of the color on the vertices}
 }
 \value{
 the function produce the plot saved with the name passed to `file_out` and also returns the layout, and the igraph object used for plotting
