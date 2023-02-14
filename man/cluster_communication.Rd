@@ -2,7 +2,7 @@
 % Please edit documentation in R/cluster_communication.R
 \name{cluster_communication}
 \alias{cluster_communication}
-\title{Function to caluclate communication between cell clusters}
+\title{Function to calculate communication between cell clusters}
 \usage{
 cluster_communication(
   cl_list,
@@ -13,50 +13,53 @@ cluster_communication(
 )
 }
 \arguments{
-\item{cl_list}{the output of `preparing_cl_list()` or a gene list composed by a vector for each cluster where each vector is
-a named gene rank or weight vector.}
+\item{cl_list}{the output of `preparing_cl_list()` or a gene list composed by a named vector. Each vector should be composed by the ranks or weights 
+named after the respective genes. The element of the list should be named after the name of the clusters. These name will be then used in the output.
+If no weights are available use 1 for each gene. In this case the communication score will be equal the number of links 
+between the clusters}
 
-\item{gene_network_adj}{adjacency matrix of the whole gene network}
+\item{gene_network_adj}{adjacency matrix of the whole communication network}
 
-\item{k}{number of permutation}
+\item{k}{number of permutations}
 
-\item{mc_cores_perm}{number of threads to be used to calcualte permutation}
+\item{mc_cores_perm}{number of threads to be used to calculate permutations}
 
 \item{mc_cores_ccc}{number of threads to be used for CCC calculation}
 }
 \value{
 The function returns a list of two objects:
 \enumerate{
-\item communications_info: a data.frame with the detailed description of the communication between the two clusters
+\item communications_info: a data.frame with the detailed description of the communication between each cluster pairs
 \itemize{
-\item cl1, cl2: name of the two clusters (derived from the name of the list in `DEG_list`)
-\item cl1_gene, cl2_gene: genes that are ligand or receptor in cl1 or cl2 that partecipate to the communication
-\item score: the score of the communication between the two genes in cl1 and cl2, claculated considering their weights
+\item cl1, cl2: name of the clusters (derived from the name of the list in `cl_list`)
+\item cl1_gene, cl2_gene: genes involved in the communication
+\item score: the score of the communication between cl1_gene and cl2_gene, calculated considering their weights (if provided)
 }
-\item {cc_communications}: a data.frame with the communication score
+\item {cc_communications}: a data.frame with the cumulative communication score
 \itemize{
 \item cl1, cl2: names of the two clusters
-\item ccc_score: communication score calculated on all the interacting ligand/receptor genes in the two clusters
-\item ngenes_cl1, ngenes_cl2: number of genes in cl1 and cl2, respectively, that participate to the communication score
-\item nlink: number of links beteewn the genes in cl1 and cl2
-\item p_value_link: empirical p-value calculated by using the permutation approcah
+\item ccc_score: communication score calculated on all the interacting genes in the two clusters. This value is equal to the sum of all 
+the `communications_info$score` for a cluster pair
+\item ngenes_cl1, ngenes_cl2: number of genes in `cl1` and `cl2`, respectively, involved in the communication score
+\item nlink: number of links between the genes in `cl1` and `cl2`
+\item p_value_link: empirical p-value calculated by using the permutation approach
 \item FDR_link: empirical false discovery rate
-\item p_adj_BH: `p-value_link` correctd by using BH method
+\item p_adj_BH: `p-value_link` corrected by using BH method (see `p.adjust()` function)
 \item gene_weight_cl1, gene_weight_cl2: cumulative weights of the genes involved in the 
-communication in cluster 1 and 2
-\item genes_cl1, genes_cl2: list of the genes involved in the communication in the clusters
+communication in `cl1` and `cl2`
+\item genes_cl1, genes_cl2: list of the genes involved in the communication between `cl1` and `cl2`
 }
 }
 }
 \description{
-cluster_communication calculates a score for the communication between all the possible pairs 
+`cluster_communication()` calculates a communication score between all the possible pairs 
 in the cluster list provided
 }
 \details{
-The CT formula is used to calculate a score for the communication between all possible cluster pairs. 
-The same approach is applied also to `k` permuted version of each cluster, obtained by random sampling of genes
-in `gene_network_adj`. The p-value and FDR are the calculated by comparing the number of links between each 
-cluster pairs and their permuted versions
+The function calculate a communication score between all possible cluster pairs that can be obtained from the `cl_list` provided by using the 
+weights or rank provided in the lists. For each cluster pair, the function samples randomly from the `gene_network_adj` two lists of the same dimensions of the 
+lists of the cluster pair considered, and calculates the number of links between them. This process is repeated `k` times. The number of links obtained with the 
+`k` permuted version of the cluster pair lists are compared to the real number of links between the clusters to calculate the p-value and FDR.
 }
 \examples{
 \dontrun{

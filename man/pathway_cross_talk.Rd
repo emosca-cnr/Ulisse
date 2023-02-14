@@ -2,7 +2,7 @@
 % Please edit documentation in R/pathway_cross_talk.R
 \name{pathway_cross_talk}
 \alias{pathway_cross_talk}
-\title{Function to caluclate cross-talks between pathways}
+\title{Function to calculate cross-talks between pathways}
 \usage{
 pathway_cross_talk(
   pathway_list,
@@ -24,11 +24,11 @@ pathway_cross_talk(
 \item{weight}{a named vector of weights for each gene in the pathway list. 
 If not provided, the function assigns to each gene a weight of 1}
 
-\item{mc_cores_pct}{numebr of threads to be used for pathway cross talk calculation}
+\item{mc_cores_pct}{number of threads to be used for pathway cross talk calculation}
 
 \item{mc_cores_perm}{number of thread to be used in permutations}
 
-\item{k}{number of permutation}
+\item{k}{number of permutation s}
 }
 \value{
 The function returns a table with:
@@ -39,23 +39,23 @@ The function returns a table with:
  \item nlink: number of links between the genes in `pathway_1` and `pathway_2`
  \item: weight_pathway1, weight_pathway2: cumulative weights of the genes involved in the 
  cross-talk between pathway 1 and 2
- \item p_value_link: p-value score calcualted by using the permutation approach
+ \item p_value_link: p-value score calculated by using the permutation approach
  \item FDR_link: empirical FDR
- \item p_adj_BH: `p-value_link` adjusted using BH method
- \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
+ \item p_adj_BH: `p-value_link` adjusted using BH method (see `p.adjust()` function)
+ \item gene_pathway1, gene_pathway2: gene involved in the CT in `pathway_1` and `pathway_2`, respectively
 }
 }
 \description{
-Calculates cross-talk between all pathway pairs that show a link between their exclusive genes
+The function calculates cross-talk between all pathway pairs that show a link between their exclusive genes
 }
 \details{
 The function defines a subset of the `gene_network_adj` for each pathway pair, 
- with the exclusive genes of a pathway in the rows and the exclusive genes of the other in the columns. 
- Only the pathway pairs that show a link in these subset will be considered. Then, the CT is calcluated, 
- as described in the paper. This approach is applied to the original adjacency matrix and to all its permuted versions.
- The permutations are obtained by random sampling genes from the adjacency matrix for each pathway.
- The p-value and FDR are calculated on the number of links, without considering the weights of the genes.
- We also provide a corrected p-value using BH method.
+with the exclusive genes of a pathway in the rows and the exclusive genes of the other in the columns. 
+Only the pathway pairs that show a link in these subset will be considered. Then, the CT is calculated, 
+as described in the paper. For each pathway pair, the function samples randomly from the `gene_network_adj` two lists of the same dimensions of the 
+lists of the pathway pair considered, and calculates the number of links between them. This process is repeated `k` times. The number of links obtained with the 
+`k` permuted version of the pathway pair lists are compared to the real number of links between the pathways to calculate the p-value and FDR. 
+We also provide a corrected p-value using BH method.
 }
 \examples{
 \dontrun{  

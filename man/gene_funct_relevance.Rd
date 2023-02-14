@@ -7,6 +7,8 @@
 gene_funct_relevance(
   pct,
   adj,
+  method = "count",
+  pct_null = NULL,
   only_diff = T,
   to_plot = T,
   file_name = NULL,
@@ -15,16 +17,21 @@ gene_funct_relevance(
 )
 }
 \arguments{
-\item{pct}{the data.frame obtained as a result of `pathway_cross_talk()`}
+\item{pct}{the data.frame obtained as a result of `pathway_cross_talk()`, filtered if needed}
 
 \item{adj}{the adjacency matrix used as an input in `pathway_cross_talk()`}
 
+\item{method}{= c("count", "normalized") should be one of the two method. If "count" then the number of genes and pathways are listed, if "normalized" the counts are 
+normalized by using a null model. In this case `pct_null` is required}
+
+\item{pct_null}{required only if `method = "normalized"`. This should be a PCT result table coming from a null model. See PCT vignette for further details}
+
 \item{only_diff}{logical, indicating if the calculation of the interactor diversity should include only the genes 
-with which the gene of interest never share a pathway}
+with which the gene of interest never share a pathway. If `method = "normalized"`, `only_diff = TRUE` is applied only to `pct` table, not `pct_null`}
 
 \item{to_plot}{logical, indicating whether to save the plot of functional relevance}
 
-\item{file_name}{file name of the plot, if NULL the plot will be saved in the working 
+\item{file_name}{file name of the plot, if `NULL` the plot will be saved in the working 
 directory as "gene_functional_relevance.jpeg"}
 
 \item{plot_names}{logical, indicating whether to print gene names in the functional relevance plot}
@@ -32,26 +39,40 @@ directory as "gene_functional_relevance.jpeg"}
 \item{n_cores}{number of cores to be use to parallelize gene functional relevance analysis}
 }
 \value{
-The function returns a data.frame with:
+If `method = "count` The function returns a data.frame with:
 \itemize{
 \item gene: the gene analysed
 \item nPTW: functional diversity
 \item nInteractors: interactor diversity
 \item pathway: list of names of the pathway counted in `nPTW` separated by `;`
 \item interactors: list of names of the genes counted in `nInteractors` spearated by `;`
+} 
+Otherwise, if `method = "normalized` the function returns a data.frame with:
+\itemize{
+\item gene: the gene analysed
+\item nPTW_norm: normalized functional diversity
+\item nInteractors_norm: normalized interactor diversity
+\item nPTW: functional diversity calculated from `pct`
+\item nInteractors: interactor diversity calculated from `pct`
+\item pathway: list of names of the pathway counted in `nPTW` separated by `;`
+\item interactors: list of names of the genes counted in `nInteractors` spearated by `;`
+\item nPTW_null: functional diversity calculated from null model `pct_null`
+\item nInteractors_null: interactor diversity calculated from null model `pct_null`
+\item pathway_null: list of names of the pathway counted in `nPTW_null` separated by `;`
+\item interactors_null: list of names of the genes counted in `nInteractors_null` spearated by `;`
 }
 }
 \description{
-gene_funct_relevance() calculates functional diversity and interactor diversity for the gene 
-that participate in significative pathway cross-talks
+The function calculates functional diversity and interactor diversity involved in significant pathway cross-talks
 }
 \details{
-gene_funct_relevance() takes as an input the data.frame obtained from `pathway_cross_talk()` and the 
-adjacency matrix used as an input of `pathway_cross_talk()`. The function then extract the genes partecipating in
-significative cross-talks and calculate for each of them the functional diversity and the interactor diversity. 
-For each gene, the functional diversity is the number of pathway with which the gene participate in the formation
-of a cross-talk of interest; the interactor diversity is the number of different genes with which the gene has links 
-that contribute to the formation of a cross-talk
+The function takes as an input the data.frame obtained from `pathway_cross_talk()` and the 
+adjacency matrix used as an input of `pathway_cross_talk()`. These inputs are used to obtain the genes involved in
+significant cross-talks and calculate for each of them the functional diversity and the interactor diversity. 
+For each gene, the functional diversity is the number of pathways with which the gene is involved in the formation
+of a cross-talk; the interactor diversity is the number of different genes with which the gene has links 
+that contribute to the formation of a cross-talk. The function does not filter the `pathway_cross_talk()` results to calculate the 
+two measures only on the significant PCTs
 }
 \examples{
 \dontrun{

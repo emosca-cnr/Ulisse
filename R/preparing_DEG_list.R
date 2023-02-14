@@ -7,15 +7,15 @@
 #' If the p-value is 0, this is approximated to 1/10 of the minimum non-zero p-value present in the data. 
 #' The function returns a gene set list for each cluster, each composed by a vector of scores named after the genes 
 #' names provided.
-#' @param cluster column of the result table of DEG analysis with the data of the cluster under analysis
+#' @param cluster column of the result table of DEG analysis with the data of the clusters under analysis
 #' @param p_val column of the result table of DEG analysis with the data of the p-value of the test. Could be either
 #' nominal or adjusted p-value
 #' @param log2FC column of the result table of DEG analysis with the data of the log2Fold Change
 #' @param gene column of the result table of DEG analysis with the names of the genes tested
-#' @param universe vector with the names of the gene of interest in teh study. This value should be the names
+#' @param universe vector with the names of the genes of interest in the study. This value should be the names
 #' in the LR network
 #' @return The function returns a gene list composed by a vector for each cluster provided. Each vector is 
-#' composed by the score, calulcated as abs(log2FC) * -log10(p-value), named by the respective genes
+#' composed by the score, calculated as abs(log2FC) * -log10(p-value), named by the respective genes
 #' @export
 
 

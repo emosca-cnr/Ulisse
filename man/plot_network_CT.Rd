@@ -15,7 +15,8 @@ plot_network_CT(
   edge_col_by = "pct",
   edge_pal = NULL,
   edge_value = NULL,
-  edge_breaks = 1,
+  edge_width = T,
+  edge_adj_col = 0.7,
   file_out = NULL,
   width = 200,
   height = 200,
@@ -25,13 +26,10 @@ plot_network_CT(
   legend_edge_col = T,
   legend_filt = T,
   legend_community = T,
-  legend_edge_breaks = T,
   x_filt = -1.5,
   y_filt = 0,
   x_comm = -1.5,
   y_comm = -0.5,
-  x_edge = -1.5,
-  y_edge = -1,
   xl = -1.45,
   yb = 0.2,
   xr = -1.3,
@@ -42,20 +40,21 @@ plot_network_CT(
 \arguments{
 \item{ct}{output of `pathway_cross_talk()` or `cluster_communication()` function}
 
-\item{all}{logical, if the function have to plot all the edges or only the significative ones. If FALSE, if the user
-provides filtering parameters, the function plot the CT passing the threshold as a solid line, 
-the others as a dashed line}
+\item{all}{logical, if the function have to plot all the edges or only the significant ones. If `TRUE`, the function uses `p_val, FDR` and `ct_val` to identify the 
+significant ones, that are plotted with a solid line, and the not significant with a dashed line. If `FALSE`, the functions uses the same filtering parameters to 
+filter the data and plot only the CT passing the filtering threshold as a solid line. If `NULL` the function does not 
+filter the data and plot all the edges as a solid line}
 
-\item{p_val, FDR, ct_val}{filtering values. If one of these is set to NULL the function ignores it}
+\item{p_val, FDR, ct_val}{filtering values. If one of these is set to `NULL` the function ignores it}
 
-\item{community}{logical or an object resulting from igraph community calculation. If TRUE, the function calculates
-the communities by using fastgreedy algorithm, if FALSE the function does not consider communities. Otherwise, if a
-community object is provided, the function use it and color the vertices accordingly}
+\item{community}{logical or an object resulting from igraph community calculation. If `TRUE`, the function calculates
+the communities by using fastgreedy algorithm, if `FALSE` the function does not consider communities. Otherwise, if a
+community object is provided, the function uses it and color the vertices accordingly}
 
 \item{pal_community}{color palette to be used to color the vertices according to the communities. If not provided,
 the function uses `rainbow()` palette}
 
-\item{edge_col_by}{name of the column to be used to color the edges. If NULL the edges will be not colored}
+\item{edge_col_by}{name of the column to be used to color the edges. If `NULL` the edges will be not colored}
 
 \item{edge_pal}{color to be used to create the gradient to color the edges. If not provided, the function uses "blue" 
 to "red"}
@@ -63,10 +62,12 @@ to "red"}
 \item{edge_value}{vector of the two values to be used to create the gradient to color the edges. If not provided, 
 the function uses minimum and maximum}
 
-\item{edge_breaks}{number of breaks to be used to group values in `edge_col_by` and plot the edges with different 
-width. If set to 1, all the edges will have the same width}
+\item{edge_width}{logical, if the edge widths should be proportional to `edge_col_by` values. If `TRUE` the `edge_col_by` values are scaled between 1 to 9 to set the
+edge width accordingly}
 
-\item{file_out}{name of the jpeg file produced. If not provided, the plot will be automatically named "ct_network.jpeg}
+\item{edge_adj_col}{value used to adjust color transparency of the edges}
+
+\item{file_out}{name of the jpeg file produced. If not provided, the plot will be automatically named `ct_network.jpeg`}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
@@ -78,10 +79,8 @@ width. If set to 1, all the edges will have the same width}
 
 \item{legend_community}{logical, if to plot the legend of the community color used}
 
-\item{legend_edge_breaks}{logical, if to plot the legend of the different interval used for edge width plotting}
-
-\item{x_filt, y_filt, x_comm, y_comm, x_edge, y_edge}{x and y coordinates for `legend_filt`, `legend_community`, 
-`legend_edge` positioning in the plot. See `legend()` function for more details}
+\item{x_filt, y_filt, x_comm, y_comm, }{x and y coordinates for `legend_filt`, `legend_community`, 
+positioning in the plot. See `legend()` function for more details}
 
 \item{xl, yb, xr, yt}{coordinates for the positioning of the gradient legend for `legend_edge_col`. See `color.legend()` 
 and `rect()` functions for more details}
@@ -93,7 +92,7 @@ the function produce the plot saved with the name passed to `file_out` and also 
 the igraph object used for plotting and the communities (if calculated)
 }
 \description{
-The function elaborate the result of `pathway_cross_talk()` or `cluster_communication()` function to obtain a graphical 
+The function elaborates the results of `pathway_cross_talk()` or `cluster_communication()` functions to obtain a graphical 
 representation of the cross-talk network
 }
 \details{

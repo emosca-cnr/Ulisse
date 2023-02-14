@@ -2,13 +2,14 @@
 % Please edit documentation in R/ct_heatmap.R
 \name{ct_heatmap}
 \alias{ct_heatmap}
-\title{Function to plot the heatmap of CT network}
+\title{Function to plot the heatmap of CT results}
 \usage{
 ct_heatmap(
   ct,
   color_by = "pct",
   color = NULL,
   color_level = NULL,
+  no_ct_color = NULL,
   legend_side = "left",
   community = F,
   pal_community = NULL,
@@ -29,25 +30,28 @@ ct_heatmap(
 )
 }
 \arguments{
-\item{ct}{output of `pathway_cross_talk()` or `cluster_communication()` function}
+\item{ct}{results obtained with `pathway_cross_talk()` or `cluster_communication()` functions}
 
 \item{color_by}{name of the column to be plotted in the heatmap}
 
-\item{color}{vector of two colors used to build the gradient to color the heatmap. If NULL, the function uses
-"blue" to "red"}
+\item{color}{vector of two colors used to build the gradient to color the heatmap, that are the colors of the two
+number of `color_level`. If NULL, the function uses `lightyellow` and `red3`}
 
 \item{color_level}{vector of the two values to be used to create the gradient to color the heatmap. If not provided, 
 the function uses minimum and maximum}
 
+\item{no_ct_color}{color that have to be used for the gene set pairs that shows no CT (in the heatmap will have score = 0). If `NULL` the function
+uses `whitesmoke`}
+
 \item{legend_side}{where to place the legend of the heatmap and of the annotations (if provided). See `Heatmap` 
 for further details}
 
-\item{community}{logical or an object resulting from igraph community calculation. If TRUE, the function calculates
-the communities by using fastgreedy algorithm, if FALSE the function does not consider communities. Otherwise, if a
-community object is provided, the function use it and color the vertices accordingly. The communities will be
+\item{community}{logical or an object resulting from igraph community calculation. If `TRUE`, the function calculates
+the communities by using fastgreedy algorithm, if `FALSE` the function does not consider communities. Otherwise, if a
+community object is provided, the function uses it and colors the vertices accordingly. The communities will be
 plotted as a row and column annotation of the heatmap}
 
-\item{pal_community}{vector of colors to be used to color the community annotation. If NULL the function will use 
+\item{pal_community}{vector of colors to be used to color the community annotation. If `NULL` the function will use 
 `rainbow()` palette}
 
 \item{row_annotation, column_annotation}{named vector to be used to annotate the rows or columns. The vector must 
@@ -56,25 +60,25 @@ discrete variable}
 
 \item{row_annotation_name, column_annotation_name}{name to be used as a title for the legend of the row/column annotation}
 
-\item{pal_row_annotation, pal_column_annotation}{vector of colors to be used to color the annotation. If NULL, the 
+\item{pal_row_annotation, pal_column_annotation}{vector of colors to be used to color the annotation. If `NULL`, the 
 function uses `rainbow()` palette}
 
-\item{row_name_side, col_name_side}{if the name of the row(column) annotation should be put at the "bottom" or "top" ("left" or "right") 
+\item{row_name_side, col_name_side}{if the name of the row/column annotation should be put at the "bottom" or "top" ("left" or "right") 
 of the annotation}
 
 \item{file_out}{name used to save the jpeg file. If not provided, the plot will be saved as "CT_heatmap.jpeg"}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
-\item{...}{further arguments passed down to ComplexHeatmap::Heatmap}
+\item{...}{further arguments passed down to `ComplexHeatmap::Heatmap()`}
 }
 \value{
 the function produce the plot saved with the name passed to `file_out` and also returns the adjacency matrix 
 and the communities (if calculated)
 }
 \description{
-The function elaborate the output of `pathway_cross_talk()` or `cluster_communication()` 
-function to represent the cross-talk network obtained as an heatmap
+The function elaborates the output of `pathway_cross_talk()` or `cluster_communication()` 
+function to represent the obtained cross-talks as an heatmap
 }
 \details{
 The functions uses `pathway_cross_talk()` or `cluster_communication()` output to build a CT network. Then, 

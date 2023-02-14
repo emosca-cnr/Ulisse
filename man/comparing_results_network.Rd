@@ -8,14 +8,14 @@ comparing_results_network(
   res_list,
   file_out,
   vertex_col_by = NULL,
-  vertex_colors = NULL,
+  vertex_color = NULL,
   vertex_value = NULL,
   legend_vertex = F,
-  edge_colors = NULL,
+  edge_color = NULL,
   edge_value = NULL,
-  edge_breaks = 1,
+  edge_width = T,
+  edge_adj_col = 0.7,
   legend_edge_col = T,
-  legend_edge_breaks = T,
   layout = NULL,
   width = 200,
   height = 200,
@@ -23,8 +23,6 @@ comparing_results_network(
   units = "mm",
   x_vertex = -1.5,
   y_vertex = 0,
-  x_edge_b = -1.5,
-  y_edge_b = -0.5,
   xl_vertex = -1.45,
   yb_vertex = -0.2,
   xr_vertex = -1.3,
@@ -39,37 +37,36 @@ comparing_results_network(
 \arguments{
 \item{res_list}{list of resulting data.frame from `pathway_cross_talk()` or `cluster_communication()`}
 
-\item{file_out}{filename of the produced plot. If not provided the plot is saved as "union_ct_network.jpeg"}
+\item{file_out}{name used to save the plot in jpeg format plot. If not provided the plot is saved as "union_ct_network.jpeg"}
 
 \item{vertex_col_by}{how to color the vertices. If set to `number` then the vertices are colored by the number of analyses in which is present. Otherwise 
 can be a named vector with a value for each pathway or cell in the results. If `NULL` no color vertices will be passed to `igraph.plot` function}
 
-\item{vertex_colors}{colors to be sued for the vertices. If `vertex_col_by = number` should be a vector of two colors. If `vertex_col_by` is a vector,
-then should be a vector of colors, one for each unique variable in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number`
-and rainbow palette for vector}
+\item{vertex_color}{vector of colors to be used for the vertices. If `vertex_col_by = number` the vector should by composed by the two color that  will be used
+to build the gradient to color the vertices. If `vertex_col_by` is a vector, then should be a vector of colors, one for each unique variable 
+in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number` and rainbow palette for vector}
 
-\item{vertex_value}{value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses min and max}
+\item{vertex_value}{value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses minimum and maximum}
 
 \item{legend_vertex}{logical, if to print the legend of the color on the vertices}
 
-\item{edge_colors}{colors t be used for the edges. It should be a vector of two colors. If `NULL` the function uses blue to red}
+\item{edge_color}{vector of two colors to build the gradient to color the edges}
 
 \item{edge_value}{vector of the two values to be used to create the gradient to color the edges. If not provided, 
 the function uses minimum and maximum}
 
-\item{edge_breaks}{number of breaks to be used to group values in `edge_col_by` and plot the edges with different 
-width. If set to 1, all the edges will have the same width}
+\item{edge_width}{logical, if the edge width should be proportional to the number of results that share that edge.}
+
+\item{edge_adj_col}{value used to adjust color transparency of the edges}
 
 \item{legend_edge_col}{logical, if to plot the legend of the color of the edges}
-
-\item{legend_edge_breaks}{logical, if to plot the legend of the different interval used for edge width plotting}
 
 \item{layout}{layout to be used in igraph plotting. If not provided, the function calculates it}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
-\item{x_vertex, y_vertex, x_edge_b, y_edge_b}{x and y coordinates for `legend_vertex` (when a vector is passed to `vertex_col_by` ) and `legend_edge_breaks` 
-positioning in the plot. See `legend()` function for more details}
+\item{x_vertex, y_vertex}{x and y coordinates for `legend_vertex` (when a vector is passed to `vertex_col_by` ) positioning in the plot. See `legend()` 
+function for more details}
 
 \item{xl_vertex, yb_vertex, xr_vertex, yt_vertex, xl_edge, yb_edge, xr_edge, yt_edge}{coordinates for the positioning of the gradient legend for `legend_edge_col`
 and `legend_vertex` (when `vertex_col_by = "number"` ). See `color.legend()` and `rect()` functions for more details}
@@ -84,7 +81,6 @@ The function is used to visually compare the results obtained by multiple PCR or
 shared edges
 }
 \details{
-The function takes as an input a list of data.frame resulting from multiple `pathway_cross_talk()` or `cluster_communication()` analyses
-and produce a union network. This network is plotted by coloring the edges corresponding to how many analyses are present. The user may also decide to color
-the vertices on the number of samples in which are present or by a user-provided variable
+The function takes as an input a list of data.frames resulting from multiple `pathway_cross_talk()` or `cluster_communication()` analyses
+and produce a union network that will be plotted with the edges colored by the number of results that have that cross-talk
 }
