@@ -1,21 +1,21 @@
-#' Function to caluclates cross-talks between pathways of differente gene communities
+#' Function to calculate cross-talks between pathways of different gene communities
 #' @description Calculates cross-talks between pathways composed by gene of different gene communities
-#' @details The function uses the `membership` data to reogranize the `pathway_list` as to obtain a list of 
-#' pathway list for each gene communities. In detail, gene will be grouped into communities and then grouped into pathways.
+#' @details The function uses the `membership` data to re-organize the `pathway_list` as to obtain a list of 
+#' pathway list for each gene community. To do so genes will be grouped into communities and then grouped into pathways.
 #' At this point, the function calculates CT between each pathway pairs of different 
 #' communities that shows at least a link.
 #' @param pathway_list a named list of genes grouped into pathways
 #' @param gene_network_adj gene network adjacency matrix
-#' @param weight weights of the genes in gene_network_adj. If not provided, the function assigns to each gene
+#' @param weight weights of the genes in `genes`. If not provided, the function assigns to each gene
 #' a weight of 1
-#' @param membership named vector with the membership of the gene in gene_network_adj to topological communities. If set to NULL
-#' then the function calculates the communities by using fastgreedy algorithm
-#' @param genes vector with the gene of interest to be used for TM-PCT calculation
+#' @param membership named vector with the membership of `genes` to topological communities. If set to `NULL`
+#' the function calculates the communities by using fastgreedy algorithm
+#' @param genes vector with the genes of interest to be used for TM-PCT calculation
 #' @param mc_cores_pct number of threads to be used to calculate cross talk 
 #' @param mc_cores_tm number of threads to be used to calcualte TM-PCT on different communities combination
 #' @return The function returns a list of two object:
 #' \enumerate{
-#'  \item comm_pathway_list: the community pathway list used for TM-PCT calculation. Each list is named with the name 
+#'  \item comm_pathway_list: the communities pathway lists used for TM-PCT calculation. Each list is named with the name 
 #'  of the gene community
 #'  \item {TM_PCT_res}: a data frame with
 #' \itemize{
@@ -26,7 +26,7 @@
 #'  \item n_link: number of links between the pathways considered
 #'  \item weight_pathway1, weight_pathway2: cumulative weights of the genes involved in CT
 #'  in `pathway_1` and `pathway_2`
-#'  \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
+#'  \item gene_pathway1, gene_pathway2: gene involved in the CT in `pathway_1` and `pathway_2`, respectively
 #'  }
 #'  }
 #'  If membership = NULL, then also the membership is returned
@@ -131,8 +131,10 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
           tab <- xxCC[[m]]
           g.1 <- rownames(tab)
           g.2 <- colnames(tab)
+          wg1 <- weight[g.1]
+          wg2 <- weight[g.2]
           weight.tab <- weight[c(g.1, g.2)]
-          tab.out <- cross_talk(mat = tab, weight = weight.tab)
+          tab.out <- cross_talk(mat = tab, weight = list(g1 = wg1, g2 = wg2))
           
           tab.out <- matrix(c(comb_mem[j, 1], comb_p[m,1], comb_mem[j, 2], comb_p[m,2], tab.out), nrow = 1)
           

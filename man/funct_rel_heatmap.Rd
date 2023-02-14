@@ -25,29 +25,29 @@ funct_rel_heatmap(
 
 \item{adj}{adjacency matrix used for PCT calculation}
 
-\item{target_g}{vector with the genes of interest. If provided, the function will consider only the gene that interact with these in the plot}
+\item{target_g}{vector with the genes of interest. If provided, the function will consider only the genes that interact with these in the plot}
 
 \item{target_ptw}{vector with the pathways of interest. If provided, the function will consider only the CT where these pathways are involved}
 
-\item{weight}{weight of the genes. If provided, the function will plot the product of the weights in the heatmpa. If `NULL` the function will lot only
+\item{weight}{weight of the genes. If provided, the function will plot the product of the weights in the heatmap. If `NULL` the function will lot only
 the presence/absence of the links (1-0)}
 
 \item{n_cores}{number of cores to be used by the function}
 
 \item{file_name}{file name of the plot. If not specified, it will be saved as "funct_rel_heatmap.jpeg"}
 
-\item{colors}{vector of two colors to be used in the heatmap. If not provided, the functions used ble and red}
+\item{colors}{vector of two colors to be used in the heatmap. If not provided, the functions used "blue" and "red"}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
 \item{...}{further arguments passed to `Heatmap` function}
 }
 \description{
-The functions highlight the links between defined genes and/or pathways to better inspect the results obtained with `gene_functional_relevance`
+The function highlight the links between defined genes and/or pathways to better inspect the results obtained with `gene_functional_relevance()`
 analysis
 }
 \details{
-The function uses the same input used for `gene_functional_relevance` to retrieve the gene interactions of specific `target_g` and/or `target_ptw`.
-The function produce an heatmap with the genes that interacts with the user-provided ones for each pathway considered. In the heatmap can be reported the 
+The function uses the same inputs used for `gene_functional_relevance()` to retrieve the gene interactions of specific `target_g` and/or `target_ptw`.
+The function produces an heatmap with the genes that interacts with the user-provided ones for each pathway considered. In the heatmap can be reported the 
 product of the weight of the genes if `weight` is provided, or the existence of the link (0-1) otherwise.
 }

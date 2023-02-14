@@ -2,7 +2,7 @@
 % Please edit documentation in R/TM_PCT.R
 \name{TM_PCT}
 \alias{TM_PCT}
-\title{Function to caluclates cross-talks between pathways of differente gene communities}
+\title{Function to calculate cross-talks between pathways of different gene communities}
 \usage{
 TM_PCT(
   pathway_list,
@@ -19,12 +19,12 @@ TM_PCT(
 
 \item{gene_network_adj}{gene network adjacency matrix}
 
-\item{membership}{named vector with the membership of the gene in gene_network_adj to topological communities. If set to NULL
-then the function calculates the communities by using fastgreedy algorithm}
+\item{membership}{named vector with the membership of `genes` to topological communities. If set to `NULL`
+the function calculates the communities by using fastgreedy algorithm}
 
-\item{genes}{vector with the gene of interest to be used for TM-PCT calculation}
+\item{genes}{vector with the genes of interest to be used for TM-PCT calculation}
 
-\item{weight}{weights of the genes in gene_network_adj. If not provided, the function assigns to each gene
+\item{weight}{weights of the genes in `genes`. If not provided, the function assigns to each gene
 a weight of 1}
 
 \item{mc_cores_pct}{number of threads to be used to calculate cross talk}
@@ -34,7 +34,7 @@ a weight of 1}
 \value{
 The function returns a list of two object:
 \enumerate{
- \item comm_pathway_list: the community pathway list used for TM-PCT calculation. Each list is named with the name 
+ \item comm_pathway_list: the communities pathway lists used for TM-PCT calculation. Each list is named with the name 
  of the gene community
  \item {TM_PCT_res}: a data frame with
 \itemize{
@@ -45,7 +45,7 @@ The function returns a list of two object:
  \item n_link: number of links between the pathways considered
  \item weight_pathway1, weight_pathway2: cumulative weights of the genes involved in CT
  in `pathway_1` and `pathway_2`
- \item gene_pathway1, gene_pathway2: gene involevd in the CT in `pathway_1` and `pathway_2`, respectively
+ \item gene_pathway1, gene_pathway2: gene involved in the CT in `pathway_1` and `pathway_2`, respectively
  }
  }
  If membership = NULL, then also the membership is returned
@@ -54,8 +54,8 @@ The function returns a list of two object:
 Calculates cross-talks between pathways composed by gene of different gene communities
 }
 \details{
-The function uses the `membership` data to reogranize the `pathway_list` as to obtain a list of 
-pathway list for each gene communities. In detail, gene will be grouped into communities and then grouped into pathways.
+The function uses the `membership` data to re-organize the `pathway_list` as to obtain a list of 
+pathway list for each gene community. To do so genes will be grouped into communities and then grouped into pathways.
 At this point, the function calculates CT between each pathway pairs of different 
 communities that shows at least a link.
 }

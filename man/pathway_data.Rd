@@ -25,14 +25,12 @@ pathway_data(
 
 \item{genes}{vector with gene gene name of interest}
 
-\item{min_size}{minimum number of gene present in each gene set to be considered}
-
-\item{max_size}{maximum number of gene present in each gene set to be considered}
+\item{min_size, max_size}{filtering the gene sets to maintain only the ones that have at least `min_size` or less than `max_size` number of genes}
 }
 \value{
 The output is a list of two output:
 \enumerate{
-\item msigdb_output: a data.frame with the data downloaded by MsigDB
+\item msigdb_output: a data.frame with the data downloaded by MSigDB data
 \item path_list: a list of pathway. Each list is composed by a vector with the names of the genes of interest 
 that are part of that pathway
 }

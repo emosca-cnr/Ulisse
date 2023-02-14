@@ -7,7 +7,7 @@
 preparing_DEG_list(cluster, p_val, log2FC, gene, universe)
 }
 \arguments{
-\item{cluster}{column of the result table of DEG analysis with the data of the cluster under analysis}
+\item{cluster}{column of the result table of DEG analysis with the data of the clusters under analysis}
 
 \item{p_val}{column of the result table of DEG analysis with the data of the p-value of the test. Could be either
 nominal or adjusted p-value}
@@ -16,12 +16,12 @@ nominal or adjusted p-value}
 
 \item{gene}{column of the result table of DEG analysis with the names of the genes tested}
 
-\item{universe}{vector with the names of the gene of interest in teh study. This value should be the names
+\item{universe}{vector with the names of the genes of interest in the study. This value should be the names
 in the LR network}
 }
 \value{
 The function returns a gene list composed by a vector for each cluster provided. Each vector is 
-composed by the score, calulcated as abs(log2FC) * -log10(p-value), named by the respective genes
+composed by the score, calculated as abs(log2FC) * -log10(p-value), named by the respective genes
 }
 \description{
 The function prepares the input for `cluster_communication()` analysis by using DEG results data

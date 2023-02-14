@@ -25,6 +25,6 @@ The function returns an array with:
 `cross_talk()` calculates the cross-talk score for a provided matrix and vector of weights
 }
 \details{
-The function calculates the cross-talk values for a provided matrix and a vector of weights.
+The function calculates the cross-talk values for a provided matrix and a list of vectors of weights (fist row, second column).
 The weights should be named by gene names
 }

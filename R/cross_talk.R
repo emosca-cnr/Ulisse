@@ -1,6 +1,6 @@
 #' Function to caluclate cross-talk
 #' @description `cross_talk()` calculates the cross-talk score for a provided matrix and vector of weights
-#' @details The function calculates the cross-talk values for a provided matrix and a vector of weights.
+#' @details The function calculates the cross-talk values for a provided matrix and a list of vectors of weights (fist row, second column).
 #' The weights should be named by gene names
 #' @param mat the matrix on which calculate the cross-talk. It should be the subset of the adjacency matrix of
 #' a gene network, with on the rows the genes of a gene set, and on the columns the genes of anoher one to
@@ -13,7 +13,6 @@
 #' \item gene_1, gene_2: genes involved in the links between geneset 1 and 2
 #' }
 #' @importFrom stringi stri_c
-#' @export
 
 
 cross_talk <- function(mat, weight) {

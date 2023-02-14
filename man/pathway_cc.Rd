@@ -2,7 +2,7 @@
 % Please edit documentation in R/pathway_cc.R
 \name{pathway_cc}
 \alias{pathway_cc}
-\title{Function to caluclate sub-components pathway score}
+\title{Function to calculate sub-components pathway score}
 \usage{
 pathway_cc(pathway_list, gene_network_adj, genes, weight, mc_cores_cc = 2)
 }
@@ -11,12 +11,12 @@ pathway_cc(pathway_list, gene_network_adj, genes, weight, mc_cores_cc = 2)
 
 \item{gene_network_adj}{adjacency matrix of the whole gene network considered}
 
-\item{genes}{vector with the gene of interest to be used for pathway cc calculation}
+\item{genes}{vector with the gene of interest to be used for pathway_cc calculation}
 
-\item{weight}{weights of the genes in pathway list. If not provided, the function assign to each gene
+\item{weight}{named vector of the weights of the `genes`. If not provided, the function assign to each gene
 a weight of 1}
 
-\item{mc_cores_cc}{numebr of threads to be used for cc calculation}
+\item{mc_cores_cc}{number of threads to be used for cc calculation}
 }
 \value{
 The function returns a list of two object:
@@ -24,7 +24,7 @@ The function returns a list of two object:
  \item membership: results of [igraph::components()] for each pathway considered
  \item {pathway_cc}: a data frame with
 \itemize{
- \item pathway: name of the pathway where the components scores are calcualted
+ \item pathway: name of the pathway where the components scores are calculated
  \item ID: id of the component of the pathway
  \item score: component score
  \item n_gene: number of genes in the component
@@ -34,12 +34,12 @@ The function returns a list of two object:
 }
 }
 \description{
-Calculates the score of each pathway connected components
+The function calculates the score of each pathway connected components
 }
 \details{
 By coupling the pathway data to the adjacency matrix, the function identifies the pathway components as
- connected components (see [igraph::components()] for details). For each component, the function calcualtes the score 
- as described in the article.
+connected components (see [igraph::components()] for details). For each component, the function calculates the score 
+as described in the article.
 }
 \examples{
 \dontrun{
