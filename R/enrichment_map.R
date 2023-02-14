@@ -92,7 +92,7 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
   
   if(min_comm_size > 1){
     cat("Excluding communities smaller than ", min_comm_size, "\n")
-    keep_comm <- sizes(temp)
+    keep_comm <- sizes(path_mod_comm)
     keep_comm <- names(keep_comm)[keep_comm >= min_comm_size]
     cat("Kept:", length(keep_comm), "\n")
     path_mod <- igraph::induced_subgraph(path_mod, igraph::V(path_mod)$name[igraph::V(path_mod)$comm_id %in% keep_comm])
