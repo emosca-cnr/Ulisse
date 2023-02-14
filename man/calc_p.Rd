@@ -7,8 +7,9 @@
 calc_p(X)
 }
 \arguments{
-\item{X}{list of matrices, where the first is the one obtained with real data}
+\item{X}{list of matrices, where the first is the one obtained with real data and the others are obtained through permutations. 
+The matrices should be 1 column matrices with the same order.}
 }
 \description{
-Estimation of p values
+This function is used to calculate p-value from a list of matrices
 }

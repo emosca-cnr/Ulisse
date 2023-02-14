@@ -13,7 +13,7 @@ edge_weights(community, network, weight.within = 100, weight.between = 1)
 
 \item{weight.within}{value to weight the attraction between two vertices of the same community}
 
-\item{weight.between}{value to weight the attraction between two vertices of two disntict communities}
+\item{weight.between}{value to weight the attraction between two vertices of two distinct communities}
 }
 \value{
 vector of edge weights

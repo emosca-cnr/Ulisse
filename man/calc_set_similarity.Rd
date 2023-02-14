@@ -2,12 +2,12 @@
 % Please edit documentation in R/calc_set_similarity.R
 \name{calc_set_similarity}
 \alias{calc_set_similarity}
-\title{Similarity between two sets}
+\title{The function calculates similarities between two sets.}
 \usage{
 calc_set_similarity(x, y, method = c("jaccard", "overlap", "average"))
 }
 \arguments{
-\item{x, y}{two sets}
+\item{x, y}{two sets provided as vectors}
 
 \item{method}{one among "jaccard", "overlap" and "average"}
 }
@@ -15,5 +15,13 @@ calc_set_similarity(x, y, method = c("jaccard", "overlap", "average"))
 similarity
 }
 \description{
-Similarity between two sets
+The function takes as input two vertices and calculates their similarity by using three different methods:
+\itemize{
+\item Jaccard = number of common elements between x and y, divided by the number of unique elements present in c(x, y)
+\item Overlap = number of common elements between x and y. divided by the minimum length of unique elements present in either x or y
+\item Average = the mean between Jaccard and Overlap measure
+}
+}
+\details{
+`calc_set_similarity` calculates similarities between two sets by using `jaccard`, `overlap`, `average` methods.
 }
