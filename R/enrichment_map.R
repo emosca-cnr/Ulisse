@@ -139,10 +139,13 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
     ### community labels
     network_df <- data.frame(L, name=V(path_mod)$name, comm_id=V(path_mod)$comm_id, score=V(path_mod)$score, show.name=FALSE, stringsAsFactors = F) ##all
     if(score.decreasing){
-      network_df$rank <- unlist(tapply(-network_df$score, network_df$comm_id, rank))
+      temp <- tapply(setNames(-network_df$score, network_df$name), network_df$comm_id, rank, ties.method="min")
     }else{
-      network_df$rank <- unlist(tapply(network_df$score, network_df$comm_id, rank))
+      temp <- tapply(setNames(network_df$score, network_df$name), network_df$comm_id, rank, ties.method="min")
     }
+    temp <- data.frame(rank=unlist(temp), name=unlist(lapply(temp, names)), stringsAsFactors = F)
+    network_df <- merge(network_df, temp, by="name")
+    rm(temp)
     network_df$show.name[network_df$rank <= n_name] <- TRUE
     
     #community label"
