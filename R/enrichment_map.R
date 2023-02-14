@@ -38,11 +38,13 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
   
   method <- match.arg(method)
   cat("method:", method, "\n")
-  if(method == "overlap"){
-    coeff <- 0.5
-  }
-  if(method == 'jaccard'){
-    coeff <- 0.1
+  if(is.null(coeff)){
+    if(method == "overlap"){
+      coeff <- 0.5
+    }
+    if(method == 'jaccard'){
+      coeff <- 0.1
+    }
   }
   cat("coeff:", coeff, "\n")
   cat("comm_method:", comm_method, "\n")
@@ -150,7 +152,7 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
     V(path_mod)$label <- network_df$show.comm[match(V(path_mod)$name, network_df$name)]
     V(path_mod)$label[V(path_mod)$label] <- V(path_mod)$comm_id[V(path_mod)$label]
     V(path_mod)$label[V(path_mod)$label == FALSE] <- ""
-  
+    
     network_df$color <- mark.col[as.numeric(as.factor(network_df$comm_id))]
     
     size.pal <- seq(from=vertex.size.min, to=vertex.size.max, length.out=n_size)
