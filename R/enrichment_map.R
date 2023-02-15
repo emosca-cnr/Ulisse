@@ -103,7 +103,11 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
   
   V(path_mod)$score <- x[match(V(path_mod)$name, names(x))]
   
-  #print pathway network - option 1
+  ### genes of each pathway community
+  path_comm_genes <- split(V(path_mod)$name, V(path_mod)$comm_id)
+  path_comm_genes <- lapply(path_comm_genes, function(pathway_vector) sort(unique(unlist(gs_list[names(gs_list) %in% pathway_vector]))))
+  
+  #print pathway network 
   if(plot_flag){
     
     if(is.null(vertex.color.pal)){
@@ -198,12 +202,12 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
     
     
     grDevices::dev.off()
+    write.table(network_df, file=paste0(file.prefix, ".txt"), row.names = F, sep="\t")
     
   }
   
-  write.table(network_df, file=paste0(file.prefix, ".txt"), row.names = F, sep="\t")
   
   
-  return(list(igraph=path_mod, network_data=network_df, sim_coeff=set_sim_df))
+  return(list(igraph=path_mod, network_data=network_df, path_comm_genes=path_comm_genes, sim_coeff=set_sim_df))
   
 }
