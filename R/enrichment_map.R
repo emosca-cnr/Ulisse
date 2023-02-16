@@ -66,8 +66,11 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
     }
     cat("done.\n")
   }else{
-    gs_list <- unique(c(set_sim_df[, 1], set_sim_df[, 2]))
-    gs_list <- gs_list[ gs_list %in% names(x)]
+    cat("Using given gene set similarities\n")
+    cat("Keep only gene sets for which similarity values are avilable\n")
+    gs <- unique(c(set_sim_df[, 1], set_sim_df[, 2]))
+    gs_list <- gs_list[names(gs_list) %in% gs]
+    x <- x[names(x) %in% names(gs_list)]
   }
   
   
