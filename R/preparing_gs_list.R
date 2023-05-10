@@ -5,6 +5,7 @@
 #' @param gs_names names of the gene-sets, to be used to build the gene-set list. Should have the same length of `gs_gene` 
 #' @param gs_genes names of the genes in the gene-sets `gs_genes`
 #' @param weights named vector with a weight for each gene in `gs_gene`. If `NULL` the function assigns `1` to each gene
+#' @param min_size,max_size filtering the gene sets to maintain only the ones that have at least `min_size` or less than `max_size` number of genes
 #' @return The output is a gene-set list with a vector for each gene-set, composed by weights named after the genes
 #' @importFrom stats setNames
 #' @export

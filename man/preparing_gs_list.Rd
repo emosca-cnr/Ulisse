@@ -12,6 +12,8 @@ preparing_gs_list(gs_names, gs_genes, weights, min_size = 1, max_size = 500)
 \item{gs_genes}{names of the genes in the gene-sets `gs_genes`}
 
 \item{weights}{named vector with a weight for each gene in `gs_gene`. If `NULL` the function assigns `1` to each gene}
+
+\item{min_size, max_size}{filtering the gene sets to maintain only the ones that have at least `min_size` or less than `max_size` number of genes}
 }
 \value{
 The output is a gene-set list with a vector for each gene-set, composed by weights named after the genes

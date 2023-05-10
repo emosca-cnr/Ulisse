@@ -14,7 +14,7 @@
 #'  not (`FALSE`, suggested for pathway cross-talk)
 #' @param hash logical, if hash map should be used to speed cross-talk calculation. Suggested only with high number of gene-sets (like in pathway cross-talk)
 #' @param ct_info logical, if the function has to return the detail of gene-gene interactions between gene sets
-#' @param mc_cores_pct number of threads to be used for cross talk calculation
+#' @param mc_cores_ct number of threads to be used for cross talk calculation
 #' @param mc_cores_perm number of thread to be used in permutations
 #' @return The function can return two output type:
 #' \itemize{

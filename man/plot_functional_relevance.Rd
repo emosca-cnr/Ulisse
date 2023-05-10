@@ -34,8 +34,6 @@ the Brewer "Spectral" palette is used}
 \item{jitter_width, jitter_height}{values to control point jitter in the plot. See ggplot2::geom_jitter() for details}
 
 \item{width, height, res, units}{values used to save the plot in jpeg format, see grDevices::jpeg() for details}
-
-\item{ct_null}{required only if `method = "normalized"`. This should be a cross-talk result table coming from a general model}
 }
 \value{
 If `file_name` The function returns the ggplot object

@@ -45,7 +45,7 @@ community object is provided, the function uses it and color the vertices accord
 \item{pal_community}{color palette to be used to color the vertices according to the communities. If not provided,
 the function uses `rainbow()` palette. If `community = FALSE` the function ignores it}
 
-\item{voronoi_radius, voronois_alpha:}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `community` arguments are enabled, the the communities are
+\item{voronoi_radius, voronoi_alpha:}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `community` arguments are enabled, the the communities are
 represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
 the radius of the cells and the transparency, respectively.}
 

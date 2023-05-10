@@ -4,7 +4,6 @@
 #'  and functional diversity, and is colored by functional relevance score
 #' @param fr the data.frame obtained as `gene_functional_relevance()` result
 #' @param method = c("count", "relative") If "count" then the functional and interactor diversity and functional relevance are used, otherwise the relative ones
-#' @param ct_null required only if `method = "normalized"`. This should be a cross-talk result table coming from a general model
 #' @param file_name file name of the plot, if `NULL` the plot will be returned by the function
 #' @param plot_names logical, or a vector with the same length and order of the genes in `fr`. If `TRUE` all genes name are plotted,
 #'  if `FALSE` no names are plotted, otherwise the passed vector is used to label genes and all of them are plotted

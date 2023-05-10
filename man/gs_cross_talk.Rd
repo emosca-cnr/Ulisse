@@ -32,7 +32,7 @@ not (`FALSE`, suggested for pathway cross-talk)}
 
 \item{mc_cores_perm}{number of thread to be used in permutations}
 
-\item{mc_cores_pct}{number of threads to be used for cross talk calculation}
+\item{mc_cores_ct}{number of threads to be used for cross talk calculation}
 }
 \value{
 The function can return two output type:

@@ -19,7 +19,7 @@
 #'  the functions will use pals::alphabet2 as default
 #' @param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them
 #' @param vertex_size size of the vertices in the plot
-#' @param voronoi_radius,voronois_alpha: parameters passed to `geom_node_voronoi()`. If both `vertex` and `community` arguments are enabled, the the communities are
+#' @param voronoi_radius,voronoi_alpha: parameters passed to `geom_node_voronoi()`. If both `vertex` and `community` arguments are enabled, the the communities are
 #'  represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
 #'  the radius of the cells and the transparency, respectively.
 #' @param edge_col_by name of the column to be used to color the edges. Default = `ct_score`

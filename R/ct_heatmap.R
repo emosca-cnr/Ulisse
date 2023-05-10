@@ -12,6 +12,9 @@
 #' uses `whitesmoke`
 #' @param color_level vector of the two values to be used to create the gradient to color the heatmap. If not provided, 
 #' the function uses minimum and maximum
+#' @param filtering logical, if the function have to plot all the edges or only the significant ones. If `TRUE`, the function uses `p_val, FDR` and `ct_val` to identify the 
+#'  significant ones, that are plotted with a solid line, and the not significant with a dashed line. If `FALSE`, all edges are plotted as a solid line. 
+#' @param p_val,FDR,ct_val filtering values. If one of these is set to `NULL` the function ignores it
 #' @param legend_side where to place the legend of the heatmap and of the annotations (if provided). See `Heatmap` 
 #' for further details
 #' @param community logical or an object resulting from igraph community calculation. If `TRUE`, the function calculates
@@ -42,8 +45,8 @@
 #' @export
 
 
-ct_heatmap <- function(ct, color_by = "ct_score", filtering = FALSE, p_val, FDR, ct_val,
-                       color = NULL, color_level = NULL, no_ct_color = NULL,
+ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NULL, no_ct_color = NULL,
+                       filtering = FALSE, p_val, FDR, ct_val,
                        legend_side = "left", community = F, pal_community = NULL, label_size = 5,
                        row_annotation = NULL, pal_row_annotation = NULL, row_name_side = "bottom",
                        column_annotation = NULL, pal_column_annotation = NULL, col_name_side = "left",

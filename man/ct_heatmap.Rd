@@ -7,13 +7,13 @@
 ct_heatmap(
   ct,
   color_by = "ct_score",
+  color = NULL,
+  color_level = NULL,
+  no_ct_color = NULL,
   filtering = FALSE,
   p_val,
   FDR,
   ct_val,
-  color = NULL,
-  color_level = NULL,
-  no_ct_color = NULL,
   legend_side = "left",
   community = F,
   pal_community = NULL,
@@ -45,6 +45,11 @@ the function uses minimum and maximum}
 
 \item{no_ct_color}{color that have to be used for the gene set pairs that shows no cross-talk (in the heatmap will have score = 0). If `NULL` the function
 uses `whitesmoke`}
+
+\item{filtering}{logical, if the function have to plot all the edges or only the significant ones. If `TRUE`, the function uses `p_val, FDR` and `ct_val` to identify the 
+significant ones, that are plotted with a solid line, and the not significant with a dashed line. If `FALSE`, all edges are plotted as a solid line.}
+
+\item{p_val, FDR, ct_val}{filtering values. If one of these is set to `NULL` the function ignores it}
 
 \item{legend_side}{where to place the legend of the heatmap and of the annotations (if provided). See `Heatmap` 
 for further details}

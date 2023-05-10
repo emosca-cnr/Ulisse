@@ -178,12 +178,12 @@ comparing_results_network <- function(res_list, vertex_number = F, vertex_number
   } else if(!vertex_number & !is.null(vertex)) {
     p <- p + geom_node_point(aes_string(color = vertex), size = vertex_size) +
       scale_color_manual(limits = names(vertex_pal), values = vertex_pal)
-  } else if(is.null(community) & is.null(vertex)) {
+  } else if(!vertex_number & is.null(vertex)) {
     p <- p + geom_node_point(color = "gray65", size = vertex_size) 
   }
   if(vertex_label) {
     p <- p +
-      geom_node_text(aes(label = label), repel = T)
+      geom_node_text(aes_string(label = "label"), repel = T)
   }
   
   if(!is.null(file_out)) {
