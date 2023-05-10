@@ -2,85 +2,77 @@
 % Please edit documentation in R/comparing_results_network.R
 \name{comparing_results_network}
 \alias{comparing_results_network}
-\title{Function to plot the union network of multiple PCT or CCC analyses by highlighting the shared edges and vertices.}
+\title{Visual representation of multiple cross-talk analyses.}
 \usage{
 comparing_results_network(
   res_list,
   file_out,
-  vertex_col_by = NULL,
-  vertex_color = NULL,
-  vertex_value = NULL,
-  legend_vertex = F,
-  edge_color = NULL,
-  edge_value = NULL,
-  edge_width = T,
+  vertex_number = F,
+  vertex_number_pal = NULL,
+  vertex_number_adj = 0.7,
+  vertex_size = 5,
+  vertex = NULL,
+  vertex_pal = NULL,
+  voronoi_radius = 0.8,
+  voronoi_alpha = 0.3,
+  vertex_label = TRUE,
+  edge_color_by = "number",
+  edge_width = TRUE,
+  edge_pal = NULL,
   edge_adj_col = 0.7,
-  legend_edge_col = T,
-  layout = NULL,
   width = 200,
   height = 200,
   res = 300,
   units = "mm",
-  x_vertex = -1.5,
-  y_vertex = 0,
-  xl_vertex = -1.45,
-  yb_vertex = -0.2,
-  xr_vertex = -1.3,
-  yt_vertex = -0.5,
-  xl_edge = -1.45,
-  yb_edge = -0.9,
-  xr_edge = -1.3,
-  yt_edge = -0.6,
   ...
 )
 }
 \arguments{
-\item{res_list}{list of resulting data.frame from `pathway_cross_talk()` or `cluster_communication()`}
+\item{res_list}{list of resulting data.frame from `gs_cross_talk()`}
 
-\item{file_out}{name used to save the plot in jpeg format plot. If not provided the plot is saved as "union_ct_network.jpeg"}
+\item{file_out}{name used to save the plot in jpeg format plot. If `NULL` the functions returns also the plot object}
 
-\item{vertex_col_by}{how to color the vertices. If set to `number` then the vertices are colored by the number of analyses in which is present. Otherwise 
-can be a named vector with a value for each pathway or cell in the results. If `NULL` no color vertices will be passed to `igraph.plot` function}
+\item{vertex_number}{logical, if the vertices should be colored by the number of results in which are present}
 
-\item{vertex_color}{vector of colors to be used for the vertices. If `vertex_col_by = number` the vector should by composed by the two color that  will be used
-to build the gradient to color the vertices. If `vertex_col_by` is a vector, then should be a vector of colors, one for each unique variable 
-in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number` and rainbow palette for vector}
+\item{vertex_number_pal}{vector of two colors to be used for gradient coloring the vertices when `vertex_number = TRUE`. 
+If `NULL` the gradient is build from "red" to "blue".}
 
-\item{vertex_value}{value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses minimum and maximum}
+\item{vertex_number_adj}{value used to set transparency to vertex colors in `vertex_number_pal`}
 
-\item{legend_vertex}{logical, if to print the legend of the color on the vertices}
+\item{vertex_size}{size of the vertices}
 
-\item{edge_color}{vector of two colors to build the gradient to color the edges}
+\item{vertex}{can be either `name` value to color the vertices according to their name, or a list of two vector, where the first is 
+the name of the attribute and the second is a named vector with the attribute per vertices 
+to be used for color (only discrete value), or `NULL` if the vertices should be not colored (thus "grey65" is passed as default color). 
+If `vertex_number = TRUE`, `vertex` is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`)}
 
-\item{edge_value}{vector of the two values to be used to create the gradient to color the edges. If not provided, 
-the function uses minimum and maximum}
+\item{vertex_pal}{named vector with the colors to be used for each unique `vertex` element. If `NULL` pals::alphabet2() palette is used}
+
+\item{voronoi_radius, voronois_alpha:}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
+first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
+the radius of the cells and the transparency, respectively.}
 
 \item{edge_width}{logical, if the edge width should be proportional to the number of results that share that edge.}
 
-\item{edge_adj_col}{value used to adjust color transparency of the edges}
-
-\item{legend_edge_col}{logical, if to plot the legend of the color of the edges}
-
-\item{layout}{layout to be used in igraph plotting. If not provided, the function calculates it}
+\item{edge_pal}{palette used to color the edges according to `edge_color_by`. If `edge_color_by="number` than the palette should be the two color used for
+gradient coloring them; if `NULL` "red" to "blue" is used. If `edge_color_by="which` than the palette should be a (named) vector with enought colors for each 
+results name combination}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
-\item{x_vertex, y_vertex}{x and y coordinates for `legend_vertex` (when a vector is passed to `vertex_col_by` ) positioning in the plot. See `legend()` 
-function for more details}
+\item{...}{further graphical parameters to be passed to `ggraph()` function}
 
-\item{xl_vertex, yb_vertex, xr_vertex, yt_vertex, xl_edge, yb_edge, xr_edge, yt_edge}{coordinates for the positioning of the gradient legend for `legend_edge_col`
-and `legend_vertex` (when `vertex_col_by = "number"` ). See `color.legend()` and `rect()` functions for more details}
-
-\item{...}{further argument passed to `igraph.plot` function}
+\item{edge_color_by=c("number", "which")}{if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")}
 }
 \value{
-the function produce the plot saved with the name passed to `file_out` and also returns the layout, and the igraph object used for plotting
+If `file_out` is null the function returns the plot and the igraph object used for plotting. 
+ Otherwise, only the igraph object is returned and the plot is saved through to `file_out`
 }
 \description{
-The function is used to visually compare the results obtained by multiple PCR or CCC analyses by creating a union network and highlighting the
-shared edges
+The function is used to merge the results obtained by multiple cross-talk analyses by creating a union network and highlighting the
+shared edges and vertices
 }
 \details{
-The function takes as an input a list of data.frames resulting from multiple `pathway_cross_talk()` or `cluster_communication()` analyses
-and produce a union network that will be plotted with the edges colored by the number of results that have that cross-talk
+The function takes as an input a list of data.frames resulting from multiple `gs_cross_talk()` analyses
+and produce a union network that will be plotted with the edges colored by the number or which of results that have that cross-talk
 }

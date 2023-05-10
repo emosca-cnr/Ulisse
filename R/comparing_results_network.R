@@ -1,48 +1,45 @@
-#' Function to plot the union network of multiple PCT or CCC analyses by highlighting the shared edges and vertices.
-#' @description The function is used to visually compare the results obtained by multiple PCR or CCC analyses by creating a union network and highlighting the
-#' shared edges
-#' @details The function takes as an input a list of data.frames resulting from multiple `pathway_cross_talk()` or `cluster_communication()` analyses
-#' and produce a union network that will be plotted with the edges colored by the number of results that have that cross-talk
-#' @param res_list list of resulting data.frame from `pathway_cross_talk()` or `cluster_communication()`
-#' @param file_out name used to save the plot in jpeg format plot. If not provided the plot is saved as "union_ct_network.jpeg"
-#' @param vertex_col_by how to color the vertices. If set to `number` then the vertices are colored by the number of analyses in which is present. Otherwise 
-#' can be a named vector with a value for each pathway or cell in the results. If `NULL` no color vertices will be passed to `igraph.plot` function
-#' @param vertex_color vector of colors to be used for the vertices. If `vertex_col_by = number` the vector should by composed by the two color that  will be used
-#' to build the gradient to color the vertices. If `vertex_col_by` is a vector, then should be a vector of colors, one for each unique variable 
-#' in the `vertex_col_by` vector. If set to `NULL` then the function uses blue to red for `number` and rainbow palette for vector
-#' @param vertex_value value to be used for the gradient of the vertices when `vertex_col_by = number`. If `NULL` the function uses minimum and maximum
-#' @param legend_vertex logical, if to print the legend of the color on the vertices
-#' @param edge_color vector of two colors to build the gradient to color the edges
-#' @param edge_value vector of the two values to be used to create the gradient to color the edges. If not provided, 
-#' the function uses minimum and maximum
+#' Visual representation of multiple cross-talk analyses.
+#' @description The function is used to merge the results obtained by multiple cross-talk analyses by creating a union network and highlighting the
+#' shared edges and vertices
+#' @details The function takes as an input a list of data.frames resulting from multiple `gs_cross_talk()` analyses
+#' and produce a union network that will be plotted with the edges colored by the number or which of results that have that cross-talk 
+#' @param res_list list of resulting data.frame from `gs_cross_talk()`
+#' @param vertex_number logical, if the vertices should be colored by the number of results in which are present
+#' @param vertex_number_pal vector of two colors to be used for gradient coloring the vertices when `vertex_number = TRUE`. 
+#'  If `NULL` the gradient is build from "red" to "blue".
+#' @param vertex_number_adj value used to set transparency to vertex colors in `vertex_number_pal`
+#' @param vertex_size size of the vertices
+#' @param vertex can be either `name` value to color the vertices according to their name, or a list of two vector, where the first is 
+#'  the name of the attribute and the second is a named vector with the attribute per vertices 
+#'  to be used for color (only discrete value), or `NULL` if the vertices should be not colored (thus "grey65" is passed as default color). 
+#'  If `vertex_number = TRUE`, `vertex` is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`)
+#' @param vertex_pal named vector with the colors to be used for each unique `vertex` element. If `NULL` pals::alphabet2() palette is used
+#' @param voronoi_radius,voronois_alpha: parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
+#'  first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
+#'  the radius of the cells and the transparency, respectively.
+#' @param edge_color_by=c("number","which") if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")
 #' @param edge_width logical, if the edge width should be proportional to the number of results that share that edge. 
-#' @param edge_adj_col value used to adjust color transparency of the edges
-#' @param legend_edge_col logical, if to plot the legend of the color of the edges
-#' @param layout layout to be used in igraph plotting. If not provided, the function calculates it
+#' @param edge_pal palette used to color the edges according to `edge_color_by`. If `edge_color_by="number` than the palette should be the two color used for
+#'  gradient coloring them; if `NULL` "red" to "blue" is used. If `edge_color_by="which` than the palette should be a (named) vector with enought colors for each 
+#'  results name combination
+#' @param file_out name used to save the plot in jpeg format plot. If `NULL` the functions returns also the plot object
 #' @param width,height,res,units graphical value of `jpeg()` function
-#' @param x_vertex,y_vertex x and y coordinates for `legend_vertex` (when a vector is passed to `vertex_col_by` ) positioning in the plot. See `legend()` 
-#' function for more details
-#' @param xl_vertex,yb_vertex,xr_vertex,yt_vertex,xl_edge,yb_edge,xr_edge,yt_edge coordinates for the positioning of the gradient legend for `legend_edge_col`
-#' and `legend_vertex` (when `vertex_col_by = "number"` ). See `color.legend()` and `rect()` functions for more details
-#' @param ... further argument passed to `igraph.plot` function
-#' @return the function produce the plot saved with the name passed to `file_out` and also returns the layout, and the igraph object used for plotting 
-#' @importFrom graphics legend
+#' @param ... further graphical parameters to be passed to `ggraph()` function
+#' @return If `file_out` is null the function returns the plot and the igraph object used for plotting. 
+#'  Otherwise, only the igraph object is returned and the plot is saved through to `file_out` 
 #' @importFrom grDevices rainbow dev.off jpeg adjustcolor
-#' @importFrom plotrix color.legend rescale
-#' @importFrom circlize colorRamp2
 #' @import igraph
+#' @import ggraph
 #' @export
 
 
 
 
-comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, vertex_color =NULL, vertex_value = NULL, legend_vertex=F,
-                                      edge_color = NULL, edge_value = NULL, edge_width = T, edge_adj_col = 0.7, legend_edge_col=T, 
-                                      layout = NULL,
-                                      width = 200, height = 200, res = 300, units = "mm", 
-                                      x_vertex = -1.5, y_vertex = 0, 
-                                      xl_vertex = -1.45, yb_vertex = -0.2, xr_vertex = -1.3, yt_vertex =-0.5,
-                                      xl_edge = -1.45, yb_edge = -0.9, xr_edge = -1.3, yt_edge = -0.6, ...) {
+comparing_results_network <- function(res_list, file_out, vertex_number = F, vertex_number_pal = NULL, vertex_number_adj = 0.7, vertex_size = 5,
+                                      vertex = NULL, vertex_pal =NULL, voronoi_radius = 0.8, voronoi_alpha = 0.3, vertex_label = TRUE,
+                                      edge_color_by = "number", edge_width = TRUE,
+                                      edge_pal = NULL, edge_adj_col = 0.7, 
+                                      width = 200, height = 200, res = 300, units = "mm",  ...) {
   
   res_list <- lapply(res_list, function(x) {
     x$sample <- 1
@@ -51,6 +48,12 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
     return(x)
   }
   )
+  n <- names(res_list)
+  res_list <- lapply(1:length(res_list), function(x) {
+    E(res_list[[x]])$s_name <- n[x]
+    return(res_list[[x]])
+  })
+  names(res_list) <- n
   
   union.g <- igraph::union(res_list[[1]], res_list[2:length(res_list)])
   attr.union.g <- data.frame(edge.attributes(union.g), stringsAsFactors = F)
@@ -58,198 +61,138 @@ comparing_results_network <- function(res_list, file_out, vertex_col_by = NULL, 
   idx <- grep("sample", colnames(attr.union.g))
   attr.union.g$nsample <- rowSums(attr.union.g[, idx], na.rm = T)
   
-  E(union.g)$nsample <- attr.union.g$nsample
+  E(union.g)$edge_number <- attr.union.g$nsample
   
+  if(edge_color_by == "number") {
+    edge_color_by = "edge_number"
+  } else if(edge_color_by == "which") {
+   idx <- grep("s_name", colnames(attr.union.g))
+   attr.union.g$res <- apply( attr.union.g[ , idx ] , 1 , function(x) paste(x[!is.na(x)], collapse = ";"))
+   E(union.g)$res <- attr.union.g$res
+  }
   
+  if(edge_width) {
+    edge_width = "edge_number"
+  }
   #building defaults and value to be plotted---------------
   #filename
-  if(is.null(file_out)) {
-    file_out <- "union_ct_network.jpeg"
-  }
-  #vertex color
-  if(is.null(vertex_col_by)) {
-    legend_vertex <- F
-  } else if(vertex_col_by == "number") {
+  # if(is.null(file_out)) {
+  #   file_out <- "union_ct_network.jpeg"
+  # }
+  #vertex color-------------------------------------
+  if(vertex_number) {
     Vattr.union.g <- data.frame(vertex.attributes(union.g), stringsAsFactors = F)
     
     idx <- grep("sample", colnames(Vattr.union.g))
     Vattr.union.g$nsample <- rowSums(Vattr.union.g[, idx], na.rm = T)
     
-    V(union.g)$col_by <- Vattr.union.g$nsample
-    if(is.null(vertex_value)) {
-      vertex_value <- c(min(V(union.g)$col_by), max(V(union.g)$col_by))
+    V(union.g)$vertex_number <- Vattr.union.g$nsample
+    
+    if(is.null(vertex_number_pal)) {
+      vertex_number_pal <- c("blue", "red")
+    }
+  }
+  
+  #other possible annotations-- if both number and annotations --> voronoi
+  if(!is.null(vertex)) {
+    if(length(vertex) == 2) {
+      vertex_attr(union.g, name = vertex[[1]]) <- vertex[[2]][V(union.g)$name]
+      vertex <- vertex[[1]]
+    } 
+  }
+  if(!is.null(vertex) & is.null(vertex_pal)) {
+    v <- unique(vertex_attr(union.g, name = vertex))
+    vertex_pal <- setNames(pals::alphabet2(length(v)), v)
+  }
+  
+  #labels
+  if(is.logical(vertex_label)) {
+    if(vertex_label) {
+      V(union.g)$label <- V(union.g)$name
+    }
+  } else {
+    V(union.g)$label <- vertex_label[V(union.g)$name]
+    vertex_label <- TRUE
+  }
+  #edges color-----------------------------------
+  
+  if(is.null(edge_pal)) {
+    if(edge_color_by == "edge_number") {
+      edge_pal <- c("blue", "red")
+    } else if (edge_color_by == "which") {
+      ed <- unique(E(union.g)$res)
+      edge_pal <- setNames(pals::alphabet2(length(ed)), ed)
     }
     
-    if(is.null(vertex_color)) {
-      vertex_color <- c("blue", "red")
-    }
-    if(vertex_value[1] == vertex_value[2]) {
-      V(union.g)$color <- "red"
-    } else {
-      vertex_cl <- colorRamp2(vertex_value, vertex_color)
-      V(union.g)$color <- vertex_cl(V(union.g)$col_by)
-    }
-    
   } else {
-    V(union.g)$col_by <- vertex_col_by[V(union.g)$name]
-    if(!is.null(vertex_color)) {
-      v.col.lvl <- unique(vertex_col_by)
-      if(length(vertex_color) < length(v.col.lvl)) {
-        print.warnings("Not enought colors provided for the vertices. Rainbow used instead")
-        vertex_color <- rainbow(length(v.col.lvl))
-        names(vertex_color) <- v.col.lvl
-      } 
-      names(vertex_color) <- v.col.lvl
-    } else {
-      vertex_color <- rainbow(length(v.col.lvl))
-      names(vertex_color) <- v.col.lvl
+    if(edge_color_by == "which") {
+      ed <- unique(E(union.g)$res)
+      n_ed <- names(edge_pal)
+      idx <- sum(n_ed %in% ed)
+      if(length(edge_pal) >= length(ed) & idx == length(ed)) {
+        edge_pal <- setNames(edge_pal, ed)
+      } else {
+        print.warnings("Not enought color provided as edge_pal palette. Using pals::alphabet2() instead")
+        edge_pal <- setNames(pals::alphabet2(length(ed)), ed)
+      }
+      
     }
-    V(union.g)$color <- vertex_color[V(union.g)$col_by]
   }
   
-  #edges color
-  if(is.null(edge_color)) {
-    edge_color <- c("blue", "red")
-  }
-  
-  if(is.null(edge_value)) {
-    edge_value <- c(min(E(union.g)$nsample), max(E(union.g)$nsample))
-  }
-  
-  edge_cl <- colorRamp2(edge_value, edge_color)
-  E(union.g)$color <- adjustcolor(edge_cl(E(union.g)$nsample), edge_adj_col)
-  
-  if(edge_width) {
-    E(union.g)$width <- rescale(E(union.g)$nsample, c(1,9))
-  } else {
-    NULL
-  }
-  
-  #layout
-  if(is.null(layout)) {
-    lo_cl <- layout_with_fr(union.g, weights = E(union.g)$nsample)
-  } else {
-    lo_cl <- layout
-  }
   
   #plotting----------------------------
-  if(is.null(vertex_col_by)){
-    if(!edge_width) {
-      jpeg(file_out, width = width, height = height, res=res, 
-           units=units)
-      plot(union.g, edge.col = E(union.g)$color, layout=lo_cl, ...)
-      if(legend_edge_col) {
-        color.legend(xl = xl_edge, yb = yb_edge, xr = xr_edge, yt = yt_edge, 
-                     legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                     rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                     gradient="y", align = "rb")
-      }
-      
-      dev.off()
-    } else {
-      jpeg(file_out, width = width, height = height, res=res, 
-           units=units)
-      plot(union.g, edge.col = E(union.g)$color, 
-           edge.width = E(union.g)$width, layout=lo_cl, ...)
-      
-      if(legend_edge_col) {
-        color.legend(xl = xl_edge, yb = yb_edge, xr = xr_edge, yt = yt_edge, 
-                     legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                     rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                     gradient="y", align = "rb")
-      }
-      dev.off()
-      
-    }
-  } else {
-    if(vertex_col_by == "number") {
-      if(!(edge_width)) {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        plot(union.g, edge.col = E(union.g)$color, vertex.color=V(union.g)$color,
-             layout=lo_cl, ...)
-        if(legend_vertex) {
-          color.legend(xl = xl_vertex, yb = yb_vertex, xr = xr_vertex, yt = yt_vertex, 
-                       legend = c(vertex_value[1], (vertex_value[1] + vertex_value[2])/2, vertex_value[2]), 
-                       rect.col = edge_cl(seq(vertex_value[1], vertex_value[2], length.out = 10 )), 
-                       gradient="y", align = "rb")
-        }
-        
-        if(legend_edge_col) {
-          color.legend(xl = xl_edge, yb = yb_edge, xr = xr_edge, yt = yt_edge, 
-                       legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                       gradient="y", align = "rb")
-        }
-        dev.off()
-        
-      } else {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        plot(union.g, edge.col = E(union.g)$color, vertex.color=V(union.g)$color,
-             edge.width = E(union.g)$width, layout=lo_cl, ...)
-        
-        
-        if(legend_vertex) {
-          color.legend(xl = xl_vertex, yb = yb_vertex, xr = xr_vertex, yt = yt_vertex, 
-                       legend = c(vertex_value[1], (vertex_value[1] + vertex_value[2])/2, vertex_value[2]), 
-                       rect.col = edge_cl(seq(vertex_value[1], vertex_value[2], length.out = 10 )), 
-                       gradient="y", align = "rb")
-        }
-        if(legend_edge_col) {
-          color.legend(xl = xl_edge, yb = yb_edge, xr = xr_edge, yt = yt_edge, 
-                       legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                       gradient="y", align = "rb")
-        }
-        
-        
-        dev.off()
-      }
-    } else {
-      if(!(edge_width)) {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        plot(union.g, edge.col = E(union.g)$color, vertex.color=V(union.g)$color,
-             layout=lo_cl, ...)
-        if(legend_vertex) {
-          legend(x= x_vertex, y = y_vertex, fill = vertex_color, legend = names(vertex_color))
-        }
-        
-        if(legend_edge_col) {
-          color.legend(xl = xl_edge, yb = yb_edge, xr = xr_edge, yt = yt_edge, 
-                       legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                       gradient="y", align = "rb")
-        }
-        dev.off()
-      } else {
-        jpeg(file_out, width = width, height = height, res=res, 
-             units=units)
-        plot(union.g, edge.col = E(union.g)$color, vertex.color=V(union.g)$color,
-             edge.width = E(union.g)$width, layout=lo_cl, ...)
-        
-        
-        if(legend_vertex) {
-          legend(x= x_vertex, y = y_vertex, fill = vertex_color, legend = names(vertex_color))
-        }
-        
-        if(legend_edge_col) {
-          color.legend(xl = xl_edge, yb = yb_edge, xr = xr_edge, yt = yt_edge, 
-                       legend = c(edge_value[1], (edge_value[1] + edge_value[2])/2, edge_value[2]), 
-                       rect.col = edge_cl(seq(edge_value[1], edge_value[2], length.out = 10 )), 
-                       gradient="y", align = "rb")
-        }
-        
-        
-        dev.off()
-      }
-    }
-    
-    
+  
+  p <- ggraph(union.g, ...) +
+    theme_graph() 
+  if(vertex_number & !is.null(vertex)) {
+    p <- p + geom_node_voronoi(aes_string(fill = vertex), max.radius = voronoi_radius, colour = 'white', alpha = voronoi_alpha) +
+      scale_fill_manual(limits = names(vertex_pal), values = vertex_pal) 
   }
   
-  return(list(network = union.g, layout = lo_cl))
+  if(!is.null(edge_width) & edge_color_by == "edge_number") {
+    p <- p + geom_edge_link(aes_string(edge_colour = edge_color_by, edge_width = edge_width), alpha = edge_adj_col) +
+      scale_edge_color_gradient(low = edge_pal[1], high = edge_pal[2])
+    
+  } else if(!is.null(edge_width) & edge_color_by == "which") {
+    p <- p + geom_edge_link(aes_string(edge_colour = "res", edge_width = edge_width), alpha = edge_adj_col) +
+      scale_edge_color_manual(limits = names(edge_pal), values = edge_pal)
+    
+  } else if(is.null(edge_width) & edge_color_by == "edge_number") {
+    p <- p + geom_edge_link(aes_string(edge_colour = edge_color_by), alpha = edge_adj_col) +
+      scale_edge_color_gradient(low = edge_pal[1], high = edge_pal[2])
+    
+  } else if (is.null(edge_width) & edge_color_by == "which") {
+    p <- p + geom_edge_link(aes_string(edge_colour = res), alpha = edge_adj_col) +
+      scale_edge_color_manual(limits = names(edge_pal), values = edge_pal)
+  }
+  
+  if(vertex_number & !is.null(vertex)) {
+    p <- p + geom_node_point(aes(color = vertex_number), size = vertex_size) +
+      scale_color_gradient(low = vertex_number_pal[1], high = vertex_number_pal[2])
+    
+  } else if(vertex_number  & is.null(vertex)) {
+    p <- p + geom_node_point(aes_string(color = vertex_number), size = vertex_size) +
+      scale_color_gradient(low = vertex_number_pal[1], high = vertex_number_pal[2])
+  } else if(!vertex_number & !is.null(vertex)) {
+    p <- p + geom_node_point(aes_string(color = vertex), size = vertex_size) +
+      scale_color_manual(limits = names(vertex_pal), values = vertex_pal)
+  } else if(is.null(community) & is.null(vertex)) {
+    p <- p + geom_node_point(color = "gray65", size = vertex_size) 
+  }
+  if(vertex_label) {
+    p <- p +
+      geom_node_text(aes(label = label), repel = T)
+  }
+  
+  if(!is.null(file_out)) {
+    jpeg(file_out, res = res, height = height, width = width, units = units)
+    print(p)
+    dev.off()
+    return( union.g)
+  } else {
+    return(list(plot = p, graph = union.g))
+  }
+  
   
 }
 

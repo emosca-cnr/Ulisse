@@ -3,11 +3,9 @@
 #' @details By coupling the pathway data to the adjacency matrix, the function identifies the pathway components as
 #' connected components (see [igraph::components()] for details). For each component, the function calculates the score 
 #' as described in the article.
-#' @param pathway_list a named list of genes grouped into pathways
+#' @param gs_list a named list of genes grouped into gene-sets as obtained from `preparing_gs_list`, `preparing_msigdb_list()`, 
+#'  `preparing_DEG_list()` or `preparing_expr_list()` functions
 #' @param gene_network_adj adjacency matrix of the whole gene network considered
-#' @param genes vector with the gene of interest to be used for pathway_cc calculation
-#' @param weight named vector of the weights of the `genes`. If not provided, the function assign to each gene
-#' a weight of 1
 #' @param mc_cores_cc number of threads to be used for cc calculation
 #' @return The function returns a list of two object:
 #' \enumerate{
@@ -37,27 +35,19 @@
 #' @export
 
 
-pathway_cc <- function (pathway_list, gene_network_adj, genes, 
-                        weight, mc_cores_cc = 2) {
-  genes <- as.character(genes)
-  genes <- genes[genes %in% rownames(gene_network_adj)]
-  pathway_list <- lapply(pathway_list, function(x) x <- as.character(x))
-  if(is.null(weight) ) {
-    weight <- rep(1, length(genes))
-    names(weight) <- genes
-  } 
+gene_set_cc <- function (gs_list, gene_network_adj, mc_cores_cc = 2) {
+  
   if(!is(gene_network_adj, "sparseMatrix" )) {
     gene_network_adj <- as(gene_network_adj, "dgCMatrix")
   }
   gene_network_adj <- sign(gene_network_adj)
-  weight <- weight[weight !=0]
-  sub_adj_mt <- gene_network_adj[genes, genes, drop = F]
+  gs_list <- lapply(gs_list, function(x) x <- x[names(x) %in% rownames(gene_network_adj)])
+  gene <- as.character(unique(unlist(lapply(gs_list, names))))
+  gene_network_adj <- gene_network_adj[gene, gene, drop = F]
   
-  
-  xx <- mclapply(pathway_list, function(x) {
-    g_sub <- x[x %in% genes]
+  xx <- mclapply(gs_list, function(x) {
     
-    tmp <- sub_adj_mt[g_sub, g_sub, drop = F]
+    tmp <- gene_network_adj[as.character(names(x)), as.character(names(x)), drop = F]
     
     return(tmp)
   }, mc.cores = mc_cores_cc)
@@ -69,7 +59,7 @@ pathway_cc <- function (pathway_list, gene_network_adj, genes,
     return("No pathway on which calculate CC")
   } else {
     xx <- xx[idx]
-    pathway_list <- pathway_list[idx]
+    gs_list <- gs_list[idx]
     
     
     cc_out <- mclapply(1:length(xx), function(x) {
@@ -80,14 +70,14 @@ pathway_cc <- function (pathway_list, gene_network_adj, genes,
       
     },   mc.cores = mc_cores_cc)
     
-    out <- mclapply(1:length(pathway_list), function(z) {
+    out <- mclapply(1:length(gs_list), function(z) {
       tab <- xx[[z]]
       name.tab <- names(xx)[z]
       cc <- cc_out[[z]]
       tmp <- lapply(1:cc$no, function(x){
         cc_genes <- as.character(names(cc$membership[which(cc$membership==x)]))
         tab.tmp <- tab[cc_genes, cc_genes, drop = F]
-        score <- sum(t(weight[cc_genes]) %*% tab.tmp)/2
+        score <- sum(t(gs_list[[z]][cc_genes]) %*% tab.tmp)/2
         score <- score/length(cc_genes)
         n_gene <- length(cc_genes)
         n_link <- sum(tab.tmp)/2

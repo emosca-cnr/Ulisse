@@ -2,19 +2,24 @@
 % Please edit documentation in R/plot_network_CT.R
 \name{plot_network_CT}
 \alias{plot_network_CT}
-\title{Function for plotting results from PCT or CCC analysis as a network}
+\title{Plot cross-talk results as a network}
 \usage{
 plot_network_CT(
   ct,
-  all = FALSE,
+  filtering = FALSE,
   p_val,
   FDR,
   ct_val,
   community,
   pal_community = NULL,
-  edge_col_by = "pct",
+  voronoi_radius = 0.8,
+  voronoi_alpha = 0.3,
+  vertex = "name",
+  vertex_pal = NULL,
+  vertex_size = 5,
+  vertex_label = TRUE,
+  edge_col_by = "ct_score",
   edge_pal = NULL,
-  edge_value = NULL,
   edge_width = T,
   edge_adj_col = 0.7,
   file_out = NULL,
@@ -22,28 +27,14 @@ plot_network_CT(
   height = 200,
   res = 300,
   units = "mm",
-  layout = NULL,
-  legend_edge_col = T,
-  legend_filt = T,
-  legend_community = T,
-  x_filt = -1.5,
-  y_filt = 0,
-  x_comm = -1.5,
-  y_comm = -0.5,
-  xl = -1.45,
-  yb = 0.2,
-  xr = -1.3,
-  yt = 0.5,
   ...
 )
 }
 \arguments{
-\item{ct}{output of `pathway_cross_talk()` or `cluster_communication()` function}
+\item{ct}{output of `gs_cross_talk()` function}
 
-\item{all}{logical, if the function have to plot all the edges or only the significant ones. If `TRUE`, the function uses `p_val, FDR` and `ct_val` to identify the 
-significant ones, that are plotted with a solid line, and the not significant with a dashed line. If `FALSE`, the functions uses the same filtering parameters to 
-filter the data and plot only the CT passing the filtering threshold as a solid line. If `NULL` the function does not 
-filter the data and plot all the edges as a solid line}
+\item{filtering}{logical, if the function have to plot all the edges or only the significant ones. If `TRUE`, the function uses `p_val, FDR` and `ct_val` to identify the 
+significant ones, that are plotted with a solid line, and the not significant with a dashed line. If `FALSE`, all edges are plotted as a solid line.}
 
 \item{p_val, FDR, ct_val}{filtering values. If one of these is set to `NULL` the function ignores it}
 
@@ -52,51 +43,47 @@ the communities by using fastgreedy algorithm, if `FALSE` the function does not 
 community object is provided, the function uses it and color the vertices accordingly}
 
 \item{pal_community}{color palette to be used to color the vertices according to the communities. If not provided,
-the function uses `rainbow()` palette}
+the function uses `rainbow()` palette. If `community = FALSE` the function ignores it}
 
-\item{edge_col_by}{name of the column to be used to color the edges. If `NULL` the edges will be not colored}
+\item{voronoi_radius, voronois_alpha:}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `community` arguments are enabled, the the communities are
+represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
+the radius of the cells and the transparency, respectively.}
+
+\item{vertex}{a list of two vector, where the first is the name of the attribute and the second is a named vector with the attribute per vertices 
+to be used for color (only discrete value), or `NULL` if the vertices should be not colored (thus "grey65" is passed as default color)}
+
+\item{vertex_pal}{color palette used to color vertices. Should be a named vector with the names corresponding to the unique elements in `vertices`. If `NULL`
+the functions will use pals::alphabet2 as default}
+
+\item{vertex_size}{size of the vertices in the plot}
+
+\item{vertex_label}{logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them}
+
+\item{edge_col_by}{name of the column to be used to color the edges. Default = `ct_score`}
 
 \item{edge_pal}{color to be used to create the gradient to color the edges. If not provided, the function uses "blue" 
 to "red"}
 
-\item{edge_value}{vector of the two values to be used to create the gradient to color the edges. If not provided, 
-the function uses minimum and maximum}
-
-\item{edge_width}{logical, if the edge widths should be proportional to `edge_col_by` values. If `TRUE` the `edge_col_by` values are scaled between 1 to 9 to set the
-edge width accordingly}
+\item{edge_width}{logical, if the edge widths should be proportional to `edge_col_by` values}
 
 \item{edge_adj_col}{value used to adjust color transparency of the edges}
 
-\item{file_out}{name of the jpeg file produced. If not provided, the plot will be automatically named `ct_network.jpeg`}
+\item{file_out}{name of the jpeg file produced. if `NULL` the functions returns also the plot object}
 
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
-\item{layout}{layout to be used in igraph plotting. If not provided, the function calculates it}
-
-\item{legend_edge_col}{logical, if to plot the legend of the color of the edges}
-
-\item{legend_filt}{logical, if to plot legend of the different lines used when `all = T`}
-
-\item{legend_community}{logical, if to plot the legend of the community color used}
-
-\item{x_filt, y_filt, x_comm, y_comm, }{x and y coordinates for `legend_filt`, `legend_community`, 
-positioning in the plot. See `legend()` function for more details}
-
-\item{xl, yb, xr, yt}{coordinates for the positioning of the gradient legend for `legend_edge_col`. See `color.legend()` 
-and `rect()` functions for more details}
-
-\item{...}{further graphical parameters to be passed to `igraph.plot()` function}
+\item{...}{further graphical parameters to be passed to `ggraph()` function}
 }
 \value{
-the function produce the plot saved with the name passed to `file_out` and also returns the layout,
-the igraph object used for plotting and the communities (if calculated)
+If `file_out` is null the function returns the plot and the igraph object used for plotting (which may contain the communities under `comm_id` attribute). 
+ Otherwise, only the igraph object is returned and the plot is saved through to `file_out`
 }
 \description{
-The function elaborates the results of `pathway_cross_talk()` or `cluster_communication()` functions to obtain a graphical 
-representation of the cross-talk network
+The function elaborates the results of `gs_cross_talk()` functions to obtain a graphical 
+ representation of the cross-talk network
 }
 \details{
-The functions uses `pathway_cross_talk()` or `cluster_communication()` output to build a CT network. Then, the network is plotted with
-the edges colored by a value of interest. The user may decide if to plot all the edges, color the vertices by 
-their community, scale the dimension of the edges over a variable of interest.
+The functions uses `gs_cross_talk()` output to build a cross-talk network. Then, the network is plotted with
+ the edges colored by a value of interest. The user may decide if to plot all the edges, color the vertices by 
+ their community, scale the dimension of the edges over a variable of interest.
 }

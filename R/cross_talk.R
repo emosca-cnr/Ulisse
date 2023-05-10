@@ -36,8 +36,8 @@ cross_talk <- function(mat, weight) {
   mat.out[2] = length(row.n)
   mat.out[3] = length(col.n)
   mat.out[4] = sum(mat)
-  mat.out[5] = sum(wg.1)
-  mat.out[6] = sum(wg.2)
+  mat.out[5] = sum(wg.1[row.n])
+  mat.out[6] = sum(wg.2[col.n])
   mat.out[7] = stri_c(row.n, collapse = ";")
   mat.out[8] = stri_c(col.n, collapse = ";")
   

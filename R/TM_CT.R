@@ -11,7 +11,7 @@
 #' @param membership named vector with the membership of `genes` to topological communities. If set to `NULL`
 #' the function calculates the communities by using fastgreedy algorithm
 #' @param genes vector with the genes of interest to be used for TM-PCT calculation
-#' @param mc_cores_pct number of threads to be used to calculate cross talk 
+#' @param mc_cores_ct number of threads to be used to calculate cross talk 
 #' @param mc_cores_tm number of threads to be used to calcualte TM-PCT on different communities combination
 #' @return The function returns a list of two object:
 #' \enumerate{
@@ -38,7 +38,7 @@
 #'  wgt <- rep(1, 6)
 #'  memb <- c(1, 1, 2, 2, 3, 3)
 #'  pct <- TM_PCT(pathway_list = ptw_list, gene_network_adj = adj, weight = wgt, membership = memb, 
-#'                 mc_cores_tm = 1, mc_cores_pct = 1)
+#'                 mc_cores_tm = 1, mc_cores_ct = 1)
 #' }
 #' @import parallel
 #' @importFrom gtools permutations
@@ -46,23 +46,19 @@
 #' @importFrom stringi stri_c
 #' @export
 
-TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight, 
-                    mc_cores_pct = 2, mc_cores_tm = 2) {
-  genes <- as.character(genes)
-  genes <- genes[genes %in% rownames(gene_network_adj)]
-  pathway_list <- lapply(pathway_list, function(x) x <- as.character(x))
-  if(is.null(weight) ) {
-    weight <- rep(1, length(genes))
-    names(weight) <- genes
-  } 
+TM_CT <- function (gs_list, gene_network_adj, membership, genes, weight, 
+                    mc_cores_ct = 2, mc_cores_tm = 2) {
+  
   if(!is(gene_network_adj, "sparseMatrix" )) {
     gene_network_adj <- as(gene_network_adj, "dgCMatrix")
   }
   gene_network_adj <- sign(gene_network_adj)
-  weight <- weight[weight !=0]
-  sub_adj_mt <- gene_network_adj[genes, genes, drop = F]
+  gs_list <- lapply(gs_list, function(x) x <- x[names(x) %in% rownames(gene_network_adj)])
+  gene <- as.character(unique(unlist(lapply(gs_list, names))))
+  #sub_adj_mt <- gene_network_adj[gene, gene, drop = F]
+  
   if(is.null(membership)) {
-    sub.g <- graph_from_adjacency_matrix(sub_adj_mt, mode = "undirected")
+    sub.g <- graph_from_adjacency_matrix(gene_network_adj, mode = "undirected")
     community <- fastgreedy.community(sub.g)
     membership <- membership(community)
     ret_memb <- T
@@ -73,7 +69,7 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
    
   unqMem <- unique(membership)
   mem_ptwL <- mclapply(unqMem, function(z) {
-    tmp <- lapply(pathway_list, function(x) x <- x[x %in% rownames(sub_adj_mt)[membership == z]])
+    tmp <- lapply(gs_list, function(x) x <- x[names(x) %in% rownames(gene_network_adj)[membership == z]])
     tmp <- tmp[lengths(tmp) != 0]
   }, mc.cores = mc_cores_tm
   )
@@ -91,12 +87,12 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
     idx_1 <- as.character(g.1[!g.1 %in% g.2])
     idx_2 <- as.character(g.2[!g.2 %in% g.1])
     
-    tmp <- sub_adj_mt[idx_1, idx_2, drop = F]
+    tmp <- gene_network_adj[idx_1, idx_2, drop = F]
     
     return( tmp) 
-  }, mc.cores = mc_cores_pct
+  }, mc.cores = mc_cores_ct
   )
-  idx <- which(mclapply(xx, function(n) sum(n, na.rm = T), mc.cores = mc_cores_pct) !=0)
+  idx <- which(mclapply(xx, function(n) sum(n, na.rm = T), mc.cores = mc_cores_ct) !=0)
   if(length(idx) == 0) {
     print("No cambination of TM available to calculate PCT") 
     return("No cambination of TM available to calculate PCT")
@@ -114,36 +110,35 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
       comb_p <- comb_p[comb_p$ptwCC1 != comb_p$ptwCC2,]
       
       xxCC <- mclapply(1:nrow(comb_p),  function (x) {
-        idx_1 <- as.character(ptw_listCC1[[comb_p[x,1]]])
-        idx_2 <- as.character(ptw_listCC2[[comb_p[x,2]]])
-        tmp <- sub_adj_mt[idx_1, idx_2, drop = F]
+        idx_1 <- as.character(names(ptw_listCC1[[comb_p[x,1]]]))
+        idx_2 <- as.character(names(ptw_listCC2[[comb_p[x,2]]]))
+        tmp <- gene_network_adj[idx_1, idx_2, drop = F]
         
         return( tmp) 
-      }, mc.cores = mc_cores_pct)
+      }, mc.cores = mc_cores_ct)
       
       
-      idxCC <- which(mclapply(xxCC, function(n) sum(n, na.rm = T), mc.cores = mc_cores_pct) !=0)
+      idxCC <- which(mclapply(xxCC, function(n) sum(n, na.rm = T), mc.cores = mc_cores_ct) !=0)
       if (length(idxCC) != 0) {
         xxCC <- xxCC[idxCC]
         comb_p <- comb_p[idxCC,]
         
         pct <- mclapply(1:length(xxCC), function(m) {
           tab <- xxCC[[m]]
-          g.1 <- rownames(tab)
-          g.2 <- colnames(tab)
-          wg1 <- weight[g.1]
-          wg2 <- weight[g.2]
-          weight.tab <- weight[c(g.1, g.2)]
-          tab.out <- cross_talk(mat = tab, weight = list(g1 = wg1, g2 = wg2))
+          
+          g.1 <- ptw_listCC1[[comb_p[m, 1]]]
+          g.2 <- ptw_listCC2[[comb_p[m, 2]]]
+          
+          tab.out <- cross_talk(mat = tab, weight = list(g1 = g.1, g2 = g.2))
           
           tab.out <- matrix(c(comb_mem[j, 1], comb_p[m,1], comb_mem[j, 2], comb_p[m,2], tab.out), nrow = 1)
           
           return(tab.out)
-        },   mc.cores = mc_cores_pct)
+        },   mc.cores = mc_cores_ct)
         pct <- do.call(rbind, pct)
-        colnames(pct) <- c("commID_1", "pathway_1", "commID_2", "pathway_2", "pct", 
-                           "ngenes_pathway1", "ngenes_pathway2", "nlink", "weight_pathway1", 
-                           "weight_pathway2", "gene_pathway1", "gene_pathway2")
+        # colnames(pct) <- c("commID_1", "gs1", "commID_2", "gs2", "ct_score", 
+        #                    "ngenes_pathway1", "ngenes_pathway2", "nlink", "weight_pathway1", 
+        #                    "weight_pathway2", "gene_pathway1", "gene_pathway2")
         
         return(pct)
       } else {
@@ -155,10 +150,10 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
     
     res <- do.call(rbind, res)
     res <- data.frame(commID_1 = res[, 1],
-                      pathway_1 = res[, 2], 
+                      gs1 = res[, 2], 
                       commID_2 = res[, 3], 
-                      pathway_2 = res[, 4], 
-                      pct = as.numeric(res[, 5]), 
+                      gs2 = res[, 4], 
+                      ct_score = as.numeric(res[, 5]), 
                       ngenes_pathway1 = as.numeric(res[, 6]), 
                       ngenes_pathway2 = as.numeric(res[, 7]), 
                       nlink = as.numeric(res[, 8]), 
@@ -168,10 +163,10 @@ TM_PCT <- function (pathway_list, gene_network_adj, membership, genes, weight,
                       gene_pathway2 = res[, 12], stringsAsFactors = F)
     
     if(ret_memb) {
-      out <- list(membership = membership ,comm_pathway_list = mem_ptwL, TM_PCT_res = res)
+      out <- list(membership = membership ,comm_pathway_list = mem_ptwL, TM_CT_res = res)
       return(out)
     } else {
-      out <- list(comm_pathway_list = mem_ptwL, TM_PCT_res = res)
+      out <- list(comm_pathway_list = mem_ptwL, TM_CT_res = res)
       return(out)
     }
     

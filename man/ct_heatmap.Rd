@@ -2,35 +2,38 @@
 % Please edit documentation in R/ct_heatmap.R
 \name{ct_heatmap}
 \alias{ct_heatmap}
-\title{Function to plot the heatmap of CT results}
+\title{Function to plot the heatmap of cross-talk results}
 \usage{
 ct_heatmap(
   ct,
-  color_by = "pct",
+  color_by = "ct_score",
+  filtering = FALSE,
+  p_val,
+  FDR,
+  ct_val,
   color = NULL,
   color_level = NULL,
   no_ct_color = NULL,
   legend_side = "left",
   community = F,
   pal_community = NULL,
+  label_size = 5,
   row_annotation = NULL,
-  row_annotation_name = "row_anno",
   pal_row_annotation = NULL,
   row_name_side = "bottom",
   column_annotation = NULL,
-  column_annotation_name = "col_anno",
   pal_column_annotation = NULL,
   col_name_side = "left",
   file_out = NULL,
-  width = 200,
-  height = 200,
+  file_width = 200,
+  file_height = 200,
   res = 300,
   units = "mm",
   ...
 )
 }
 \arguments{
-\item{ct}{results obtained with `pathway_cross_talk()` or `cluster_communication()` functions}
+\item{ct}{results obtained with `gs_cross-talk()` functions}
 
 \item{color_by}{name of the column to be plotted in the heatmap}
 
@@ -40,7 +43,7 @@ number of `color_level`. If NULL, the function uses `lightyellow` and `red3`}
 \item{color_level}{vector of the two values to be used to create the gradient to color the heatmap. If not provided, 
 the function uses minimum and maximum}
 
-\item{no_ct_color}{color that have to be used for the gene set pairs that shows no CT (in the heatmap will have score = 0). If `NULL` the function
+\item{no_ct_color}{color that have to be used for the gene set pairs that shows no cross-talk (in the heatmap will have score = 0). If `NULL` the function
 uses `whitesmoke`}
 
 \item{legend_side}{where to place the legend of the heatmap and of the annotations (if provided). See `Heatmap` 
@@ -54,21 +57,19 @@ plotted as a row and column annotation of the heatmap}
 \item{pal_community}{vector of colors to be used to color the community annotation. If `NULL` the function will use 
 `rainbow()` palette}
 
-\item{row_annotation, column_annotation}{named vector to be used to annotate the rows or columns. The vector must 
-be named after all the cells/pathways in the `ct` tables. The values in the vector will be treated as a 
+\item{row_annotation, column_annotation}{data.frame with columns corresponding to the rows or columns annotations. The rownames must 
+be named after all the cells/gene-set in the `ct` tables. The values in the columns will be treated as a 
 discrete variable}
 
-\item{row_annotation_name, column_annotation_name}{name to be used as a title for the legend of the row/column annotation}
-
-\item{pal_row_annotation, pal_column_annotation}{vector of colors to be used to color the annotation. If `NULL`, the 
-function uses `rainbow()` palette}
+\item{pal_row_annotation, pal_column_annotation}{list of vectors, one for each column in `row_annotation,column_annotation` df. Each 
+vector should be a color vector named after each cells/gene-set in the `ct` table. If `NULL`, the function uses `pals::alphabet2()` palette}
 
 \item{row_name_side, col_name_side}{if the name of the row/column annotation should be put at the "bottom" or "top" ("left" or "right") 
 of the annotation}
 
-\item{file_out}{name used to save the jpeg file. If not provided, the plot will be saved as "CT_heatmap.jpeg"}
+\item{file_out}{name used to save the jpeg file. If `NULL` the complexHeatmap object is returned}
 
-\item{width, height, res, units}{graphical value of `jpeg()` function}
+\item{file_width, file_height, res, units}{graphical value of `jpeg()` function}
 
 \item{...}{further arguments passed down to `ComplexHeatmap::Heatmap()`}
 }
@@ -77,11 +78,11 @@ the function produce the plot saved with the name passed to `file_out` and also 
 and the communities (if calculated)
 }
 \description{
-The function elaborates the output of `pathway_cross_talk()` or `cluster_communication()` 
+The function elaborates the output of `gs_cross-talk()` 
 function to represent the obtained cross-talks as an heatmap
 }
 \details{
-The functions uses `pathway_cross_talk()` or `cluster_communication()` output to build a CT network. Then, 
+The functions uses `gs_cross-talk()` output to build a cross-talk network. Then, 
 the adjacency matrix of the network is plotted with or without annotations on the rows and columns. The user may 
 also decide which value to plot in the heatmap
 }
