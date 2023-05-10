@@ -52,4 +52,4 @@ vignettes/*.pdf
 
 #temporary files
 *._
-docs
+#docs

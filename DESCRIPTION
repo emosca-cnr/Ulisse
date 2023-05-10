@@ -35,7 +35,12 @@ Imports:
   Matrix,
   reshape2,
   ComplexHeatmap,
-  circlize
+  circlize,
+  ggplot2,
+  ggraph,
+  ggrepel,
+  pals,
+  scales
 Depends:
   R (>= 3.5.0)
 Suggests: 
