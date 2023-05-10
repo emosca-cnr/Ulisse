@@ -20,6 +20,7 @@
 #' plotted as a row and column annotation of the heatmap
 #' @param pal_community vector of colors to be used to color the community annotation. If `NULL` the function will use 
 #' `rainbow()` palette
+#' @param label_size size of the gene-set names that will be printed on the diagonal of the heatmaps
 #' @param row_annotation,column_annotation data.frame with columns corresponding to the rows or columns annotations. The rownames must 
 #' be named after all the cells/gene-set in the `ct` tables. The values in the columns will be treated as a 
 #' discrete variable
