@@ -48,8 +48,9 @@ If `vertex_number = TRUE`, `vertex` is represented as cells of voronoi tessellat
 
 \item{voronoi_radius, voronoi_alpha}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
 first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
-the radius of the cells and the transparency, respectively.
-@param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them}
+the radius of the cells and the transparency, respectively.}
+
+\item{vertex_label}{logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them}
 
 \item{edge_color_by}{=c("number","which") if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")}
 
