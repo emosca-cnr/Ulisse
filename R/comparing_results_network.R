@@ -17,7 +17,7 @@
 #' @param voronoi_radius,voronoi_alpha parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
 #'  first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
 #'  the radius of the cells and the transparency, respectively.
-#'  @param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them
+#' @param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them
 #' @param edge_color_by =c("number","which") if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")
 #' @param edge_width logical, if the edge width should be proportional to the number of results that share that edge. 
 #' @param edge_pal palette used to color the edges according to `edge_color_by`. If `edge_color_by="number` than the palette should be the two color used for
