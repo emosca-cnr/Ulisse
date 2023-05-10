@@ -4,7 +4,7 @@
 #' pathway list for each gene community. To do so genes will be grouped into communities and then grouped into pathways.
 #' At this point, the function calculates CT between each pathway pairs of different 
 #' communities that shows at least a link.
-#' @param pathway_list a named list of genes grouped into pathways
+#' @param gs_list a named list of genes grouped into pathways
 #' @param gene_network_adj gene network adjacency matrix
 #' @param weight weights of the genes in `genes`. If not provided, the function assigns to each gene
 #' a weight of 1

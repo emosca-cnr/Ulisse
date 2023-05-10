@@ -29,11 +29,17 @@
 #' @param vertex.pie vertex pie
 #' @param ... additional parameters of plot.igraph
 #' @return list of two data frames containing pathway network and vertex similarity
-#' @import igraph pals
+#' @import igraph pals stats graphics
+#' @importFrom utils write.table
 #' @importFrom  RColorBrewer brewer.pal
 #' @export
 #'
-enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NULL, all_gs=TRUE, weight.within = 4, weight.between = 1, file.prefix='en_map', comm_method='fastgreedy', vertex.label.cex=1, vertex.label.dist=0.5, vertex.label.degree=pi/2, vertex.label.font=2, gs_list_size=NULL, set_sim_df=NULL, plot_flag=TRUE, vertex.color=NULL, img.width=200, img.height=200, img.res=300, min_comm_size=2, vertex.size.min=2, vertex.size.max=5, edge.wd.min=1, edge.wd.max=4, mark.groups=T, vertex.shape='circle', vertex.pie=NULL, vertex.color.pal=NULL, n_width=3, n_size=3, L=NULL, score.decreasing=TRUE, n_name=1, legend.cex=0.7, ...){
+enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NULL, all_gs=TRUE, weight.within = 4, weight.between = 1, 
+                           file.prefix='en_map', comm_method='fastgreedy', vertex.label.cex=1, vertex.label.dist=0.5, vertex.label.degree=pi/2, 
+                           vertex.label.font=2, gs_list_size=NULL, set_sim_df=NULL, plot_flag=TRUE, vertex.color=NULL, img.width=200, 
+                           img.height=200, img.res=300, min_comm_size=2, vertex.size.min=2, vertex.size.max=5, edge.wd.min=1, edge.wd.max=4, 
+                           mark.groups=T, vertex.shape='circle', vertex.pie=NULL, vertex.color.pal=NULL, n_width=3, n_size=3, L=NULL, 
+                           score.decreasing=TRUE, n_name=1, legend.cex=0.7, ...){
   
   
   method <- match.arg(method)

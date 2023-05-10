@@ -6,7 +6,6 @@
 \usage{
 comparing_results_network(
   res_list,
-  file_out,
   vertex_number = F,
   vertex_number_pal = NULL,
   vertex_number_adj = 0.7,
@@ -20,6 +19,7 @@ comparing_results_network(
   edge_width = TRUE,
   edge_pal = NULL,
   edge_adj_col = 0.7,
+  file_out,
   width = 200,
   height = 200,
   res = 300,
@@ -29,8 +29,6 @@ comparing_results_network(
 }
 \arguments{
 \item{res_list}{list of resulting data.frame from `gs_cross_talk()`}
-
-\item{file_out}{name used to save the plot in jpeg format plot. If `NULL` the functions returns also the plot object}
 
 \item{vertex_number}{logical, if the vertices should be colored by the number of results in which are present}
 
@@ -48,9 +46,12 @@ If `vertex_number = TRUE`, `vertex` is represented as cells of voronoi tessellat
 
 \item{vertex_pal}{named vector with the colors to be used for each unique `vertex` element. If `NULL` pals::alphabet2() palette is used}
 
-\item{voronoi_radius, voronois_alpha:}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
+\item{voronoi_radius, voronoi_alpha:}{parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
 first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
-the radius of the cells and the transparency, respectively.}
+the radius of the cells and the transparency, respectively.
+@param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them}
+
+\item{edge_color_by}{=c("number","which") if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")}
 
 \item{edge_width}{logical, if the edge width should be proportional to the number of results that share that edge.}
 
@@ -58,11 +59,13 @@ the radius of the cells and the transparency, respectively.}
 gradient coloring them; if `NULL` "red" to "blue" is used. If `edge_color_by="which` than the palette should be a (named) vector with enought colors for each 
 results name combination}
 
+\item{edge_adj_col}{value used to adjust color transparency of the edges}
+
+\item{file_out}{name used to save the plot in jpeg format plot. If `NULL` the functions returns also the plot object}
+
 \item{width, height, res, units}{graphical value of `jpeg()` function}
 
 \item{...}{further graphical parameters to be passed to `ggraph()` function}
-
-\item{edge_color_by=c("number", "which")}{if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")}
 }
 \value{
 If `file_out` is null the function returns the plot and the igraph object used for plotting. 

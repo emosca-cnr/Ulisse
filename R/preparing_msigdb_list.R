@@ -10,6 +10,7 @@
 #' @param weights vector with `genes` weights in the same order. If `NULL` the function assigns `1` to each gene
 #' @param min_size,max_size filtering the gene sets to maintain only the ones that have at least `min_size` or less than `max_size` number of genes
 #' @return The output is a gene-set list with a vector for each gene-set, composed by weights named after the genes
+#' @importFrom stats setNames
 #' @export
 
 preparing_msigdb_list <- function (species, category = NULL, subcategory = NULL, type = "gene_symbol", genes, weights,

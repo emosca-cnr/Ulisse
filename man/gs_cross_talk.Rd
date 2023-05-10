@@ -89,6 +89,8 @@ The function takes as inputs the adjacency matrix of the biological network (`ge
  ptwB = setNames(c(1, 1, 1), c("D", "E", "F")), ptwC = setNames(c(1, 1, 1), c("A", "B", "E")))
  adj <- matrix(data = sample(c(0,1), 20*20, replace = TRUE), nrow = 6, 
  ncol = 6, dimnames = list(LETTERS[1:20], LETTERS[1:20]))
- pct <- gs_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, shared = FALSE, hash = FALSE, ct_info = FALSE, mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
+ pct <- gs_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, 
+                      shared = FALSE, hash = FALSE, ct_info = FALSE, 
+                      mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
  }
 }

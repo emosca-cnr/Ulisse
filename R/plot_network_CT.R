@@ -33,6 +33,7 @@
 #' @return If `file_out` is null the function returns the plot and the igraph object used for plotting (which may contain the communities under `comm_id` attribute). 
 #'  Otherwise, only the igraph object is returned and the plot is saved through to `file_out` 
 #' @importFrom grDevices rainbow dev.off jpeg adjustcolor
+#' @importFrom stats setNames
 #' @import igraph
 #' @import ggraph
 #' @export
@@ -141,13 +142,13 @@ plot_network_CT <- function(ct, filtering = FALSE, p_val, FDR, ct_val,
   }
   
   if(!is.null(community) & !is.null(vertex)) {
-    p <- p + geom_node_voronoi(aes(fill = comm_id), max.radius = voronoi_radius, colour = 'white', alpha = voronoi_alpha) +
+    p <- p + geom_node_voronoi(aes_string(fill = "comm_id"), max.radius = voronoi_radius, colour = 'white', alpha = voronoi_alpha) +
       scale_fill_manual(limits = names(pal_community), values = pal_community) +
       geom_node_point(aes_string(color = vertex), size = vertex_size) +
       scale_color_manual(limits = names(vertex_pal), values = vertex_pal)
       
   } else if(!is.null(community) & is.null(vertex)) {
-    p <- p + geom_node_point(aes(color = comm_id), size = vertex_size) +
+    p <- p + geom_node_point(aes_string(color = "comm_id"), size = vertex_size) +
       scale_color_manual(limits = names(pal_community), values = pal_community)
   } else if(is.null(community) & !is.null(vertex)) {
     p <- p + geom_node_point(aes_string(color = vertex), size = vertex_size) +
@@ -157,7 +158,7 @@ plot_network_CT <- function(ct, filtering = FALSE, p_val, FDR, ct_val,
   }
   if(vertex_label) {
     p <- p +
-      geom_node_text(aes(label = label), repel = T)
+      geom_node_text(aes_string(label = "label"), repel = T)
   }
   if(!is.null(file_out)) {
     jpeg(file_out, res = res, height = height, width = width, units = units)

@@ -71,7 +71,8 @@ gslist <- list(gsA = c("A", "B","C"), gsB = c("D", "E", "F"), gsC = c("A", "B", 
 adj <- matrix(data = sample(c(0,1), 6*6, replace = TRUE), nrow = 6, 
 ncol = 6, dimnames = list(LETTERS[1:6], LETTERS[1:6]))
 wgt <- rep(1, 6)
-pct <- gscross_talk(gslist = gslist, gene_network_adj = adj, mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
+pct <- gscross_talk(gslist = gslist, gene_network_adj = adj, 
+                    mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 funct_rel <- gene_funct_relevance(ct, adj, to_plot=FALSE)
 }
 }

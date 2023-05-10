@@ -38,6 +38,7 @@
 #' @importFrom circlize colorRamp2
 #' @import igraph
 #' @import ComplexHeatmap
+#' @import grid
 #' @export
 
 

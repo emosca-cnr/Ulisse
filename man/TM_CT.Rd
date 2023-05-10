@@ -15,6 +15,8 @@ TM_CT(
 )
 }
 \arguments{
+\item{gs_list}{a named list of genes grouped into pathways}
+
 \item{gene_network_adj}{gene network adjacency matrix}
 
 \item{membership}{named vector with the membership of `genes` to topological communities. If set to `NULL`
@@ -28,8 +30,6 @@ a weight of 1}
 \item{mc_cores_ct}{number of threads to be used to calculate cross talk}
 
 \item{mc_cores_tm}{number of threads to be used to calcualte TM-PCT on different communities combination}
-
-\item{pathway_list}{a named list of genes grouped into pathways}
 }
 \value{
 The function returns a list of two object:

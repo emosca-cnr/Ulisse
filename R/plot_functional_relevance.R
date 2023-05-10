@@ -53,8 +53,8 @@ plot_functional_relevance <- function(fr, method = "count", file_name = NULL, pl
   }
   
   
-  p <- ggplot(tab.out, aes(y=functional_diversity, x=interactor_diversity, label = label)) + 
-    geom_jitter(aes(fill = functional_relevance), width = 0.07, height = 0.07, shape = 21, color = "gray75",stroke = 0.2) +
+  p <- ggplot(tab.out, aes_string(y="functional_diversity", x="interactor_diversity", label = "label")) + 
+    geom_jitter(aes_string(fill = "functional_relevance"), width = 0.07, height = 0.07, shape = 21, color = "gray75",stroke = 0.2) +
     geom_text_repel(fontface="italic", max.overlaps = 2000)+
     theme_light() +
     labs(fill = expression(italic("f"))) +

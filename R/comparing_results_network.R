@@ -14,14 +14,16 @@
 #'  to be used for color (only discrete value), or `NULL` if the vertices should be not colored (thus "grey65" is passed as default color). 
 #'  If `vertex_number = TRUE`, `vertex` is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`)
 #' @param vertex_pal named vector with the colors to be used for each unique `vertex` element. If `NULL` pals::alphabet2() palette is used
-#' @param voronoi_radius,voronois_alpha: parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
+#' @param voronoi_radius,voronoi_alpha: parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
 #'  first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
 #'  the radius of the cells and the transparency, respectively.
-#' @param edge_color_by=c("number","which") if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")
+#'  @param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them
+#' @param edge_color_by =c("number","which") if the edges should be colored by number of results that share that edge ("number") or which results contain it ("which")
 #' @param edge_width logical, if the edge width should be proportional to the number of results that share that edge. 
 #' @param edge_pal palette used to color the edges according to `edge_color_by`. If `edge_color_by="number` than the palette should be the two color used for
 #'  gradient coloring them; if `NULL` "red" to "blue" is used. If `edge_color_by="which` than the palette should be a (named) vector with enought colors for each 
 #'  results name combination
+#' @param edge_adj_col value used to adjust color transparency of the edges
 #' @param file_out name used to save the plot in jpeg format plot. If `NULL` the functions returns also the plot object
 #' @param width,height,res,units graphical value of `jpeg()` function
 #' @param ... further graphical parameters to be passed to `ggraph()` function
@@ -35,10 +37,10 @@
 
 
 
-comparing_results_network <- function(res_list, file_out, vertex_number = F, vertex_number_pal = NULL, vertex_number_adj = 0.7, vertex_size = 5,
+comparing_results_network <- function(res_list, vertex_number = F, vertex_number_pal = NULL, vertex_number_adj = 0.7, vertex_size = 5,
                                       vertex = NULL, vertex_pal =NULL, voronoi_radius = 0.8, voronoi_alpha = 0.3, vertex_label = TRUE,
                                       edge_color_by = "number", edge_width = TRUE,
-                                      edge_pal = NULL, edge_adj_col = 0.7, 
+                                      edge_pal = NULL, edge_adj_col = 0.7, file_out, 
                                       width = 200, height = 200, res = 300, units = "mm",  ...) {
   
   res_list <- lapply(res_list, function(x) {

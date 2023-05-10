@@ -6,6 +6,7 @@
 #' @param gs_genes names of the genes in the gene-sets `gs_genes`
 #' @param weights named vector with a weight for each gene in `gs_gene`. If `NULL` the function assigns `1` to each gene
 #' @return The output is a gene-set list with a vector for each gene-set, composed by weights named after the genes
+#' @importFrom stats setNames
 #' @export
 
 preparing_gs_list <- function (gs_names , gs_genes, weights, min_size=1, max_size=500) {
