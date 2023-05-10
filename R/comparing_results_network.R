@@ -14,7 +14,7 @@
 #'  to be used for color (only discrete value), or `NULL` if the vertices should be not colored (thus "grey65" is passed as default color). 
 #'  If `vertex_number = TRUE`, `vertex` is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`)
 #' @param vertex_pal named vector with the colors to be used for each unique `vertex` element. If `NULL` pals::alphabet2() palette is used
-#' @param voronoi_radius,voronoi_alpha: parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
+#' @param voronoi_radius,voronoi_alpha parameters passed to `geom_node_voronoi()`. If both `vertex` and `vertex_number` arguments are enabled, then the 
 #'  first is represented as cells of voronoi tessellation (see `ggraph::geom_node_voronoi()`). In this case, these argument are used to control 
 #'  the radius of the cells and the transparency, respectively.
 #'  @param vertex_label logical, if vertex names should be plotted or not, or a named vector, with the label that should be associated to each vertex named by them
