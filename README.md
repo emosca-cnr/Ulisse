@@ -1,4 +1,4 @@
-<img src="vignettes/logo.png" width="200">
+<img src="vignettes/logo.png" width="300">
 
 # Ulisse - An R package to go beyond the boundaries of gene-sets
 
