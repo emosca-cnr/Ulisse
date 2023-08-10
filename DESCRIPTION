@@ -18,7 +18,7 @@ Maintainer: Ettore Mosca <ettore.mosca@itb.cnr.it>
 Description: Ulisse implements functions for pathway analysis, pathway cross-talk analysis and cell-cell communication analysis.
 License: GPL-3
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Imports:
   igraph,
   parallel,
@@ -48,4 +48,3 @@ Suggests:
   knitr,
   kableExtra,
   pander
-

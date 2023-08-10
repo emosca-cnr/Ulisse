@@ -9,6 +9,7 @@
 filter_gsl <- function(gsl, universe, min_size=5, max_size=500){
   
   ans <- lapply(gsl, function(x) x[x %in% universe])
+  ans <- lapply(ans, unique)
   idx_keep <- unlist(lapply(ans, function(x) length(x) >= min_size & length(x) <= max_size))
   
   ans <- ans[idx_keep]

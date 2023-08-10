@@ -3,7 +3,7 @@
 #' @param e.weights edge weights
 #' @param v.weights vertex weights
 #' @param verbose TRUE/FALSE
-#' @param methods one or more of cfastgreedy", "labprop", "walktrap", "eigen", "multilev", "infomap"
+#' @param methods one or more of "fastgreedy", "labprop", "walktrap", "eigen", "multilev", "infomap"
 #' @return list od community objects
 #' @import igraph
 #' @export

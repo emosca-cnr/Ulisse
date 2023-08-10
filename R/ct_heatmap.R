@@ -54,6 +54,7 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
   
   ct.g <- graph_from_data_frame(ct, directed = F)
   adj.ct <- as_adjacency_matrix(ct.g, sparse = F, attr = color_by)
+  adj.ct[adj.ct == 0] <- NA
   ct_names <- as.character(rownames(adj.ct))
   if(filtering) {
     if(is.null(p_val)) {
@@ -182,7 +183,7 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
   if(is.null(no_ct_color)) {
     no_ct_color <- "whitesmoke"
   }
-  col_fun <- colorRamp2(c(0, color_level), c(no_ct_color, color))
+  col_fun <- colorRamp2(color_level, color)
   
   #plotting--------------------
   if(!is.null(file_out)) {
@@ -194,12 +195,12 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
   if(is.null(column_annotation)) {
     if(is.null(row_annotation)) {
       
-      h <- Heatmap(adj.ct, col = col_fun, rect_gp = gpar(type = "none"),
+      h <- Heatmap(adj.ct, col = col_fun, rect_gp = gpar(type = "none"), na_col = no_ct_color,
                    heatmap_legend_param = list(title=color_by), cell_fun = function(j, i, x, y, width, height, fill) {
                      
                      if(i > j) {
                        grid.rect(x = x, y = y, width = width, height = height,
-                                 gp = gpar(col = "white", fill = col_fun(adj.ct[i, j]), lwd = 0.2))
+                                 gp = gpar(col = "white", fill = fill, lwd = 0.2))
                        if(sig.ct[i, j] == 1) {
                          grid.text("*", x, y, gp = gpar(col="blue"))
                        }
@@ -209,6 +210,8 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
                                  gp = gpar(col = NA,  fill = NA))
                      } else {
                        txt <- rownames(adj.ct)[i]
+                       grid.rect(x = x, y = y, width = width, height = height,
+                                 gp = gpar(col = "white", fill = "white"))
                        grid.text(txt, x, y, gp = gpar(fontsize = label_size), just = "left")
                      }
                    }, cluster_rows = FALSE, cluster_columns = FALSE,
@@ -218,13 +221,13 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
     } else {
       row_ha <- HeatmapAnnotation(df = df.row, col = pal_row, annotation_name_side = row_name_side, which = "row")
       
-      h <- Heatmap(adj.ct, col = col_fun,
+      h <- Heatmap(adj.ct, col = col_fun, na_col = no_ct_color,
                    heatmap_legend_param = list(title=color_by),
                    left_annotation = row_ha, rect_gp = gpar(type = "none"), cell_fun = function(j, i, x, y, width, height, fill) {
                      
                      if(i > j) {
                        grid.rect(x = x, y = y, width = width, height = height,
-                                 gp = gpar(col = "white", fill = col_fun(adj.ct[i, j]), lwd = 0.2))
+                                 gp = gpar(col = "white", fill = fill, lwd = 0.2))
                        if(sig.ct[i, j] == 1) {
                          grid.text("*", x, y, gp = gpar(col="blue"))
                        }
@@ -234,6 +237,8 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
                                  gp = gpar(col = NA,  fill = NA))
                      } else {
                        txt <- rownames(adj.ct)[i]
+                       grid.rect(x = x, y = y, width = width, height = height,
+                                 gp = gpar(col = "white", fill = "white"))
                        grid.text(txt, x, y, gp = gpar(fontsize = label_size), just = "left")
                      }
                    }, cluster_rows = FALSE, cluster_columns = FALSE,
@@ -244,14 +249,14 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
     if(is.null(row_annotation)) {
       
       col_ha <- columnAnnotation(df = df.col, col = pal_column, annotation_name_side = col_name_side)
-      h <- Heatmap(adj.ct, col = col_fun,
+      h <- Heatmap(adj.ct, col = col_fun, na_col = no_ct_color,
                    heatmap_legend_param = list(title=color_by),
                    bottom_annotation = col_ha,
                    rect_gp = gpar(type = "none"), cell_fun = function(j, i, x, y, width, height, fill) {
                      
                      if(i > j) {
                        grid.rect(x = x, y = y, width = width, height = height,
-                                 gp = gpar(col = "white", fill = col_fun(adj.ct[i, j]), lwd = 0.2))
+                                 gp = gpar(col = "white", fill = fill, lwd = 0.2))
                        if(sig.ct[i, j] == 1) {
                          grid.text("*", x, y, gp = gpar(col="blue"))
                        }
@@ -261,6 +266,8 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
                                  gp = gpar(col = NA,  fill = NA))
                      } else {
                        txt <- rownames(adj.ct)[i]
+                       grid.rect(x = x, y = y, width = width, height = height,
+                                 gp = gpar(col = "white", fill = "white"))
                        grid.text(txt, x, y, gp = gpar(fontsize = label_size), just = "left")
                      }
                    }, cluster_rows = FALSE, cluster_columns = FALSE,
@@ -271,7 +278,7 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
       
       row_ha <- HeatmapAnnotation(df = df.row, col = pal_row, annotation_name_side = row_name_side, which = "row")
       col_ha <- HeatmapAnnotation(df = df.col, col = pal_column, annotation_name_side = col_name_side)
-      h <- Heatmap(adj.ct, col = col_fun,
+      h <- Heatmap(adj.ct, col = col_fun, na_col = no_ct_color,
                    heatmap_legend_param = list(title=color_by),
                    left_annotation = row_ha, 
                    bottom_annotation = col_ha,
@@ -279,7 +286,7 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
                      
                      if(i > j) {
                        grid.rect(x = x, y = y, width = width, height = height,
-                                 gp = gpar(col = "white", fill = col_fun(adj.ct[i, j]), lwd = 0.2))
+                                 gp = gpar(col = "white", fill = fill, lwd = 0.2))
                        if(sig.ct[i, j] == 1) {
                          grid.text("*", x, y, gp = gpar(col="blue"))
                        }
@@ -289,6 +296,8 @@ ct_heatmap <- function(ct, color_by = "ct_score", color = NULL, color_level = NU
                                  gp = gpar(col = NA,  fill = NA))
                      } else {
                        txt <- rownames(adj.ct)[i]
+                       grid.rect(x = x, y = y, width = width, height = height,
+                                 gp = gpar(col = "white", fill = "white"))
                        grid.text(txt, x, y, gp = gpar(fontsize = label_size), just = "left")
                      }
                    }, cluster_rows = FALSE, cluster_columns = FALSE,

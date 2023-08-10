@@ -5,46 +5,38 @@
 \title{Enrichment map}
 \usage{
 enrichment_map(
-  x,
-  gs_list,
+  gs_score = ora_score,
+  gs_list = ptw_all,
   method = c("overlap", "jaccard"),
   coeff = NULL,
   all_gs = TRUE,
-  weight.within = 4,
-  weight.between = 1,
-  file.prefix = "en_map",
   comm_method = "fastgreedy",
-  vertex.label.cex = 1,
-  vertex.label.dist = 0.5,
-  vertex.label.degree = pi/2,
-  vertex.label.font = 2,
+  min_comm_size = 2,
   gs_list_size = NULL,
   set_sim_df = NULL,
-  plot_flag = TRUE,
-  vertex.color = NULL,
-  img.width = 200,
-  img.height = 200,
-  img.res = 300,
-  min_comm_size = 2,
-  vertex.size.min = 2,
-  vertex.size.max = 5,
-  edge.wd.min = 1,
-  edge.wd.max = 4,
-  mark.groups = T,
-  vertex.shape = "circle",
-  vertex.pie = NULL,
-  vertex.color.pal = NULL,
-  n_width = 3,
-  n_size = 3,
-  L = NULL,
-  score.decreasing = TRUE,
-  n_name = 1,
-  legend.cex = 0.7,
-  ...
+  file_prefix = "en_map",
+  layout = NULL,
+  weight_within = 4,
+  weight_between = 1,
+  pal_community = NULL,
+  pal_score = NULL,
+  top_ptw = "score",
+  wrap = 15,
+  label_fontsize = c(6, 5),
+  e_color = "gray65",
+  e_alpha = 0.5,
+  e_range = c(1, 4),
+  v_stroke = 0.5,
+  v_range = c(2, 8),
+  save_plot = TRUE,
+  width = 200,
+  height = 200,
+  res = 300,
+  units = "mm"
 )
 }
 \arguments{
-\item{x}{named vector of pathway scores}
+\item{gs_score}{named vector of pathway scores}
 
 \item{gs_list}{gene set list}
 
@@ -52,59 +44,77 @@ enrichment_map(
 
 \item{coeff}{threshold for the similarity score between two gene sets}
 
-\item{all_gs}{TRUE/FALSE}
+\item{all_gs}{TRUE/FALSE, indicating if all gene-sets should be considered or only the ones with similarity score >= `coeff`}
 
-\item{weight.within}{value to weight the attraction between two vertices of the same community}
+\item{comm_method}{community algorithm to be used; available algorithms are c("fastgreedy", "labprop", "walktrap", "eigen", "multilev", "infomap")
+see `Ulisse::find_communities()` for further details}
 
-\item{weight.between}{value to weight the attraction between two vertices of two disntict communities}
+\item{min_comm_size}{minimum size of a community to be considered in the enrichment map. If `min_comm_size = 1` and `all_gs = TRUE`,
+then all gene-sets are displayed}
 
-\item{comm_method}{one among 'auto', 'fastgreedy' and 'multilev'}
+\item{gs_list_size}{named vector with size f the gene-sets in `gs_list`}
 
-\item{vertex.label.cex}{vertex label size}
+\item{set_sim_df}{optional, data.frame with three columns 'set1', 'set2' and 'sim'}
 
-\item{vertex.label.dist}{vertex label distance from veritex}
+\item{file_prefix}{prefix used to save similarity data.frame and enrichment map plot (if `save_plot = TRUE`)}
 
-\item{vertex.label.degree}{vertex label orientation}
+\item{layout}{optional layout matrix, composed of two columns. If not provided, the layout is calculated by using
+`igraph::layout_with_fr()` function, together with `weight_within` and `weight_between` (via `Ulisse::edge_weights()` function)}
 
-\item{vertex.label.font}{vertex label font}
+\item{weight_within}{value to weight the attraction between two vertices of the same community}
 
-\item{gs_list_size}{gene set list size}
+\item{weight_between}{value to weight the attraction between two vertices of two distinct communities}
 
-\item{set_sim_df}{optional data frame with three columns 'set1', 'set2' and 'sim'}
+\item{pal_community}{palette to be used to color communities, should be a named vector with a color for each community. If not
+provided, `pals::alphabet2()` is used instead}
 
-\item{plot_flag}{TRUE/FALSE}
+\item{pal_score}{palette to be used to color vertices according to their `score`. If not provided, `pals::brewer.greens(n = 3)` is used}
 
-\item{vertex.color}{vertex color}
+\item{top_ptw}{variable used to select top gene-sets to display as a description of the communities. 
+Should be either `"score"` (to display top score gene-set for each community) or `"n_genes"` (to display gene-set with higher number of genes)}
 
-\item{img.width}{image width}
+\item{wrap}{value used to wrap long gene-sets names as a description of communities. See `stringr::str_wrap()` for further details}
 
-\item{img.height}{image height}
+\item{label_fontsize}{font size of the label and description of the communities. If two values are provided,
+the fist is used for label, the second for description. See `ggforce::geom_mark_rect()` for further details.}
 
-\item{img.res}{image resolution}
+\item{e_color}{edge color}
 
-\item{min_comm_size}{min community size}
+\item{e_alpha}{edge transparency}
 
-\item{vertex.size.min}{min vertex size}
+\item{e_range}{range of widths values used for plotting edges proportional to similarity score}
 
-\item{vertex.size.max}{max vertex size}
+\item{v_stroke}{width of the stoke of the vertices, which is colored according to communities}
 
-\item{edge.wd.min}{min edge widht}
+\item{v_range}{range of dimensions of the vertices, which is proportional to the number of genes}
 
-\item{edge.wd.max}{max edge width}
+\item{save_plot}{TRUE/FALSE, if the plot should be saved by using `file_prefix` or returned}
 
-\item{mark.groups}{TRUE/FALSE}
+\item{width}{jpeg image width}
 
-\item{vertex.shape}{vertex shape}
+\item{height}{jpeg image height}
 
-\item{vertex.pie}{vertex pie}
+\item{res}{jpeg image resolution}
 
-\item{...}{additional parameters of plot.igraph}
-
-\item{file}{output file}
+\item{units}{jpeg image units for width and height}
 }
 \value{
-list of two data frames containing pathway network and vertex similarity
+The function returns a list containing: 
+\itemize{
+ \item igraph = network object used for plotting the enrichment map
+ \item network_data = data.frame with layout (X1,X2 columns), name of the gene-sets together with community ids ("comm_id"), 
+  score and number of genes ("n_genes")
+ \item path_comm_genes = list composed by the genes present in each community
+ \item sim_coeff = data.frame with the similarity score calculated between each gene-set pair
+ \item plot = enrichment map plot obtained by using `ggraph` package functions. Only if `save_plot = FALSE`
+}
 }
 \description{
-Enrichment map
+This functions calculates similarities between gene-sets and plot a resulting enrichment map
+}
+\details{
+enrichment_map() function calculates similarities between each gene-set pair by using `method` metric. Subsequently,
+ these similarities are filtered to maintain the ones >= `coeff`. `comm_method` algorithm is then used to identify communities, 
+ which may be filtered to plot only the ones composed by at least `min_comm_size` gene-sets. Enrichment map is then plotted by using
+ `ggraph` package.
 }

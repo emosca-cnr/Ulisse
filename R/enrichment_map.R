@@ -1,47 +1,72 @@
 #' Enrichment map
-#' @param x named vector of pathway scores
+#' @description This functions calculates similarities between gene-sets and plot a resulting enrichment map
+#' @details enrichment_map() function calculates similarities between each gene-set pair by using `method` metric. Subsequently,
+#'  these similarities are filtered to maintain the ones >= `coeff`. `comm_method` algorithm is then used to identify communities, 
+#'  which may be filtered to plot only the ones composed by at least `min_comm_size` gene-sets. Enrichment map is then plotted by using
+#'  `ggraph` package.
+#' @param gs_score named vector of pathway scores
 #' @param gs_list gene set list
 #' @param method 'overlap' or 'jaccard'
 #' @param coeff threshold for the similarity score between two gene sets
-#' @param all_gs TRUE/FALSE
-#' @param weight.within value to weight the attraction between two vertices of the same community
-#' @param weight.between value to weight the attraction between two vertices of two disntict communities
-#' @param file output file
-#' @param comm_method one among 'auto', 'fastgreedy' and 'multilev'
-#' @param vertex.label.cex vertex label size
-#' @param vertex.label.dist vertex label distance from veritex
-#' @param vertex.label.degree vertex label orientation
-#' @param vertex.label.font vertex label font
-#' @param gs_list_size gene set list size
-#' @param set_sim_df optional data frame with three columns 'set1', 'set2' and 'sim'
-#' @param plot_flag TRUE/FALSE
-#' @param vertex.color vertex color
-#' @param img.width image width
-#' @param img.height image height
-#' @param img.res image resolution
-#' @param min_comm_size min community size
-#' @param vertex.size.min min vertex size
-#' @param vertex.size.max max vertex size
-#' @param edge.wd.min min edge widht
-#' @param edge.wd.max max edge width
-#' @param mark.groups TRUE/FALSE
-#' @param vertex.shape vertex shape
-#' @param vertex.pie vertex pie
-#' @param ... additional parameters of plot.igraph
-#' @return list of two data frames containing pathway network and vertex similarity
+#' @param all_gs TRUE/FALSE, indicating if all gene-sets should be considered or only the ones with similarity score >= `coeff`
+#' @param comm_method community algorithm to be used; available algorithms are c("fastgreedy", "labprop", "walktrap", "eigen", "multilev", "infomap")
+#'  see `Ulisse::find_communities()` for further details
+#' @param min_comm_size minimum size of a community to be considered in the enrichment map. If `min_comm_size = 1` and `all_gs = TRUE`,
+#'  then all gene-sets are displayed
+#' @param gs_list_size named vector with size f the gene-sets in `gs_list`
+#' @param set_sim_df optional, data.frame with three columns 'set1', 'set2' and 'sim'
+#' @param file_prefix prefix used to save similarity data.frame and enrichment map plot (if `save_plot = TRUE`)
+#' @param layout optional layout matrix, composed of two columns. If not provided, the layout is calculated by using
+#'  `igraph::layout_with_fr()` function, together with `weight_within` and `weight_between` (via `Ulisse::edge_weights()` function)
+#' @param weight_within value to weight the attraction between two vertices of the same community
+#' @param weight_between value to weight the attraction between two vertices of two distinct communities
+#' @param pal_community palette to be used to color communities, should be a named vector with a color for each community. If not
+#'  provided, `pals::alphabet2()` is used instead
+#' @param pal_score palette to be used to color vertices according to their `score`. If not provided, `pals::brewer.greens(n = 3)` is used
+#' @param top_ptw variable used to select top gene-sets to display as a description of the communities. 
+#'  Should be either `"score"` (to display top score gene-set for each community) or `"n_genes"` (to display gene-set with higher number of genes)
+#' @param wrap value used to wrap long gene-sets names as a description of communities. See `stringr::str_wrap()` for further details
+#' @param label_fontsize font size of the label and description of the communities. If two values are provided,
+#'  the fist is used for label, the second for description. See `ggforce::geom_mark_rect()` for further details.
+#' @param e_color edge color
+#' @param e_alpha edge transparency
+#' @param e_range range of widths values used for plotting edges proportional to similarity score
+#' @param v_stroke width of the stoke of the vertices, which is colored according to communities
+#' @param v_range range of dimensions of the vertices, which is proportional to the number of genes
+#' @param save_plot TRUE/FALSE, if the plot should be saved by using `file_prefix` or returned
+#' @param width jpeg image width
+#' @param height jpeg image height
+#' @param res jpeg image resolution
+#' @param units jpeg image units for width and height
+#' @return The function returns a list containing: 
+#' \itemize{
+#'  \item igraph = network object used for plotting the enrichment map
+#'  \item network_data = data.frame with layout (X1,X2 columns), name of the gene-sets together with community ids ("comm_id"), 
+#'   score and number of genes ("n_genes")
+#'  \item path_comm_genes = list composed by the genes present in each community
+#'  \item sim_coeff = data.frame with the similarity score calculated between each gene-set pair
+#'  \item plot = enrichment map plot obtained by using `ggraph` package functions. Only if `save_plot = FALSE`
+#' }
 #' @import igraph pals stats graphics
 #' @importFrom utils write.table
-#' @importFrom  RColorBrewer brewer.pal
+#' @importFrom grDevices dev.off jpeg
+#' @import ggplot2
+#' @import ggraph
+#' @import pals
 #' @export
 #'
-enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NULL, all_gs=TRUE, weight.within = 4, weight.between = 1, 
-                           file.prefix='en_map', comm_method='fastgreedy', vertex.label.cex=1, vertex.label.dist=0.5, vertex.label.degree=pi/2, 
-                           vertex.label.font=2, gs_list_size=NULL, set_sim_df=NULL, plot_flag=TRUE, vertex.color=NULL, img.width=200, 
-                           img.height=200, img.res=300, min_comm_size=2, vertex.size.min=2, vertex.size.max=5, edge.wd.min=1, edge.wd.max=4, 
-                           mark.groups=T, vertex.shape='circle', vertex.pie=NULL, vertex.color.pal=NULL, n_width=3, n_size=3, L=NULL, 
-                           score.decreasing=TRUE, n_name=1, legend.cex=0.7, ...){
-  
-  
+enrichment_map <- function(gs_score = ora_score, gs_list = ptw_all, method=c('overlap', 'jaccard'),
+                           coeff=NULL, all_gs=TRUE, comm_method='fastgreedy', min_comm_size=2,
+                           gs_list_size=NULL, set_sim_df=NULL, file_prefix='en_map', 
+                           layout = NULL, weight_within = 4, weight_between = 1,
+                           pal_community = NULL, pal_score = NULL, top_ptw = "score",
+                           wrap = 15, label_fontsize = c(6, 5), 
+                           e_color = "gray65", e_alpha = 0.5, e_range = c(1,4), 
+                           v_stroke = 0.5, v_range = c(2,8), 
+                           save_plot=TRUE, width=200, 
+                           height=200, res=300, units = "mm"){
+  #method=c('overlap')
+  #similarity method and coeff----------------
   method <- match.arg(method)
   cat("method:", method, "\n")
   if(is.null(coeff)){
@@ -56,38 +81,50 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
   cat("comm_method:", comm_method, "\n")
   
   if(is.null(gs_list_size)){
-    gs_list <- gs_list[names(gs_list) %in% names(x)]
+    gs_list <- gs_list[names(gs_list) %in% names(gs_score)]
     gs_list_size <-lengths(gs_list)
   }
   
+  #calculating similarities-----------------------
   if(is.null(set_sim_df)){
-    cat("Calculating gene set similarities...")
-    set_sim_df <- data.frame(t(utils::combn(names(x), 2)), stringsAsFactors = FALSE)
+    cat("Calculating gene set similarities... ")
+    set_sim_df <- data.frame(t(utils::combn(names(gs_score), 2)), stringsAsFactors = FALSE) #build table of pair occurrences
     colnames(set_sim_df)[1:2] <- c('set1', 'set2')
-    for(j in 1:nrow(set_sim_df)){
-      if(j %% 1000 ==0 ){
-        cat(j, '/', nrow(set_sim_df), '\n')
-      }
-      set_sim_df$sim[j] <- calc_set_similarity(gs_list[names(gs_list) == set_sim_df$set1[j]][[1]], gs_list[names(gs_list) == set_sim_df$set2[j]][[1]], method=method)
-    }
+    cat( nrow(set_sim_df), 'similarities found\n')
+    set_sim_df$sim <- sapply(1:nrow(set_sim_df), function(x) {
+      s.1 <- as.character(set_sim_df[x, 1])
+      s.2 <- as.character(set_sim_df[x, 2])
+      out <- calc_set_similarity(gs_list[[s.1]], 
+                                 gs_list[[s.2]], method=method)
+      return(out)
+    }, simplify = T)
+    
+    write.table(set_sim_df, paste0(file_prefix, "_sim_table.txt"), sep = "\t", col.names = T, row.names = F, quote = F)
+    
     cat("done.\n")
   }else{
     cat("Using given gene set similarities\n")
     cat("Keep only gene sets for which similarity values are avilable\n")
     gs <- unique(c(set_sim_df[, 1], set_sim_df[, 2]))
     gs_list <- gs_list[names(gs_list) %in% gs]
-    x <- x[names(x) %in% names(gs_list)]
+    gs_score <- gs_score[names(gs_score) %in% names(gs_list)]
   }
+  
   
   
   cat("Summary of gene set similarities (", nrow(set_sim_df),"):\n")
   print(summary(set_sim_df$sim))
   
-  #enrichment map: overlap
-  path_mod <- igraph::simplify(igraph::graph.data.frame(set_sim_df[set_sim_df$sim >= coeff, ], directed=FALSE), edge.attr.comb = 'mean')
-  if(length(igraph::V(path_mod)) < length(x) & all_gs){
-    path_mod <- igraph::add_vertices(path_mod, length(which(!(names(x) %in% igraph::V(path_mod)$name))), attr = list(name=names(x)[which(!(names(x) %in% igraph::V(path_mod)$name))])) #reintroduce vertexes excluded
-  }
+  #building pathway network + communities------------------------------
+  path_mod <- igraph::graph.data.frame(set_sim_df[set_sim_df$sim >= coeff, ], 
+                                                        directed=FALSE)#build network
+  if(length(igraph::V(path_mod)) < length(gs_score) & all_gs){
+    to_add <- names(gs_score)
+    to_add <- to_add[!to_add %in% V(path_mod)$name]
+    l <- length(to_add)
+    path_mod <- igraph::add_vertices(path_mod, l, 
+                                     attr = list(name=to_add)) #reintroduce vertexes excluded
+  } #reintroduce vertex at degree 0
   cat("Enrichment Map: V=", length(V(path_mod)), ", E=", length(E(path_mod)), "\n")
   
   cat("Community detection...\n")
@@ -96,12 +133,9 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
   
   path_mod_comm <- path_mod_comm$comm[[comm_method]]
   
-  V(path_mod)$comm_id <- path_mod_comm$membership
-  # out <- data.frame(id=names(x), score=x, module=0, size=1, stringsAsFactors = FALSE)
-  # out$module[out$id %in% path_mod_comm$names]<- path_mod_comm$membership[match(out$id[out$id %in% path_mod_comm$names], path_mod_comm$names)]
-  # out$size[out$id %in% path_mod_comm$names] <- table(path_mod_comm$membership)[out$module[out$id %in% path_mod_comm$names]]
-  
-  if(min_comm_size > 1){
+  V(path_mod)$comm_id <- as.character(path_mod_comm$membership)
+   
+  if(min_comm_size > 1){ #filtering network by community size. Removing communities smaller that `min_comm_size`
     cat("Excluding communities smaller than ", min_comm_size, "\n")
     keep_comm <- sizes(path_mod_comm)
     keep_comm <- names(keep_comm)[keep_comm >= min_comm_size]
@@ -110,113 +144,87 @@ enrichment_map <- function(x, gs_list, method=c('overlap', 'jaccard'), coeff=NUL
     cat("Enrichment Map: V=", length(V(path_mod)), ", E=", length(E(path_mod)), "\n")
   }
   
-  V(path_mod)$score <- x[match(V(path_mod)$name, names(x))]
-  
+  V(path_mod)$score <- gs_score[V(path_mod)$name] #pathway score based on ORA res
+  V(path_mod)$size <- gs_list_size[V(path_mod)$name]
   ### genes of each pathway community
   path_comm_genes <- split(V(path_mod)$name, V(path_mod)$comm_id)
   path_comm_genes <- lapply(path_comm_genes, function(pathway_vector) sort(unique(unlist(gs_list[names(gs_list) %in% pathway_vector]))))
   
-  #print pathway network 
-  if(plot_flag){
-    
-    if(is.null(vertex.color.pal)){
-      vertex.color.pal <- pals::brewer.greens(n = 5)
-      vertex.color.factor <- ggplot2::cut_interval(V(path_mod)$score, n=5)
-    }
-    
-    #color
-    mark.col <- pals::polychrome(length(table(V(path_mod)$comm_id)))
-    
-    #layout
-    if(is.null(L)){
-      L <- igraph::layout_with_fr(path_mod, weights = edge_weights(list(membership=V(path_mod)$comm_id), path_mod, weight.within = weight.within, weight.between = weight.between))
-    }
-    
-    #vertex color
-    if(vertex.shape != 'pie'){
-      if(is.null(vertex.color)){
-        igraph::V(path_mod)$color <- vertex.color.pal[as.numeric(vertex.color.factor)]
-      }else{
-        igraph::V(path_mod)$color <- vertex.color
-      }
-    }
-    #vertex shape
-    if(length(vertex.shape) == length(V(path_mod))){
-      igraph::V(path_mod)$shape <- vertex.shape[match(igraph::V(path_mod)$name, names(vertex.shape))]
-    }
-    if(vertex.shape == 'pie'){
-      igraph::V(path_mod)$shape <- 'pie'
-      igraph::V(path_mod)$pie <- vertex.pie[match(igraph::V(path_mod)$name, names(vertex.pie))]
-    }
-    
-    ### community labels
-    network_df <- data.frame(L, name=V(path_mod)$name, comm_id=V(path_mod)$comm_id, score=V(path_mod)$score, show.name=FALSE, stringsAsFactors = F) ##all
-    if(score.decreasing){
-      temp <- tapply(setNames(-network_df$score, network_df$name), network_df$comm_id, rank, ties.method="min")
-    }else{
-      temp <- tapply(setNames(network_df$score, network_df$name), network_df$comm_id, rank, ties.method="min")
-    }
-    temp <- data.frame(rank=unlist(temp), name=unlist(lapply(temp, names)), stringsAsFactors = F)
-    network_df <- merge(network_df, temp, by="name")
-    rm(temp)
-    network_df$show.name[network_df$rank <= n_name] <- TRUE
-    
-    #community label"
-    comm_top <- data.frame(show.comm=unlist(tapply(network_df$X2, network_df$comm_id, max)))
-    network_df <- merge(network_df, comm_top, by.x="comm_id", by.y=0, all=T)
-    network_df$show.comm <- network_df$X2 == network_df$show.comm
-    V(path_mod)$label <- network_df$show.comm[match(V(path_mod)$name, network_df$name)]
-    V(path_mod)$label[V(path_mod)$label] <- V(path_mod)$comm_id[V(path_mod)$label]
-    V(path_mod)$label[V(path_mod)$label == FALSE] <- ""
-    
-    network_df$color <- mark.col[as.numeric(as.factor(network_df$comm_id))]
-    
-    size.pal <- seq(from=vertex.size.min, to=vertex.size.max, length.out=n_size)
-    size.factor <- ggplot2::cut_interval(gs_list_size[match(igraph::V(path_mod)$name, names(gs_list_size))], n = n_size)
-    igraph::V(path_mod)$size <- size.pal[as.numeric(size.factor)]
-    
-    width.pal <- seq(from=edge.wd.min, to=edge.wd.max, length.out=n_width)
-    width.factor <- ggplot2::cut_interval(igraph::E(path_mod)$sim, n = n_width)
-    igraph::E(path_mod)$width <- width.pal[as.numeric(width.factor)]
-    
-    ### mark groups
-    if(mark.groups){
-      mark.groups <- split(igraph::V(path_mod)$name, V(path_mod)$comm_id)
-    }else{
-      mark.groups <- NULL
-    }
-    
-    #without labels
-    grDevices::jpeg(paste0(file.prefix, ".jpg"), units='mm', width = img.width, height = img.height, res=img.res)
-    
-    layout(matrix(c(2, 2, 1, 3), nrow = 2, byrow = T), heights = c(0.10, 0.90), widths = c(.8, .2))
-    
-    par(mar=c(.1, .1, .1, .1), oma=c(0, 0, 0, 0))
-    igraph::plot.igraph(path_mod, mark.groups = mark.groups, layout=L, mark.col=adjustcolor(mark.col, 0.2), mark.border=NA, vertex.label.degree=-pi/2, vertex.label.font=2, vertex.label.cex=2, vertex.label.dist=1, vertex.label.color="black", ...)
-    
-    ### module annotations
-    par(mar=c(0.1, 0.1, 0.1, 0.1))
-    plot.new()
-    #legend("topleft", legend = paste(network_df$comm_id[network_df$show.name], network_df$name[network_df$show.name]), cex=0.7, text.col = network_df$color[network_df$show.name], bty = "n", xpd=T, text.font = 2, ncol=2)
-    legend("topleft", legend = paste(network_df$comm_id[network_df$show.name], network_df$name[network_df$show.name]), cex=legend.cex, bty = "n", xpd=T, text.font = 2, ncol=2)
-    
-    if(is.null(vertex.color) & vertex.shape != 'pie'){
-      plot.new()
-      graphics::legend("topright", legend = levels(size.factor), pch = 1, pt.cex =size.pal, xpd = TRUE, bty = "n", cex = 0.8)
-      
-      graphics::legend("right", legend = levels(width.factor), lwd=width.pal, xpd = TRUE, bty = "n", cex = 0.8)
-      
-      graphics::legend("bottomright", legend = levels(vertex.color.factor), pch = 21, pt.bg = vertex.color.pal, col = "black", xpd = TRUE, bty = "n", cex = 0.8)
-    }
-    
-    
-    grDevices::dev.off()
-    write.table(network_df, file=paste0(file.prefix, ".txt"), row.names = F, sep="\t")
-    
+  #layout---------------------------------
+  if(is.null(layout)){
+    layout <- igraph::layout_with_fr(path_mod, weights = edge_weights(list(membership=V(path_mod)$comm_id), path_mod, 
+                                                                      weight.within = weight_within, weight.between = weight_between))
+  }
+  
+  #preparing tables for returning-----------------
+  network_df <- data.frame(layout, name=V(path_mod)$name, comm_id=V(path_mod)$comm_id, 
+                           score=V(path_mod)$score, stringsAsFactors = F) ##all
+  network_df$n_genes <- gs_list_size[network_df$name]
+  tmp <- split(network_df, network_df$comm_id)
+  n <- names(tmp)
+  tmp <- unlist(lapply(tmp, function(tab) {
+    tab <- tab[order(tab[, top_ptw], decreasing = F),]
+    tab <- tab$name[1]
+    tab <- gsub("_", " ",  tab)
+    return(tab)
+  }))
+  
+  names(tmp) <- n
+  V(path_mod)$comm_id2 <- tmp[as.character(V(path_mod)$comm_id)]
+  
+  #palettes---------------------------
+  if(is.null(pal_community)) {
+    pal_community <- pals::alphabet2(n = length(n))
+    names(pal_community) <- n
+  } else {
+    pal_community <- pal_community[n]
   }
   
   
+  if(is.null(pal_score)) {
+    pal_score <- pals::brewer.greens(n = 3)
+  } 
   
-  return(list(igraph=path_mod, network_data=network_df, path_comm_genes=path_comm_genes, sim_coeff=set_sim_df))
+  
+  #plot--------------------------------
+  
+  #set pals + alpha values
+  #names of the pathway with most genes/highest score
+  #community labels
+  p <- ggraph(path_mod, layout) +
+    theme_graph() +
+    ggforce::geom_mark_rect(aes(x = x, y = y, label = comm_id, 
+                                description = stringr::str_wrap(comm_id2, wrap), 
+                                fill = comm_id, color = comm_id), 
+                            show.legend = FALSE, label.fontsize = label_fontsize, con.cap = unit(1, "mm"),
+                            label.margin = margin(1, 0, 1, 0, "mm")) +
+    scale_fill_manual(values = pal_community) +
+    scale_color_manual("Community", values = pal_community) +
+    geom_edge_link(aes(edge_width = sim), color = e_color, alpha = e_alpha) +
+    scale_edge_width("Similarity", range = e_range) +
+    ggnewscale::new_scale_fill() +
+    geom_node_point(aes(fill = score, size = size, color = comm_id), shape = 21, stroke = v_stroke) +
+    scale_fill_gradientn(colours = pal_score) +
+    scale_size("# genes", range = v_range) +
+    guides(color = guide_legend(override.aes = list(shape = 19, size = 3))) #+
+    # theme(plot.margin = unit(c(0, 0, 0, 0), "cm"),
+    #       legend.key.size = unit(5, 'mm'))
+  
+  if(save_plot) {
+    jpeg(paste0(file_prefix, ".jpeg"), width = width, height = height, 
+         res = res, units = units)
+  }
+  print(p)
+  if(save_plot) {
+    dev.off()
+  }
+  
+  if(save_plot) {
+    return(list(igraph=path_mod, network_data=network_df, path_comm_genes=path_comm_genes, sim_coeff=set_sim_df))
+  } else {
+    return(list(igraph=path_mod, network_data=network_df, path_comm_genes=path_comm_genes, sim_coeff=set_sim_df, plot = p))
+  }
+  
   
 }
+

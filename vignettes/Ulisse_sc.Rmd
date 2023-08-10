@@ -34,7 +34,7 @@ library(igraph)
 #options(width = 80)
 ```
 
-In this tutorial we will see how to use Ulisse to analyse cell-cell cross-talk (CCC) data. For CCC analysis we need two inputs: a ranked gene list for each cell cluster and a biological network, which in this case is a communication network. 
+In this tutorial we will see how to analyse intercelluar cross-talk by using Ulisse. For this analysis we need two inputs: ranked gene sets of the cell cluster and a communication network. 
 
 ```{r libraries, message=FALSE, warning=FALSE, eval=FALSE}
 library(Seurat)
@@ -48,12 +48,12 @@ library(scales)
 
 # Preparation of the inputs
 
-As an example, we will use a breast cancer single cell sample and Omnipath communication network. We will apply this workflow on cell-type data, but it can be also applied on clusters. As a communication network, other resources are available and cam be used. Only take care that Ulisse need an undirected biological network and does not considers sub-units.
+Firstly we will see how to prepare the inputs by using Ulisse's functions.
+The cell gene sets derive from the cell type or cell clusters of a single cell sample (or multiple integrated samples), while the intercellular network has to be provided.Here, we will use Omnipath communication network [@turei2021], but other resources can be used. Only take care that Ulisse uses undirected biological network and does not considers sub-units.
 
 ## Ligand-receptor network
 
-To obtain the biological network we will use Omnipath [@turei2021], a database composed by various resources.
-Ligand-Receptor (LR) interactions will download the intercellular network from Omnipath using ligand as `transmitter` param and receptor as `receiver`, and used to build the needed biological network. 
+With the code below we will download Omnipath intercellualr communications, that are used to build an intercellualr network by using `igraph` package functions.
 
 ```{r OmnipathLR, eval=FALSE}
 intercell_net <- import_intercell_network(interactions_param = list("datasets" = "omnipath"),
@@ -69,12 +69,11 @@ g.intercell <- graph_from_edgelist(as.matrix(g.intercell),
 
 ## Pre-processing with Seurat pipeline
 
-To explain the functioning of the CCC calculation implemented in Ulisse we will use one of the samples sequenced by Wu et al. [@wu2021]. In this study, the authors analyse 26 single cell of breast cancer samples. The samples contain tumoral as well as normal cells surrounding the tumor and composing its microenvironment.
+To explain the functioning of the intercellular cross-talk calculation implemented in Ulisse we will use one of the samples sequenced by Wu et al. [@wu2021]. In this study, the authors analyse 26 single cell of breast cancer samples, that are composed by tumoral and normal cells composing its microenvironment.
 The data can be downloaded at https://singlecell.broadinstitute.org/single_cell/study/SCP1039 or at GEO website under accession GSE176078. 
-In particular, we will study CCC in sample CID4515, but the pipeline can be applied to any sample of the study. 
-The code below can be used to read the 10x data and pre-process them to obtain dimensionality reduction through Seurat package [@Hao2021]. 
+In particular, we will study intercellular cross-talk in sample CID4515. 
+The code below can be used to read the 10x data and pre-process them to obtain dimensionality reduction through Seurat v4 package [@Hao2021]. 
 We will study the cell-cell communication among the cell-types provided by the authors, but the pipeline can be applied also to the clusters.
-We will use the matrix, barcodes, genes data together with the metadata, that provides cell annotation. 
 
 ```{r preprocessingNot1, eval=FALSE}
 data <- ReadMtx(mtx = "CID4515/count_matrix_sparse.mtx", 
@@ -89,7 +88,7 @@ data <- RunUMAP(data, dims = 1:10)
 
 ```
 
-`metadata.csv` is the table obtained by the link with the cell-types. After uploading it, we can use this information to plot the UMAP by cell type. 
+`metadata.csv` is the file with the cell-types identification provided by the authors (that can be downloaded again at https://singlecell.broadinstitute.org/single_cell/study/SCP1039). After uploading it, we can use this information to plot the UMAP by cell type. 
 
 ```{r preprocessingNot2, eval=FALSE}
 meta <- read.csv("CID44991/metadata.csv", sep = ",", stringsAsFactors = F)
@@ -124,13 +123,12 @@ DimPlot(data, reduction = "umap", group.by = "celltype_major", label = T,  cols 
 include_graphics("sc_data/umap_cell_type.jpeg")
 ```
 
-Ulisse provides two methods to study CCC, one that uses expression data and the other that uses Differentially Expressed Genes (DEG) data. We exemplify the usage of both approaches, to then compare the obtained results. It is important to note that you can choose to perform the same analyses on clusters or cell types as both of them are groups of cells. Thus, in this vignette we will consider them synonyms.
+# Intercellular cross-talk analysis
+Ulisse provides two methods to study intercellular cross-talk, one that uses expression data and the other that uses Differentially Expressed Genes (DEG) data. We exemplify the usage of both approaches, to then compare the obtained results. 
 
-# Expression CCC
+## Expression data
 
-## Ranked gene list
-
-For CCC analysis we will need a ranked gene list for each cell type These will be obtained from the normalized count matrix. 
+In this case, cell-type marker genes to be sued for cell-type gene sets are obtained from the normalized count matrix. 
 `preparing_cl_list()` takes as an inputs: 
 
 * the normalized gene counts matrix (`mtx`);
@@ -141,7 +139,7 @@ For CCC analysis we will need a ranked gene list for each cell type These will b
 
 * two threshold (`mean_t` and `cell_t`) to filter the data and remove noise. 
 
-The function uses `mean_t` to identify expressed genes in the normalized expression matrix: if the gene in a cell has a value equal or higher of that threshold is set to 1, 0 otherwise. Subsequently the function uses the binarized expression matrix to calculate for each gene in each cell type the frequency of being expressed in at least `cell_t` cells. Only the genes in `universe` are considered, which are the genes present in the LR network.
+The function uses `mean_t` to identify expressed genes in the normalized expression matrix: if the gene in a cell has a value equal or higher of that threshold is set to 1, 0 otherwise. Subsequently, the function uses the binarized expression matrix to calculate for each gene in each cell-type the frequency of being expressed in at least `cell_t` cells. Only the genes in `universe` are considered, which are the genes present in the LR network.
 
 We suggest identifying `mean_t` considering the mean expression of each gene calculated on non-zero values. Instead, `cell_t` can be set considering the filtering used to remove low expressed genes at the beginning of the Seurat pipeline.
 The code below can be used to assess the expression threshold.
@@ -185,19 +183,19 @@ head(ct_list[[1]])
 rm(ct_list)
 ```
 
-## Communication analysis
+### Communication analysis
 
-The required inputs are now ready to analyse CCC with `gs_cross_talk()` function. This function requires also additional parameter:
+The required inputs are now ready to analyse intercellular cross-talk with `gs_cross_talk()` function. This function requires also additional parameter:
 
 * `k` corresponds to the number of permutation needed that, together with the original matrix, are used for the calculation of p-value and FDR. In this case we use 49 permutation that, together with the real one, correspond to a total of 50 permuted list for each cell type pair, and thus the minimal p-value that can be observed is 1/50 or 0.02;
 
-* `shared` which should be set to `TRUE` to enable possible overlapping in gene-lists of a cell-type pair. Different cells may express the same genes, moreover when considering clusters, which may represents different states of the same cell-type. These shared genes may represents intra-cellular communication, but as bot cells in a cell-pair express the same genes, is impossible to discern if these are autocrine or paracrine communication. Thus, it is important to consider also these in CCC;
+* `shared` which should be set to `TRUE` to enable possible overlapping in gene-lists of a cell-type pair. Different cells may express the same genes, moreover when considering clusters, which may represents different states of the same cell-type. These shared genes may represents intracellular communication, but as both cells in a cell-pair express the same genes, is impossible to discern if these are autocrine or paracrine communication. Thus, it is important to consider also these in intercellular cross-talk;
 
-* `hash`: logical, used to speed-up calculation when lots of gene-sets are used. Here we have low cell-type numbers, so we suggest to set it to `FALSE`;
+* `hash`: logical, used to speed-up calculation when lots of gene-sets are used. Here, we have low cell-type numbers, so we suggest to set it to `FALSE`;
 
-* `ct_info`: logical, if detail of gene-gene interaction in the gene-set should be returned. This might be highly important in cell-cell cross-talk, so we set it to `TRUE`. By enabling this parameter, the output of the function will be a two-element list, with the fist (`ct_info`) a table with all the gene communications between the two cell types; and the second (`ct_res`) a table with the CCC results. Note that the cumulative score of a cell type pair is equal to the sum of all the gene pair scores in `ct _info`.
+* `ct_info`: logical, if detail of gene-gene interaction in the gene-set should be returned. This might be highly important in cell-cell cross-talk, so we set it to `TRUE`. By enabling this parameter, the output of the function will be a two-element list, with the fist (`ct_info`) a table with all the gene communications between the two cell types; and the second (`ct_res`) a table with the intercellular cross-talk results. Note that the cumulative score of a cell type pair is equal to the sum of all the gene pair scores in `ct _info`.
 
-* `mc_cores_perm` and `mc_cores_ct` control the parallelization of the function in CCC calculation and permutation, respectively. Be aware that `mc_cores_perm` multiplies `mc_cores_ct`. Parallelization is useful to reduce the computational time for the calculation but improves the amount of memory needed. 
+* `mc_cores_perm` and `mc_cores_ct` control the parallelization of the function in intercellular cross-talk calculation and permutation, respectively. Be aware that `mc_cores_perm` multiplies `mc_cores_ct`. Parallelization is useful to reduce the computational time for the calculation but improves the amount of memory needed. 
 
 ```{r CCC_CTnot1, eval=FALSE}
 LR.adj <- as_adjacency_matrix(g.intercell, sparse = F)
@@ -237,13 +235,13 @@ expr_ccc %>%
 rm(expr_ccc)
 ```
 
-## CCC visualization
+### Intercellular cross-talk visualization
 
-CCC results can be filtered to maintain only the significant ones. The results can be visualized as a network (`plot_network_CT()`) or as an heatmap (`ct_heatmap()`) by using Ulisse package functions.
+Intercellular cross-talk results can be filtered to maintain only the significant ones. The results can be visualized by using Ulisse package functions.
 The code below can be used to plot the results as a network. 
-`filtering` argument is used to control which CCC have to be visualized in the network. If set to `TRUE`, then `p_val`, `FDR` and `ct_val` are used to identify the significant communications and plot these with a solid line, whereas all the others will be plotted with a dashed line. Here, we enabled this visualization, by providingp-value and FDR filtering. `ct_val = NULL` allows to consider all CCC without filtering for this value. 
+`filtering` argument is used to control which intercellular cross-talks have to be visualized in the network. If set to `TRUE`, then `p_val`, `FDR` and `ct_val` are used to identify the significant communications and plot these with a solid line, whereas all the others will be plotted with a dashed line. Here, we enabled this visualization, by providing p-value and FDR filtering. `ct_val = NULL` allows to consider all intercellular cross-talk without filtering for this value. 
 `community` can be logical (if the community should be calculated by using `igraph::fastgreedy.community()`), or a community object as calculated with igraph package.
-`vertex` is used to color the vertices, and can be set to "name" to color them according to the name of the cell-type.
+`vertex` is used to color the vertices, and can be set to `"name"` to color them according to the names of the cell-types.
 `edge_col_by` and `edge_width` parameters control the value used to color the edges and if their width should be proportional to that value. `edge_adj_col` is used to control the transparency of the edges: as in pathway cross-talk there can be lots of links it can e useful to control the transparency. 
 `plot_network_CT()` function returns the igraph cross-talk network with the communities under "comm_id" vertex attribute (if calculated). `plot_network_CT()` function uses `ggraph` package functions, which are ggplot2-based. If `file_out` is set to `NULL` the function returns also the ggplot2 network object.
 
@@ -266,14 +264,14 @@ rm(ccc_net)
 include_graphics("sc_data/pct_net.jpeg")
 ```
 
-`ct_heatmap()` function can be used to plot CCC as an heatmap by selecting the variable that have to be used to color the heatmap (`color_by`, here we used the cross-talk score), color scale (`color = c("lightyellow", "red3")`), and the color used for the zeros, that are the cells in the heatmap corresponding to the cell types pairs that do not shows significant communications (`no_ct_color`). Having different colors for minimum and zero help the heatmap readability. 
+`ct_heatmap()` function can be used to plot intercellular cross-talk as an heatmap by selecting the variable that have to be used to color the heatmap (`color_by`, here we used the cross-talk score), color scale (`color = c("lightyellow", "red3")`), and the color of cells in the heatmap of the cell types pairs without communications (`no_ct_color`).
 
-Similarly to `plot_network_CT()`, `ct_heatmap()` function allows to select for significant interactions, such that these are represented with a star. This is achieved by enabling `filtering = TRUE`, that will further require p-value, FDR and cross-talk score thresholds.
+Similarly to `plot_network_CT()`, `ct_heatmap()` function can select significant interactions, which are represented with a star. This is achieved by enabling `filtering = TRUE`, that will further require p-value, FDR and/or cross-talk score thresholds.
 
 ```{r CCC_CT_H_not, eval=FALSE}
 ct_heatmap(ct = clCC$ct_res, 
            color_by = "ct_score", color = c("lightyellow", "red3"), no_ct_color = "whitesmoke", 
-           filtering = TRUE, p_val = 0.05, FDR = 0.2, ct_val = NULL)
+           filtering = TRUE, p_val = 0.05, FDR = 0.2, ct_val = NULL,label_size = 8)
 
 ```
 
@@ -281,11 +279,9 @@ ct_heatmap(ct = clCC$ct_res,
 include_graphics("sc_data/cc_ct_f_heatmap.jpeg")
 ```
 
-# DEG CCC
+## DEG data
 
-We will now analyse cell-cell cross-talk by using DEGs First of all, we need to obtain DEG data. 
-
-## DEG analysis
+We will now analyse intercellular cross-talk by using DE results.
 
 Here we will use Seurat function for Differential Expression Analysis with default parameters to calculate DEG for each cell type against the others. Then, we will use Benjamini-Hochberg method to obtain adjusted p-value to be used to filter DEGs to maintain only the significant ones. We will select only the up-regulated genes.
 
@@ -333,9 +329,9 @@ head(DEG_list[[1]])
 rm(DEG_list)
 ```
 
-## Communication Analysis
+### Communication Analysis
 
-The subsequent part of the analysis is identical to the one used for expression data: `gs_cross_talk()` is used to analyse CCC with the same inputs and parameters. The calculation will results again in a two-object list with the detail of the gene-gene interaction and the cross talk results. 
+The subsequent part of the analysis is identical to the one used for expression data: `gs_cross_talk()` is used to analyse intercellular cross-talk with the same inputs and parameters. The calculation will results again in a two-object list with the detail of the gene-gene interaction and the cross talk results. 
 
 ```{r CCC_DEGnot1, eval=FALSE}
 
@@ -372,12 +368,11 @@ DEG_ccc %>%
 rm(DEG_ccc)
 ```
 
-## CCC network
+### Intercellular cross-talk visualization
 
-As done before, we can build CCC network by filtering the results and using Ulisse function and plot it as a network
+As done before, we can build intercellular cross-talk network by filtering the results and using Ulisse function and plot it as a network
 
 ```{r CCC_DEGnetNOT, eval=FALSE}
-
 DEG_CCC_net <- plot_network_CT(ct = DEGcl_ct$ct_res, 
                                filtering = T, p_val = 0.05, FDR = 0.2, ct_val = NULL,  
                                community = F, 
@@ -398,12 +393,9 @@ include_graphics("sc_data/DEG_net.jpeg")
 or as an heatmap
 
 ```{r CCC_DEG_Hnot, eval=FALSE}
-DEG_ccc_f <- DEG_ccc$ct_res[DEG_ccc$ct_res$p_value_link <= 0.05 & DEG_ccc$ct_res$FDR_link <= 0.2,]
-
 ct_heatmap(ct = DEGcl_ct$ct_res, 
            color_by = "ct_score", color = c("lightyellow", "red3"), no_ct_color = "whitesmoke", 
-           filtering = T, p_val = 0.05, FDR = 0.2, ct_val = NULL, 
-           width = unit(12, "cm"), height = unit(12, "cm"))
+           filtering = T, p_val = 0.05, FDR = 0.2, ct_val = NULL,  label_size = 8)
 
 
 ```
@@ -412,12 +404,12 @@ ct_heatmap(ct = DEGcl_ct$ct_res,
 include_graphics("sc_data/DEGcc_ct_f_heatmap.jpeg")
 ```
 
-# Comparison between expression and DEG CCC results
+# Comparison between expression and DEG intercellular cross-talk results
 
-Ulisse provides a function build and visualize a union network out of multiple analyses or samples. 
-`comparing_results_network()` function takes as an input a list of results obtained with `gs_cross_talk()`. In order to use this function, there should be correspondence between gene-sets, thus they should share at least some cell-types or the cluster names should correspond to the same cell-type states. 
-Here we will compare the significant results obtained with expression and DEG CCC analyses on the same sample, thus the cell-types corresponds.
-`comparing_results_network()` needs as an input a named list with the cross-talk results that should be already filtered to maintain only the significant CCC, if needed. 
+Ulisse provides a function to build and visualize a union network out of multiple analyses or samples. 
+`comparing_results_network()` function takes as an input a list of results obtained with `gs_cross_talk()`. The function does not align the results, so there should be correspondence among the gene sets names of the different samples, especially when using clusters.
+Here we will compare the significant results obtained with expression and DEG intercellular cross-talk analyses on the same sample, thus the cell-types corresponds.
+`comparing_results_network()` needs as an input a named list with the cross-talk results that should be already filtered to maintain only the significant intercellular cross-talk, if needed. 
 This function will create a union network where the vertices are all the cell types present in the results in `res_list`, the links are the all the communication present between them in the results.
 The vertices can be colored by considering the number of results in which are present (`vertex_number = TRUE`) and/or by a discrete variable (in this case `vertex = "name"`, otherwise a two list, where the first element is the name of the variable, the second the named vector with, see function help for detail). If both parameters are enabled, as in this case, the `vertex` one is used to color voronoi tesselation (see ggrpah package for further detail).  When `vertex_number = TRUE`, a color palette can be provided, composed by minimum and maximum value colors, or the function will use as default "blue" to "red".
 Edges can be colored by the number of results that share them (`edge_color_by = "number"`) or, as in this case, by which results contain them (`edge_color_by = "which"`). Edges width can be proportional to the number of results in which they are present (`edge_width = TRUE`).

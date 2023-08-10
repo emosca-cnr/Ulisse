@@ -113,7 +113,7 @@ gs_cross_talk <- function(gs_list, gene_network_adj, k = 9, shared = F, hash = T
   } else {
     
     sub_adj <- sub_adj[idx]
-    comb_p <- comb_p[idx,]
+    comb_p <- comb_p[idx,, drop = F]
     perm_list <- mclapply(1:nrow(comb_p), function(x) {
       n.1 <- l_cl_list[comb_p[x,1]]
       n.2 <- l_cl_list[comb_p[x,2]]
