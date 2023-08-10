@@ -53,7 +53,8 @@
 #' @import ggplot2
 #' @import ggraph
 #' @import pals
-#' @import ggforce
+#' @importFrom ggforce geom_mark_rect
+#' @importFrom ggnewscale new_scale_fill
 #' @import stringr
 #' @export
 #'
