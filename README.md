@@ -25,6 +25,24 @@ Typical application of Ulisse include:
 
 Source code: https://github.com/emosca-cnr/Ulisse
 
+# Installation
+
+Ulisse requires R >= 4.0.0, and some Bioconductor packages.
+
+To successfully install Ulisse firstly run 
+
+```{r, include=TRUE, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE)){
+  install.packages("BiocManager")
+}
+BiocManager::install(c("DOSE", "qvalue", "TCGAbiolinks", "ComplexHeatmap", "pander", "kableExtra"))
+```
+
+The other dependencies, if missing, should be automatically installed using the following command:
+
+```{r, include=TRUE, eval=FALSE}
+devtools::install_github("emosca-cnr/Ulisse", build_vignettes = TRUE)
+```
 
 Contacts:
 

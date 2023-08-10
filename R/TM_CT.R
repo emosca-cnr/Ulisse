@@ -44,6 +44,7 @@
 #' @importFrom gtools permutations
 #' @import kit
 #' @importFrom stringi stri_c
+#' @importFrom methods is as
 #' @export
 
 TM_CT <- function (gs_list, gene_network_adj, membership, genes, weight, 

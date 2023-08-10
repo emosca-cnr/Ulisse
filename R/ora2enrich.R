@@ -15,6 +15,7 @@
 #' @export
 #' @importClassesFrom DOSE enrichResult
 #' @importFrom qvalue qvalue
+#' @importFrom methods new
 
 
 ora2enrich <- function(ulisse_res, pvalueCutoff = 0.25, pAdjustMethod = "BH", qvalueCutoff = 0.25, gene = NULL, universe = NULL, geneSets = NULL, organism = "UNKNOWN", keytype = "UNKNOWN", ontology = "UNKNOWN", readable = FALSE){

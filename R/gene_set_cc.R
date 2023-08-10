@@ -32,6 +32,7 @@
 #' @import parallel
 #' @import igraph
 #' @importFrom stringi stri_c
+#' @importFrom methods is as
 #' @export
 
 

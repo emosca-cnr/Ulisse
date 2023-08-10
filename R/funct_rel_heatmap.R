@@ -17,6 +17,7 @@
 #' @param file_name file name of the plot. If not specified, it will be saved as "funct_rel_heatmap.jpeg"
 #' @importFrom grDevices dev.off jpeg
 #' @importFrom circlize colorRamp2
+#' @importFrom methods is as
 #' @import igraph
 #' @import ComplexHeatmap
 #' @export

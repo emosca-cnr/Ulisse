@@ -66,6 +66,7 @@
 #' @import igraph
 #' @importFrom stringi stri_c
 #' @importFrom reshape2 acast
+#' @importFrom methods is as
 #' @import Matrix
 #' @export
 
