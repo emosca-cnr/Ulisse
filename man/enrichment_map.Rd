@@ -5,8 +5,8 @@
 \title{Enrichment map}
 \usage{
 enrichment_map(
-  gs_score = ora_score,
-  gs_list = ptw_all,
+  gs_score,
+  gs_list,
   method = c("overlap", "jaccard"),
   coeff = NULL,
   all_gs = TRUE,

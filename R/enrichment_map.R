@@ -53,9 +53,11 @@
 #' @import ggplot2
 #' @import ggraph
 #' @import pals
+#' @import ggforce
+#' @import stringr
 #' @export
 #'
-enrichment_map <- function(gs_score = ora_score, gs_list = ptw_all, method=c('overlap', 'jaccard'),
+enrichment_map <- function(gs_score, gs_list, method=c('overlap', 'jaccard'),
                            coeff=NULL, all_gs=TRUE, comm_method='fastgreedy', min_comm_size=2,
                            gs_list_size=NULL, set_sim_df=NULL, file_prefix='en_map', 
                            layout = NULL, weight_within = 4, weight_between = 1,
