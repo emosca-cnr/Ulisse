@@ -64,7 +64,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Ulisse workflow 1: Pathway Cross-Talk analysis of bulk data</h1>
             
-            <h4 data-toc-skip class="date">2023-07-17</h4>
+            <h4 data-toc-skip class="date">2023-08-11</h4>
       
       
       <div class="d-none name"><code>Ulisse_bulk.Rmd</code></div>
@@ -73,11 +73,11 @@
     
     
 <p>In this vignette we will show the usage of Ulisse on gene-sets or
-pathway data. We will apply pathway cross-talk analysis on mutational
-bulk data of breast cancer obtained from TCGA, but the very same
-pipeline can be used to analyse other bulk-derived gene data, as well as
-gene signatures of cell cluster in single cell data. The only difference
-is that this pipeline can be applied to only a cluster at time.</p>
+pathway data. As an example, we will apply cross-talk analysis on
+mutational bulk data of breast cancer obtained from TCGA. The very same
+pipeline can be used to analyse gene of interest of cell clusters in
+single cell data. In this case, the only difference is that this
+pipeline can be applied to only a cluster at time.</p>
 <div class="section level2">
 <h2 id="downloading-and-preparing-the-data">Downloading and preparing the data<a class="anchor" aria-label="anchor" href="#downloading-and-preparing-the-data"></a>
 </h2>
@@ -90,16 +90,15 @@ is that this pipeline can be applied to only a cluster at time.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span></code></pre></div>
 <p>Ulisse needs mainly two inputs: a gene list, that can be or not
 ranked, and a biological network.</p>
-<p>As an example dataset we will use breast cancer mutational data
-obtained from TCGA, that we will use to obtain the ranked gene list. The
-biological network will be obtained from STRING database.</p>
+<p>Breast cancer mutational data obtained from TCGA will be used to
+obtain the ranked gene list. The biological network will be obtained
+from STRING database.</p>
 <div class="section level3">
 <h3 id="biological-network">Biological network<a class="anchor" aria-label="anchor" href="#biological-network"></a>
 </h3>
-<p>We obtain STRING data from STRINGdb <span class="citation">(Szklarczyk et al. 2021)</span> and build the network
-from all the proteins present in the database. The gene names are
-formatted with STRING identifiers, so we need to convert it to gene
-symbol.</p>
+<p>In the code below, we obtain STRING data from STRINGdb <span class="citation">(Szklarczyk et al. 2021)</span> and build the network
+from all the genes present in the database. The gene names are formatted
+with STRING identifiers, so we need to convert it to gene symbol.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">string_db</span> <span class="op">&lt;-</span> <span class="va"><a href="https://rdrr.io/pkg/STRINGdb/man/STRINGdb-class.html" class="external-link">STRINGdb</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span> version<span class="op">=</span><span class="st">"11.0"</span>, </span>
 <span>                           species<span class="op">=</span><span class="fl">9606</span>, </span>
@@ -126,13 +125,14 @@ symbol.</p>
 <div class="section level3">
 <h3 id="ranked-gene-list">Ranked gene list<a class="anchor" aria-label="anchor" href="#ranked-gene-list"></a>
 </h3>
-<p>To obtain the needed ranked gene list we will download the data from
-TGCA by using TCGAbiolinks package <span class="citation">Mounir et al.
-(2019)</span>, to then split the dataset to obtain a gene by sample
-matrix, with the number of mutation observed for each gene. By making
-the row mean we will obtain the frequency of mutation for each gene in
-the samples, and we will use this value as a rank. In detail, we will
-study the cross-talks of the top 200 genes.</p>
+<p>Then, we will download the data from TGCA by using TCGAbiolinks
+package <span class="citation">Mounir et al. (2019)</span>. Here, we
+want to prioritize the genes considering the frequency of mutations
+observed among the samples. So, we handle the data to obtain a gene by
+sample matrix, with the number of mutation observed for each gene. By
+making the row mean we will obtain the frequency of mutation for each
+gene in the samples, and we will use this value as a rank, cosnidering
+the top 200 genes.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">query</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TCGAbiolinks/man/GDCquery.html" class="external-link">GDCquery</a></span><span class="op">(</span>project <span class="op">=</span> <span class="st">"TCGA-BRCA"</span>, </span>
 <span>                  data.category <span class="op">=</span> <span class="st">"Simple Nucleotide Variation"</span>,</span>
@@ -165,7 +165,7 @@ network to calculate cross-talk.</p></li>
 </ul>
 <p>As an example we will use MSigDB Hallmark pathways <span class="citation">(Liberzon et al. 2015)</span> to obtain the gene-set
 list by using <code><a href="../reference/preparing_msigdb_list.html">preparing_msigdb_list()</a></code>. This function
-downloads a defined gene-set database and uses it to group the gene in
+downloads a defines gene-set database and uses it to group the gene in
 the gene list. The function will return a list composed by a named
 vector for each pathway. The vectors are composed by the ranks named
 after the genes in the gene-set. It returns only the pathways that are
@@ -194,7 +194,7 @@ composed by at least <code>min_size</code> and maximum
 build gene-set list from custom resources. To exemplify the usage of
 this function, here we download Hallmark db from MSigDB by using msigdbr
 package <span class="citation">(Dolgalev 2021)</span> to then build the
-very same gene-set list</p>
+very same gene-set list.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">msig_out</span> <span class="op">&lt;-</span> <span class="fu">msigdbr</span><span class="fu">::</span><span class="fu"><a href="https://igordot.github.io/msigdbr/reference/msigdbr.html" class="external-link">msigdbr</a></span><span class="op">(</span>species <span class="op">=</span> <span class="st">"Homo sapiens"</span>, category <span class="op">=</span> <span class="st">"H"</span><span class="op">)</span></span>
 <span><span class="va">ptw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/preparing_gs_list.html">preparing_gs_list</a></span><span class="op">(</span>gs_names <span class="op">=</span>  <span class="va">msig_out</span><span class="op">$</span><span class="va">gs_name</span>,</span>
@@ -212,9 +212,9 @@ function as an adjacency matrix. Cross-talk calculation can be
 parallelized by increasing the <code>mc_cores_pct</code> and
 <code>mc_cores_perm</code> values: the first parallelize the calculation
 of the cross-talk on the gene-sets, the second all the permutations used
-for p-value calculation, thus multiply the <code>mc_cores_pct</code> in
+for p-value calculation, thus multiplying <code>mc_cores_pct</code> in
 some part of the function. The number of permutations <code>k</code>
-corresponds to the number of permutation needed that, together with the
+corresponds to the number of permutations needed that, together with the
 original matrix, are used for the calculation of p-value and FDR. Here
 we set the number to 49, which means that the p-value and FDR are
 calculated on 49 permuted matrices + the original one, so 50 matrix in
@@ -226,16 +226,16 @@ gene-set cross-talk to avoid considering shared genes. Pathways are
 defined to group genes that occur to a particular molecular function.
 However, they are not mutually exclusive, as a gene may be involved in
 multiple functions. Considering shared genes will lead to consider in
-cross-talk calculations even the links between a shared gene and a
-not-shared, which are nevertheless internal to the pathway. Thus, when
+cross-talk calculations even links internal to the pathway. Thus, when
 calculating cross-talk on gene-sets or pathways this parameter should be
 set to <code>FALSE</code>;</p></li>
 <li><p><code>hash</code>: logical, used to speed-up calculation when
 lots of gene-sets are used. For pathway cross-talk we suggest to set it
 to <code>TRUE</code>;</p></li>
-<li><p><code>ct_info</code>: logical, if detail of gene-gene interaction
-in the gene-set should be returned. This might be highly important in
-cell-cell cross-talk. Here we set it to <code>FALSE</code>.</p></li>
+<li><p><code>ct_info</code>: logical, if detailS of gene-gene
+interaction in the gene-set should be returned. This might be highly
+important in cell-cell cross-talk. Here we set it to
+<code>FALSE</code>.</p></li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adj.m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/igraph/man/as_adjacency_matrix.html" class="external-link">as_adjacency_matrix</a></span><span class="op">(</span><span class="va">PPI.g</span>, sparse <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
@@ -720,7 +720,7 @@ dashed line. Otherwise, the whole cross-talk result table will be used.
 <code>community</code> can be logical (if the community should be
 calculated by using <code><a href="https://rdrr.io/pkg/igraph/man/cluster_fast_greedy.html" class="external-link">igraph::fastgreedy.community()</a></code>), or a
 community object as calculated with igraph package.
-<code>vertex_label</code> can be either a logical (if the label of the
+<code>vertex_label</code> can be either logical (if the label of the
 vertices should be plotted), or a vector with the label that should be
 assigned to each vertex (explained more later in the vignette).
 <code>edge_col_by</code> and <code>edge_width</code> parameters control
@@ -759,10 +759,10 @@ function returns also the ggplot2 network object.</p>
 <span><span class="co">#&gt; + ... omitted several edges</span></span></code></pre>
 <p><img src="bulk_data/pct_net.jpeg" width="600" style="display: block; margin: auto;"></p>
 <p>Here you can see the significant CT as an heatmap. You can choose the
-variable to color the heatmap, here we decide to use cross-talk score.
-The color parameters are used to set the color of the extremes of the
-color scale, so if you want to correct for outliers you can choose not
-to use minimum and maximum (default) ad provide your own values.
+variable to color the heatmap (here: cross-talk score). The color
+parameters are used to set the color of the extremes of the color scale,
+so if you want to correct for outliers you can choose not to use minimum
+and maximum (default) ad provide your own values.
 <code>no_ct_color</code> is used to color the cells in the heatmap
 corresponding to the pathways pairs that do not shows CT but that are
 necessarily present in an heatmap with a 0 score. Having different
@@ -791,13 +791,13 @@ relevance analysis via <code><a href="../reference/gene_functional_relevance.htm
 function. In this analysis the cross-talk data are used to study the
 roles of the genes in the cross-talks. It returns:</p>
 <ul>
-<li><p>the functional diversity, which is the number of different
-pathways with which a gene is involved in a cross-talk;</p></li>
-<li><p>the interactors diversity, or the number of interactors, which
-are the genes with which a gene interacts in a significant
-cross-talk;</p></li>
-<li><p>the functional relevance, which is the log2(functional
-diversity/interactor diversity).</p></li>
+<li><p><span class="math inline">\(n_f\)</span> the functional
+diversity, which is the number of different pathways with which a gene
+is involved in a cross-talk;</p></li>
+<li><p><span class="math inline">\(n_d\)</span> the interactors
+diversity, or the number of interactors, which are the genes with which
+a gene interacts in a significant cross-talk;</p></li>
+<li><p>the functional relevance, which is <span class="math inline">\(\log_2(\frac{n_f}{n_d})\)</span></p></li>
 </ul>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">funct_rel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gene_functional_relevance.html">gene_functional_relevance</a></span><span class="op">(</span>ct <span class="op">=</span> <span class="va">pct_f</span>, adj <span class="op">=</span> <span class="va">adj.m</span>, method <span class="op">=</span> <span class="st">"count"</span><span class="op">)</span></span>
@@ -1101,7 +1101,7 @@ before, if <code>file_name</code> argument is set to <code>NULL</code>
 the function will return the ggplot2 object instead of saving it.
 <code>plot_names</code> can be used to turn on/off the plotting of gene
 names (logical) or to provide a vector with the new labels of the
-vertices, insted of their name. It should be a named vector to assure
+vertices, instead of their name. It should be a named vector to assure
 correspondence between vertices names and new labels It can be used to
 change the vertices names or, as demonstrated here, to plot only some
 vertices of interest, like the one that have top/least functional and

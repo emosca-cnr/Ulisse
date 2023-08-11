@@ -57,7 +57,7 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><p><img src="articles/images/logo.png"></p>
+  <main id="main" class="col-md-9"><p><img src="articles/images/logo.png" width="250"></p>
 <div class="section level1">
 <div class="page-header"><h1 id="ulisse---an-r-package-to-go-beyond-the-boundaries-of-gene-sets">Ulisse - An R package to go beyond the boundaries of gene-sets<a class="anchor" aria-label="anchor" href="#ulisse---an-r-package-to-go-beyond-the-boundaries-of-gene-sets"></a>
 </h1></div>
@@ -87,6 +87,15 @@
 <li>Communication analysis between clusters or cell-type in single-cell samples</li>
 </ul>
 <p>Source code: <a href="https://github.com/emosca-cnr/Ulisse" class="external-link uri">https://github.com/emosca-cnr/Ulisse</a></p>
+</div>
+<div class="section level1">
+<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h1>
+<p>Ulisse requires R &gt;= 4.0.0, and some Bioconductor packages.</p>
+<p>To successfully install Ulisse firstly run</p>
+<p><code>{r, include=TRUE, eval=FALSE} if (!require("BiocManager", quietly = TRUE)){   install.packages("BiocManager") } BiocManager::install(c("DOSE", "qvalue", "TCGAbiolinks", "ComplexHeatmap", "pander", "kableExtra"))</code></p>
+<p>The other dependencies, if missing, should be automatically installed using the following command:</p>
+<p><code>{r, include=TRUE, eval=FALSE} devtools::install_github("emosca-cnr/Ulisse", build_vignettes = TRUE)</code></p>
 <p>Contacts:</p>
 <ul>
 <li>

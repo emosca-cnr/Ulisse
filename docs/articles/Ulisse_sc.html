@@ -64,7 +64,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Ulisse workflow 2: Cell-cell cross-talk analysis on single cell data</h1>
             
-            <h4 data-toc-skip class="date">2023-07-17</h4>
+            <h4 data-toc-skip class="date">2023-08-11</h4>
       
       
       <div class="d-none name"><code>Ulisse_sc.Rmd</code></div>
@@ -72,10 +72,9 @@
 
     
     
-<p>In this tutorial we will see how to use Ulisse to analyse cell-cell
-cross-talk (CCC) data. For CCC analysis we need two inputs: a ranked
-gene list for each cell cluster and a biological network, which in this
-case is a communication network.</p>
+<p>In this tutorial we will see how to analyse intercelluar cross-talk
+by using Ulisse. For this analysis we need two inputs: ranked gene sets
+of the cell cluster and a communication network.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://saezlab.github.io/OmnipathR/" class="external-link">OmnipathR</a></span><span class="op">)</span></span>
@@ -87,20 +86,19 @@ case is a communication network.</p>
 <div class="section level2">
 <h2 id="preparation-of-the-inputs">Preparation of the inputs<a class="anchor" aria-label="anchor" href="#preparation-of-the-inputs"></a>
 </h2>
-<p>As an example, we will use a breast cancer single cell sample and
-Omnipath communication network. We will apply this workflow on cell-type
-data, but it can be also applied on clusters. As a communication
-network, other resources are available and cam be used. Only take care
-that Ulisse need an undirected biological network and does not considers
-sub-units.</p>
+<p>Firstly we will see how to prepare the inputs by using Ulisse’s
+functions. The cell gene sets derive from the cell type or cell clusters
+of a single cell sample (or multiple integrated samples), while the
+intercellular network has to be provided.Here, we will use Omnipath
+communication network <span class="citation">(Türei et al. 2021)</span>,
+but other resources can be used. Only take care that Ulisse uses
+undirected biological network and does not considers sub-units.</p>
 <div class="section level3">
 <h3 id="ligand-receptor-network">Ligand-receptor network<a class="anchor" aria-label="anchor" href="#ligand-receptor-network"></a>
 </h3>
-<p>To obtain the biological network we will use Omnipath <span class="citation">(Türei et al. 2021)</span>, a database composed by
-various resources. Ligand-Receptor (LR) interactions will download the
-intercellular network from Omnipath using ligand as
-<code>transmitter</code> param and receptor as <code>receiver</code>,
-and used to build the needed biological network.</p>
+<p>With the code below we will download Omnipath intercellualr
+communications, that are used to build an intercellualr network by using
+<code>igraph</code> package functions.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">intercell_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://saezlab.github.io/OmnipathR/reference/import_intercell_network.html" class="external-link">import_intercell_network</a></span><span class="op">(</span>interactions_param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"datasets"</span> <span class="op">=</span> <span class="st">"omnipath"</span><span class="op">)</span>,</span>
 <span>                                          transmitter_param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -115,20 +113,19 @@ and used to build the needed biological network.</p>
 <div class="section level3">
 <h3 id="pre-processing-with-seurat-pipeline">Pre-processing with Seurat pipeline<a class="anchor" aria-label="anchor" href="#pre-processing-with-seurat-pipeline"></a>
 </h3>
-<p>To explain the functioning of the CCC calculation implemented in
-Ulisse we will use one of the samples sequenced by Wu et al. <span class="citation">(Wu et al. 2021)</span>. In this study, the authors
-analyse 26 single cell of breast cancer samples. The samples contain
-tumoral as well as normal cells surrounding the tumor and composing its
+<p>To explain the functioning of the intercellular cross-talk
+calculation implemented in Ulisse we will use one of the samples
+sequenced by Wu et al. <span class="citation">(Wu et al. 2021)</span>.
+In this study, the authors analyse 26 single cell of breast cancer
+samples, that are composed by tumoral and normal cells composing its
 microenvironment. The data can be downloaded at <a href="https://singlecell.broadinstitute.org/single_cell/study/SCP1039" class="external-link uri">https://singlecell.broadinstitute.org/single_cell/study/SCP1039</a>
 or at GEO website under accession GSE176078. In particular, we will
-study CCC in sample CID4515, but the pipeline can be applied to any
-sample of the study. The code below can be used to read the 10x data and
-pre-process them to obtain dimensionality reduction through Seurat
-package <span class="citation">(Hao et al. 2021)</span>. We will study
-the cell-cell communication among the cell-types provided by the
-authors, but the pipeline can be applied also to the clusters. We will
-use the matrix, barcodes, genes data together with the metadata, that
-provides cell annotation.</p>
+study intercellular cross-talk in sample CID4515. The code below can be
+used to read the 10x data and pre-process them to obtain dimensionality
+reduction through Seurat v4 package <span class="citation">(Hao et al.
+2021)</span>. We will study the cell-cell communication among the
+cell-types provided by the authors, but the pipeline can be applied also
+to the clusters.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ReadMtx.html" class="external-link">ReadMtx</a></span><span class="op">(</span>mtx <span class="op">=</span> <span class="st">"CID4515/count_matrix_sparse.mtx"</span>, </span>
 <span>                cells <span class="op">=</span> <span class="st">"CID4515/count_matrix_barcodes.tsv"</span>,</span>
@@ -139,9 +136,11 @@ provides cell annotation.</p>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ScaleData.html" class="external-link">ScaleData</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">data</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></code></pre></div>
-<p><code>metadata.csv</code> is the table obtained by the link with the
-cell-types. After uploading it, we can use this information to plot the
-UMAP by cell type.</p>
+<p><code>metadata.csv</code> is the file with the cell-types
+identification provided by the authors (that can be downloaded again at
+<a href="https://singlecell.broadinstitute.org/single_cell/study/SCP1039" class="external-link uri">https://singlecell.broadinstitute.org/single_cell/study/SCP1039</a>).
+After uploading it, we can use this information to plot the UMAP by cell
+type.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"CID44991/metadata.csv"</span>, sep <span class="op">=</span> <span class="st">","</span>, stringsAsFactors <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
 <span><span class="va">meta</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="op">]</span></span></code></pre></div>
@@ -334,22 +333,20 @@ Endothelial
 <span></span>
 <span><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">data</span>, reduction <span class="op">=</span> <span class="st">"umap"</span>, group.by <span class="op">=</span> <span class="st">"celltype_major"</span>, label <span class="op">=</span> <span class="cn">T</span>,  cols <span class="op">=</span> <span class="va">pal_ct</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sc_data/umap_cell_type.jpeg" width="600"></p>
-<p>Ulisse provides two methods to study CCC, one that uses expression
-data and the other that uses Differentially Expressed Genes (DEG) data.
-We exemplify the usage of both approaches, to then compare the obtained
-results. It is important to note that you can choose to perform the same
-analyses on clusters or cell types as both of them are groups of cells.
-Thus, in this vignette we will consider them synonyms.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="expression-ccc">Expression CCC<a class="anchor" aria-label="anchor" href="#expression-ccc"></a>
+<h2 id="intercellular-cross-talk-analysis">Intercellular cross-talk analysis<a class="anchor" aria-label="anchor" href="#intercellular-cross-talk-analysis"></a>
 </h2>
+<p>Ulisse provides two methods to study intercellular cross-talk, one
+that uses expression data and the other that uses Differentially
+Expressed Genes (DEG) data. We exemplify the usage of both approaches,
+to then compare the obtained results.</p>
 <div class="section level3">
-<h3 id="ranked-gene-list">Ranked gene list<a class="anchor" aria-label="anchor" href="#ranked-gene-list"></a>
+<h3 id="expression-data">Expression data<a class="anchor" aria-label="anchor" href="#expression-data"></a>
 </h3>
-<p>For CCC analysis we will need a ranked gene list for each cell type
-These will be obtained from the normalized count matrix.
+<p>In this case, cell-type marker genes to be sued for cell-type gene
+sets are obtained from the normalized count matrix.
 <code>preparing_cl_list()</code> takes as an inputs:</p>
 <ul>
 <li><p>the normalized gene counts matrix (<code>mtx</code>);</p></li>
@@ -361,11 +358,12 @@ filter the data and remove noise.</p></li>
 </ul>
 <p>The function uses <code>mean_t</code> to identify expressed genes in
 the normalized expression matrix: if the gene in a cell has a value
-equal or higher of that threshold is set to 1, 0 otherwise. Subsequently
-the function uses the binarized expression matrix to calculate for each
-gene in each cell type the frequency of being expressed in at least
-<code>cell_t</code> cells. Only the genes in <code>universe</code> are
-considered, which are the genes present in the LR network.</p>
+equal or higher of that threshold is set to 1, 0 otherwise.
+Subsequently, the function uses the binarized expression matrix to
+calculate for each gene in each cell-type the frequency of being
+expressed in at least <code>cell_t</code> cells. Only the genes in
+<code>universe</code> are considered, which are the genes present in the
+LR network.</p>
 <p>We suggest identifying <code>mean_t</code> considering the mean
 expression of each gene calculated on non-zero values. Instead,
 <code>cell_t</code> can be set considering the filtering used to remove
@@ -399,12 +397,11 @@ will use the same threshold used for the pre-processing.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ct_list</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;   TNFRSF4  TNFRSF14      ENO1    AGTRAP  TNFRSF1B     EPHA2 </span></span>
 <span><span class="co">#&gt; 0.2377049 0.2049180 0.7704918 0.1885246 0.2459016 0.1147541</span></span></code></pre>
-</div>
-<div class="section level3">
-<h3 id="communication-analysis">Communication analysis<a class="anchor" aria-label="anchor" href="#communication-analysis"></a>
-</h3>
-<p>The required inputs are now ready to analyse CCC with
-<code><a href="../reference/gs_cross_talk.html">gs_cross_talk()</a></code> function. This function requires also
+<div class="section level4">
+<h4 id="communication-analysis">Communication analysis<a class="anchor" aria-label="anchor" href="#communication-analysis"></a>
+</h4>
+<p>The required inputs are now ready to analyse intercellular cross-talk
+with <code><a href="../reference/gs_cross_talk.html">gs_cross_talk()</a></code> function. This function requires also
 additional parameter:</p>
 <ul>
 <li><p><code>k</code> corresponds to the number of permutation needed
@@ -417,12 +414,12 @@ type pair, and thus the minimal p-value that can be observed is 1/50 or
 enable possible overlapping in gene-lists of a cell-type pair. Different
 cells may express the same genes, moreover when considering clusters,
 which may represents different states of the same cell-type. These
-shared genes may represents intra-cellular communication, but as bot
+shared genes may represents intracellular communication, but as both
 cells in a cell-pair express the same genes, is impossible to discern if
 these are autocrine or paracrine communication. Thus, it is important to
-consider also these in CCC;</p></li>
+consider also these in intercellular cross-talk;</p></li>
 <li><p><code>hash</code>: logical, used to speed-up calculation when
-lots of gene-sets are used. Here we have low cell-type numbers, so we
+lots of gene-sets are used. Here, we have low cell-type numbers, so we
 suggest to set it to <code>FALSE</code>;</p></li>
 <li><p><code>ct_info</code>: logical, if detail of gene-gene interaction
 in the gene-set should be returned. This might be highly important in
@@ -430,15 +427,15 @@ cell-cell cross-talk, so we set it to <code>TRUE</code>. By enabling
 this parameter, the output of the function will be a two-element list,
 with the fist (<code>ct_info</code>) a table with all the gene
 communications between the two cell types; and the second
-(<code>ct_res</code>) a table with the CCC results. Note that the
-cumulative score of a cell type pair is equal to the sum of all the gene
-pair scores in <code>ct _info</code>.</p></li>
+(<code>ct_res</code>) a table with the intercellular cross-talk results.
+Note that the cumulative score of a cell type pair is equal to the sum
+of all the gene pair scores in <code>ct _info</code>.</p></li>
 <li><p><code>mc_cores_perm</code> and <code>mc_cores_ct</code> control
-the parallelization of the function in CCC calculation and permutation,
-respectively. Be aware that <code>mc_cores_perm</code> multiplies
-<code>mc_cores_ct</code>. Parallelization is useful to reduce the
-computational time for the calculation but improves the amount of memory
-needed.</p></li>
+the parallelization of the function in intercellular cross-talk
+calculation and permutation, respectively. Be aware that
+<code>mc_cores_perm</code> multiplies <code>mc_cores_ct</code>.
+Parallelization is useful to reduce the computational time for the
+calculation but improves the amount of memory needed.</p></li>
 </ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">LR.adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/igraph/man/as_adjacency_matrix.html" class="external-link">as_adjacency_matrix</a></span><span class="op">(</span><span class="va">g.intercell</span>, sparse <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
@@ -815,31 +812,30 @@ TNFRSF14;TNFRSF25;TNFRSF1B;PLA2G2A;ECE1;RPS6KA1;FGR;TXLNA;LCK;YBX1;PLK3;LRP8;JAK
 </table>
 </div>
 </div>
-<div class="section level3">
-<h3 id="ccc-visualization">CCC visualization<a class="anchor" aria-label="anchor" href="#ccc-visualization"></a>
-</h3>
-<p>CCC results can be filtered to maintain only the significant ones.
-The results can be visualized as a network
-(<code><a href="../reference/plot_network_CT.html">plot_network_CT()</a></code>) or as an heatmap
-(<code><a href="../reference/ct_heatmap.html">ct_heatmap()</a></code>) by using Ulisse package functions. The code
-below can be used to plot the results as a network.
-<code>filtering</code> argument is used to control which CCC have to be
-visualized in the network. If set to <code>TRUE</code>, then
-<code>p_val</code>, <code>FDR</code> and <code>ct_val</code> are used to
-identify the significant communications and plot these with a solid
-line, whereas all the others will be plotted with a dashed line. Here,
-we enabled this visualization, by providingp-value and FDR filtering.
-<code>ct_val = NULL</code> allows to consider all CCC without filtering
-for this value. <code>community</code> can be logical (if the community
-should be calculated by using
-<code><a href="https://rdrr.io/pkg/igraph/man/cluster_fast_greedy.html" class="external-link">igraph::fastgreedy.community()</a></code>), or a community object as
-calculated with igraph package. <code>vertex</code> is used to color the
-vertices, and can be set to “name” to color them according to the name
-of the cell-type. <code>edge_col_by</code> and <code>edge_width</code>
-parameters control the value used to color the edges and if their width
-should be proportional to that value. <code>edge_adj_col</code> is used
-to control the transparency of the edges: as in pathway cross-talk there
-can be lots of links it can e useful to control the transparency.
+<div class="section level4">
+<h4 id="intercellular-cross-talk-visualization">Intercellular cross-talk visualization<a class="anchor" aria-label="anchor" href="#intercellular-cross-talk-visualization"></a>
+</h4>
+<p>Intercellular cross-talk results can be filtered to maintain only the
+significant ones. The results can be visualized by using Ulisse package
+functions. The code below can be used to plot the results as a network.
+<code>filtering</code> argument is used to control which intercellular
+cross-talks have to be visualized in the network. If set to
+<code>TRUE</code>, then <code>p_val</code>, <code>FDR</code> and
+<code>ct_val</code> are used to identify the significant communications
+and plot these with a solid line, whereas all the others will be plotted
+with a dashed line. Here, we enabled this visualization, by providing
+p-value and FDR filtering. <code>ct_val = NULL</code> allows to consider
+all intercellular cross-talk without filtering for this value.
+<code>community</code> can be logical (if the community should be
+calculated by using <code><a href="https://rdrr.io/pkg/igraph/man/cluster_fast_greedy.html" class="external-link">igraph::fastgreedy.community()</a></code>), or a
+community object as calculated with igraph package. <code>vertex</code>
+is used to color the vertices, and can be set to <code>"name"</code> to
+color them according to the names of the cell-types.
+<code>edge_col_by</code> and <code>edge_width</code> parameters control
+the value used to color the edges and if their width should be
+proportional to that value. <code>edge_adj_col</code> is used to control
+the transparency of the edges: as in pathway cross-talk there can be
+lots of links it can e useful to control the transparency.
 <code><a href="../reference/plot_network_CT.html">plot_network_CT()</a></code> function returns the igraph cross-talk
 network with the communities under “comm_id” vertex attribute (if
 calculated). <code><a href="../reference/plot_network_CT.html">plot_network_CT()</a></code> function uses
@@ -868,34 +864,28 @@ also the ggplot2 network object.</p>
 <span><span class="co">#&gt;  [9] CAFs       --PVL               CAFs       --B-cells          </span></span>
 <span><span class="co">#&gt; + ... omitted several edges</span></span></code></pre>
 <p><img src="sc_data/pct_net.jpeg" width="600"></p>
-<p><code><a href="../reference/ct_heatmap.html">ct_heatmap()</a></code> function can be used to plot CCC as an
-heatmap by selecting the variable that have to be used to color the
-heatmap (<code>color_by</code>, here we used the cross-talk score),
-color scale (<code>color = c("lightyellow", "red3")</code>), and the
-color used for the zeros, that are the cells in the heatmap
-corresponding to the cell types pairs that do not shows significant
-communications (<code>no_ct_color</code>). Having different colors for
-minimum and zero help the heatmap readability.</p>
+<p><code><a href="../reference/ct_heatmap.html">ct_heatmap()</a></code> function can be used to plot intercellular
+cross-talk as an heatmap by selecting the variable that have to be used
+to color the heatmap (<code>color_by</code>, here we used the cross-talk
+score), color scale (<code>color = c("lightyellow", "red3")</code>), and
+the color of cells in the heatmap of the cell types pairs without
+communications (<code>no_ct_color</code>).</p>
 <p>Similarly to <code><a href="../reference/plot_network_CT.html">plot_network_CT()</a></code>,
-<code><a href="../reference/ct_heatmap.html">ct_heatmap()</a></code> function allows to select for significant
-interactions, such that these are represented with a star. This is
-achieved by enabling <code>filtering = TRUE</code>, that will further
-require p-value, FDR and cross-talk score thresholds.</p>
+<code><a href="../reference/ct_heatmap.html">ct_heatmap()</a></code> function can select significant interactions,
+which are represented with a star. This is achieved by enabling
+<code>filtering = TRUE</code>, that will further require p-value, FDR
+and/or cross-talk score thresholds.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ct_heatmap.html">ct_heatmap</a></span><span class="op">(</span>ct <span class="op">=</span> <span class="va">clCC</span><span class="op">$</span><span class="va">ct_res</span>, </span>
 <span>           color_by <span class="op">=</span> <span class="st">"ct_score"</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lightyellow"</span>, <span class="st">"red3"</span><span class="op">)</span>, no_ct_color <span class="op">=</span> <span class="st">"whitesmoke"</span>, </span>
-<span>           filtering <span class="op">=</span> <span class="cn">TRUE</span>, p_val <span class="op">=</span> <span class="fl">0.05</span>, FDR <span class="op">=</span> <span class="fl">0.2</span>, ct_val <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span>           filtering <span class="op">=</span> <span class="cn">TRUE</span>, p_val <span class="op">=</span> <span class="fl">0.05</span>, FDR <span class="op">=</span> <span class="fl">0.2</span>, ct_val <span class="op">=</span> <span class="cn">NULL</span>,label_size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sc_data/cc_ct_f_heatmap.jpeg" width="600"></p>
 </div>
 </div>
-<div class="section level2">
-<h2 id="deg-ccc">DEG CCC<a class="anchor" aria-label="anchor" href="#deg-ccc"></a>
-</h2>
-<p>We will now analyse cell-cell cross-talk by using DEGs First of all,
-we need to obtain DEG data.</p>
 <div class="section level3">
-<h3 id="deg-analysis">DEG analysis<a class="anchor" aria-label="anchor" href="#deg-analysis"></a>
+<h3 id="deg-data">DEG data<a class="anchor" aria-label="anchor" href="#deg-data"></a>
 </h3>
+<p>We will now analyse intercellular cross-talk by using DE results.</p>
 <p>Here we will use Seurat function for Differential Expression Analysis
 with default parameters to calculate DEG for each cell type against the
 others. Then, we will use Benjamini-Hochberg method to obtain adjusted
@@ -1116,15 +1106,14 @@ vectors are filtered to maintain only the gene that are present in
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">DEG_list</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;     ACKR1       VWF     RAMP2     RAMP3   CLEC14A    ADGRL4 </span></span>
 <span><span class="co">#&gt; 1397.4371 1068.3300  919.2382  839.4853  801.0583  800.9338</span></span></code></pre>
-</div>
-<div class="section level3">
-<h3 id="communication-analysis-1">Communication Analysis<a class="anchor" aria-label="anchor" href="#communication-analysis-1"></a>
-</h3>
+<div class="section level4">
+<h4 id="communication-analysis-1">Communication Analysis<a class="anchor" aria-label="anchor" href="#communication-analysis-1"></a>
+</h4>
 <p>The subsequent part of the analysis is identical to the one used for
-expression data: <code><a href="../reference/gs_cross_talk.html">gs_cross_talk()</a></code> is used to analyse CCC
-with the same inputs and parameters. The calculation will results again
-in a two-object list with the detail of the gene-gene interaction and
-the cross talk results.</p>
+expression data: <code><a href="../reference/gs_cross_talk.html">gs_cross_talk()</a></code> is used to analyse
+intercellular cross-talk with the same inputs and parameters. The
+calculation will results again in a two-object list with the detail of
+the gene-gene interaction and the cross talk results.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">DEG_ccc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gs_cross_talk.html">gs_cross_talk</a></span><span class="op">(</span>gs_list <span class="op">=</span> <span class="va">DEG_list</span>,</span>
@@ -1497,14 +1486,14 @@ GZMA;KLRB1;CD2;CCL5;FYN;KLRF1;CXCL13;CXCR4;ITGA4;LTB;TNFRSF1B;ADGRE5;ITGB7;CD38;
 </table>
 </div>
 </div>
-<div class="section level3">
-<h3 id="ccc-network">CCC network<a class="anchor" aria-label="anchor" href="#ccc-network"></a>
-</h3>
-<p>As done before, we can build CCC network by filtering the results and
-using Ulisse function and plot it as a network</p>
+<div class="section level4">
+<h4 id="intercellular-cross-talk-visualization-1">Intercellular cross-talk visualization<a class="anchor" aria-label="anchor" href="#intercellular-cross-talk-visualization-1"></a>
+</h4>
+<p>As done before, we can build intercellular cross-talk network by
+filtering the results and using Ulisse function and plot it as a
+network</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">DEG_CCC_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_network_CT.html">plot_network_CT</a></span><span class="op">(</span>ct <span class="op">=</span> <span class="va">DEGcl_ct</span><span class="op">$</span><span class="va">ct_res</span>, </span>
+<code class="sourceCode R"><span><span class="va">DEG_CCC_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/plot_network_CT.html">plot_network_CT</a></span><span class="op">(</span>ct <span class="op">=</span> <span class="va">DEGcl_ct</span><span class="op">$</span><span class="va">ct_res</span>, </span>
 <span>                               filtering <span class="op">=</span> <span class="cn">T</span>, p_val <span class="op">=</span> <span class="fl">0.05</span>, FDR <span class="op">=</span> <span class="fl">0.2</span>, ct_val <span class="op">=</span> <span class="cn">NULL</span>,  </span>
 <span>                               community <span class="op">=</span> <span class="cn">F</span>, </span>
 <span>                               vertex <span class="op">=</span> <span class="st">"name"</span>, vertex_size <span class="op">=</span> <span class="fl">5</span>, vertex_label <span class="op">=</span> <span class="cn">TRUE</span>, vertex_pal <span class="op">=</span> <span class="va">pal_ct</span>,</span>
@@ -1526,33 +1515,33 @@ using Ulisse function and plot it as a network</p>
 <p><img src="sc_data/DEG_net.jpeg" width="600"></p>
 <p>or as an heatmap</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">DEG_ccc_f</span> <span class="op">&lt;-</span> <span class="va">DEG_ccc</span><span class="op">$</span><span class="va">ct_res</span><span class="op">[</span><span class="va">DEG_ccc</span><span class="op">$</span><span class="va">ct_res</span><span class="op">$</span><span class="va">p_value_link</span> <span class="op">&lt;=</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">DEG_ccc</span><span class="op">$</span><span class="va">ct_res</span><span class="op">$</span><span class="va">FDR_link</span> <span class="op">&lt;=</span> <span class="fl">0.2</span>,<span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/ct_heatmap.html">ct_heatmap</a></span><span class="op">(</span>ct <span class="op">=</span> <span class="va">DEGcl_ct</span><span class="op">$</span><span class="va">ct_res</span>, </span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/ct_heatmap.html">ct_heatmap</a></span><span class="op">(</span>ct <span class="op">=</span> <span class="va">DEGcl_ct</span><span class="op">$</span><span class="va">ct_res</span>, </span>
 <span>           color_by <span class="op">=</span> <span class="st">"ct_score"</span>, color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lightyellow"</span>, <span class="st">"red3"</span><span class="op">)</span>, no_ct_color <span class="op">=</span> <span class="st">"whitesmoke"</span>, </span>
-<span>           filtering <span class="op">=</span> <span class="cn">T</span>, p_val <span class="op">=</span> <span class="fl">0.05</span>, FDR <span class="op">=</span> <span class="fl">0.2</span>, ct_val <span class="op">=</span> <span class="cn">NULL</span>, </span>
-<span>           width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">12</span>, <span class="st">"cm"</span><span class="op">)</span>, height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">12</span>, <span class="st">"cm"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>           filtering <span class="op">=</span> <span class="cn">T</span>, p_val <span class="op">=</span> <span class="fl">0.05</span>, FDR <span class="op">=</span> <span class="fl">0.2</span>, ct_val <span class="op">=</span> <span class="cn">NULL</span>,  label_size <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sc_data/DEGcc_ct_f_heatmap.jpeg" width="600"></p>
 </div>
 </div>
+</div>
 <div class="section level2">
-<h2 id="comparison-between-expression-and-deg-ccc-results">Comparison between expression and DEG CCC results<a class="anchor" aria-label="anchor" href="#comparison-between-expression-and-deg-ccc-results"></a>
+<h2 id="comparison-between-expression-and-deg-intercellular-cross-talk-results">Comparison between expression and DEG intercellular cross-talk
+results<a class="anchor" aria-label="anchor" href="#comparison-between-expression-and-deg-intercellular-cross-talk-results"></a>
 </h2>
-<p>Ulisse provides a function build and visualize a union network out of
-multiple analyses or samples. <code><a href="../reference/comparing_results_network.html">comparing_results_network()</a></code>
-function takes as an input a list of results obtained with
-<code><a href="../reference/gs_cross_talk.html">gs_cross_talk()</a></code>. In order to use this function, there
-should be correspondence between gene-sets, thus they should share at
-least some cell-types or the cluster names should correspond to the same
-cell-type states. Here we will compare the significant results obtained
-with expression and DEG CCC analyses on the same sample, thus the
-cell-types corresponds. <code><a href="../reference/comparing_results_network.html">comparing_results_network()</a></code> needs
-as an input a named list with the cross-talk results that should be
-already filtered to maintain only the significant CCC, if needed. This
-function will create a union network where the vertices are all the cell
-types present in the results in <code>res_list</code>, the links are the
-all the communication present between them in the results. The vertices
-can be colored by considering the number of results in which are present
+<p>Ulisse provides a function to build and visualize a union network out
+of multiple analyses or samples.
+<code><a href="../reference/comparing_results_network.html">comparing_results_network()</a></code> function takes as an input a
+list of results obtained with <code><a href="../reference/gs_cross_talk.html">gs_cross_talk()</a></code>. The function
+does not align the results, so there should be correspondence among the
+gene sets names of the different samples, especially when using
+clusters. Here we will compare the significant results obtained with
+expression and DEG intercellular cross-talk analyses on the same sample,
+thus the cell-types corresponds.
+<code><a href="../reference/comparing_results_network.html">comparing_results_network()</a></code> needs as an input a named list
+with the cross-talk results that should be already filtered to maintain
+only the significant intercellular cross-talk, if needed. This function
+will create a union network where the vertices are all the cell types
+present in the results in <code>res_list</code>, the links are the all
+the communication present between them in the results. The vertices can
+be colored by considering the number of results in which are present
 (<code>vertex_number = TRUE</code>) and/or by a discrete variable (in
 this case <code>vertex = "name"</code>, otherwise a two list, where the
 first element is the name of the variable, the second the named vector
