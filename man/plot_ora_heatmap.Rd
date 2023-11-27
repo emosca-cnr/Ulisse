@@ -16,6 +16,8 @@ plot_ora_heatmap(
 \arguments{
 \item{ora_res}{result of function gsea()}
 
+\item{p.stat}{p-value that will be plotted}
+
 \item{a}{alpha over FDR}
 
 \item{na_col}{color for FDR > a}
@@ -23,8 +25,6 @@ plot_ora_heatmap(
 \item{max_gs}{maximum number of gene sets that will be plotted}
 
 \item{...}{further arguments to ComplexHeatmap::Heatmap()}
-
-\item{nes_sign}{whether to print nes sign}
 }
 \description{
 Plot heatmap of ORA results for multiple runs

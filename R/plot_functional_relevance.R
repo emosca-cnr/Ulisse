@@ -12,7 +12,6 @@
 #' @param jitter_width,jitter_height values to control point jitter in the plot. See ggplot2::geom_jitter() for details
 #' @param width,height,res,units values used to save the plot in jpeg format, see grDevices::jpeg() for details
 #' @return If `file_name` The function returns the ggplot object
-#' @import plotrix
 #' @import ggplot2
 #' @import ggrepel
 #' @importFrom grDevices dev.off jpeg

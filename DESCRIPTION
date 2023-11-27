@@ -28,7 +28,6 @@ Imports:
   kit,
   msigdbr,
   qvalue,
-  plotrix,
   TCGAbiolinks,
   stringi,
   Matrix,
@@ -44,7 +43,8 @@ Imports:
   ggnewscale,
   methods,
   openxlsx,
-  stringr
+  stringr,
+  devtools
 Depends:
   R (>= 3.5.0)
 Suggests: 

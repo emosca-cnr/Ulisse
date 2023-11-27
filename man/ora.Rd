@@ -25,6 +25,8 @@ ora(
 
 \item{p_adj_method}{p value adjustment method, see p.adjust.methods}
 
+\item{description}{optional named vector with gene set description; names must be gene set identifiers}
+
 \item{wbd_min}{minimum number of white balls drawn}
 
 \item{min_size}{minimum gene set size}

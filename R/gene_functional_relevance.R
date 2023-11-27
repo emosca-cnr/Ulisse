@@ -50,8 +50,6 @@
 #'                     mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
 #' funct_rel <- gene_funct_relevance(ct, adj, to_plot=FALSE)
 #' }
-#' @import plotrix
-#' @importFrom grDevices dev.off jpeg
 #' @export
 
 

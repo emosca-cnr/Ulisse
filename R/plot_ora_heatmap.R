@@ -1,9 +1,9 @@
 #' Plot heatmap of ORA results for multiple runs
 #' @param ora_res result of function gsea()
-#' @param nes_sign whether to print nes sign
 #' @param a alpha over FDR
 #' @param na_col color for FDR > a
 #' @param max_gs maximum number of gene sets that will be plotted
+#' @param p.stat p-value that will be plotted
 #' @param ... further arguments to ComplexHeatmap::Heatmap()
 #' @importFrom ComplexHeatmap Heatmap
 #' @importFrom pals brewer.purples
