@@ -4,7 +4,7 @@
 \alias{ora1gs}
 \title{Hypergeometric test on 1 dataset}
 \usage{
-ora1gs(wb, bb, bd)
+ora1gs(wb = NULL, bb = NULL, bd = NULL)
 }
 \arguments{
 \item{wb}{white balls}

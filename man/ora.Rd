@@ -4,16 +4,34 @@
 \alias{ora}
 \title{Over Representation Analysis}
 \usage{
-ora(wb, bb, gsl, p_adj_method = "fdr")
+ora(
+  wb = NULL,
+  universe = NULL,
+  gsl = NULL,
+  p_adj_method = "fdr",
+  description = NULL,
+  wbd_min = 1,
+  min_size = 5,
+  max_size = 500,
+  out_file_prefix = "ora_res"
+)
 }
 \arguments{
-\item{wb}{hits (white balls)}
+\item{wb}{list of character vectors with hits (white balls)}
 
-\item{bb}{other elements (black balls)}
+\item{universe}{universe, character vector}
 
 \item{gsl}{named list of sets}
 
 \item{p_adj_method}{p value adjustment method, see p.adjust.methods}
+
+\item{wbd_min}{minimum number of white balls drawn}
+
+\item{min_size}{minimum gene set size}
+
+\item{max_size}{maximum gene set size}
+
+\item{out_file_prefix}{prefix for .xlsx and .txt output files}
 }
 \description{
 Over Representation Analysis

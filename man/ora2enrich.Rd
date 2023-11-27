@@ -6,21 +6,23 @@
 this function translates the result of an ORA into the DOSE class "enrichResult"}
 \usage{
 ora2enrich(
-  ulisse_res,
-  pvalueCutoff = 0.25,
+  ora_res = NULL,
+  pvalueCutoff = 1,
   pAdjustMethod = "BH",
-  qvalueCutoff = 0.25,
-  gene = NULL,
+  qvalueCutoff = 1,
+  wb = NULL,
   universe = NULL,
-  geneSets = NULL,
+  gsl = NULL,
   organism = "UNKNOWN",
   keytype = "UNKNOWN",
   ontology = "UNKNOWN",
-  readable = FALSE
+  readable = FALSE,
+  min_size = 5,
+  max_size = 500
 )
 }
 \arguments{
-\item{ulisse_res}{ora analysis result}
+\item{ora_res}{ora analysis result}
 
 \item{pvalueCutoff}{cut off over adjusted p value= 0.25}
 
@@ -28,11 +30,11 @@ ora2enrich(
 
 \item{qvalueCutoff}{cut off over q values}
 
-\item{gene}{input gene list}
+\item{wb}{input gene list}
 
 \item{universe}{universe of genes}
 
-\item{geneSets}{list of gene sets}
+\item{gsl}{list of gene sets}
 
 \item{organism}{organism}
 

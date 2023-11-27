@@ -4,7 +4,19 @@
 \alias{gsea}
 \title{Gene Sert Enrichment Analysis}
 \usage{
-gsea(rl, gsl, k = 100, ord.mode = -1, mc_cores_path = 1, mc_cores_perm = 1)
+gsea(
+  rl = NULL,
+  gsl = NULL,
+  k = 99,
+  min_size = 5,
+  max_size = 500,
+  decreasing = NULL,
+  mc_cores_path = 1,
+  mc_cores_perm = 1,
+  description = NULL,
+  out_file_prefix = "gsea_res",
+  min.k = 20
+)
 }
 \arguments{
 \item{rl}{numeric matrix of genes-by-ranking criteria; each column contains numeric values; rownames are mandatory}
@@ -13,14 +25,24 @@ gsea(rl, gsl, k = 100, ord.mode = -1, mc_cores_path = 1, mc_cores_perm = 1)
 
 \item{k}{integer, number of permutations}
 
-\item{ord.mode}{ordering mode: -1 -> descending; 1 ascending; must be of lenght equal to ncol(rl)}
+\item{min_size}{minimum gene set size}
+
+\item{max_size}{maximum gene set size}
+
+\item{decreasing}{TRUE/FALSE vector that specifies whether to order each column of rl decreasingly or not; must be of length equal to `ncol(rl)`. If NULL, all columns will be ranked in decreasing order}
 
 \item{mc_cores_path}{number of cores to use for parallel calculation of gene set lists; the total number of cpu used will be mc_cores_path x mc_cores_perm}
 
 \item{mc_cores_perm}{number of cores to use for parallel calculation of ranked list permutations; the total number of cpu used will be mc_cores_path x mc_cores_perm}
+
+\item{description}{optional named vector with gene set description; names must be gene seet identifiers}
+
+\item{out_file_prefix}{prefix for .xlsx and .txt output files}
+
+\item{min.k}{minimum number of permutations to obtain valid permutation-based statistics}
 }
 \value{
-data.frame with es, nes, p-value, adjusted p-value and FDR q-value
+data.frame with: es, enrichment score; nes normalized enrichment score; nperm, number of permutations actually used; p-value, empirical p-value; adjusted p-value, BH FDR; q_val: q-value estimnated from p-values using qvalue package; FDR q-value, empirical FDR; tags, leading edge size; tags_perc, leading edge size percent over gene set; list_top, rank of the ES; list_top_perc, rank of the ES percent over full ranked list; lead_edge, gene names of the leading edge
 }
 \description{
 Gene Sert Enrichment Analysis

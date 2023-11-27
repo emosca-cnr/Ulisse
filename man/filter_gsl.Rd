@@ -4,7 +4,7 @@
 \alias{filter_gsl}
 \title{Filter a gene set list}
 \usage{
-filter_gsl(gsl, universe, min_size = 5, max_size = 500)
+filter_gsl(gsl = NULL, universe = NULL, min_size = 5, max_size = 500)
 }
 \arguments{
 \item{gsl}{gene set list (named list)}
