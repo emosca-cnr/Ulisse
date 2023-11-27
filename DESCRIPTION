@@ -28,7 +28,6 @@ Imports:
   kit,
   msigdbr,
   qvalue,
-  viridis,
   plotrix,
   TCGAbiolinks,
   stringi,
@@ -40,7 +39,12 @@ Imports:
   ggraph,
   ggrepel,
   pals,
-  scales
+  scales,
+  ggforce,
+  ggnewscale,
+  methods,
+  openxlsx,
+  stringr
 Depends:
   R (>= 3.5.0)
 Suggests: 
