@@ -43,6 +43,10 @@ ora2enrich(
 \item{ontology}{ontology}
 
 \item{readable}{readable}
+
+\item{min_size}{minimum gene set size}
+
+\item{max_size}{maximum gene set size}
 }
 \description{
 ora2enrich

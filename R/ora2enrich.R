@@ -11,7 +11,8 @@
 #' @param keytype keytype
 #' @param ontology ontology
 #' @param readable readable
-#'
+#' @param min_size minimum gene set size
+#' @param max_size maximum gene set size
 #' @export
 #' @importClassesFrom DOSE enrichResult
 #' @importFrom qvalue qvalue
