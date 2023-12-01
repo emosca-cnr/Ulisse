@@ -52,7 +52,7 @@ ora <- function(wb=NULL, universe=NULL, gsl=NULL, p_adj_method='fdr', descriptio
     
     cat("#{gene sets} with wbd >=", wbd_min, ":", nrow(out[[i]]), "\n")
     
-    out[[i]]$N <- length(wb) + length(bb)
+    out[[i]]$N <- length(wb[[i]]) + length(bb)
     out[[i]]$exp <- out[[i]]$wb * out[[i]]$bd / out[[i]]$N
     out[[i]]$id <- rownames(out[[i]])
     out[[i]]$p_adj <- p.adjust(out[[i]]$p, method = p_adj_method)
