@@ -9,29 +9,37 @@
 #' @importFrom pals brewer.purples
 #' @importFrom grid gpar grid.text
 
-plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, na_col="khaki", max_gs=50, ...){
+plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, p.stat="FDRq", na_col="khaki", max_gs=50, min.p=0.0001, ...){
   
   if(length(gsea_res)<2){
     stop("This function requires at least two GSEAs.\n")
   }
   
+  if(!p.stat %in% colnames(gsea_res[[1]])){
+    stop("p.stat", p.stat, "is not in", colnames(ora_res[[1]]), ".\n")
+  }
+  
   cat("Size: ", unlist(lapply(gsea_res, nrow)), "\n")
   
-  X_matrix <- merge(gsea_res[[1]][, c("id", "FDRq")], gsea_res[[2]][, c("id", "FDRq")], by=1, all=T, sort=F)
+  X_matrix <- merge(gsea_res[[1]][, c("description", p.stat)], gsea_res[[2]][, c("description", p.stat)], by=1, all=T, sort=F)
   colnames(X_matrix)[2:3] <- names(gsea_res)[1:2]
   
   if(length(gsea_res)>2){
     for(i in 3:length(gsea_res)){
-      X_matrix <- merge(X_matrix, gsea_res[[i]][, c("id", "FDRq")], by=1, all = T, sort=F)
+      X_matrix <- merge(X_matrix, gsea_res[[i]][, c("description", p.stat)], by=1, all = T, sort=F)
       colnames(X_matrix)[i+1] <- names(gsea_res)[i]
     }
   }
   
-  rownames(X_matrix) <- X_matrix$id
-  X_matrix$id <- NULL
-  #rownames(X_matrix) <- gss$gs_name[match(rownames(X_matrix), gss$gs_id)]
+  rownames(X_matrix) <- X_matrix$description
+  X_matrix$description <- NULL
   X_matrix <- -log10(X_matrix)
-  X_matrix[X_matrix < -log10(a)] <- NA
+
+  if(is.null(na_col)){
+    X_matrix[is.na(X_matrix)] <- 0
+  }else{
+    X_matrix[X_matrix < -log10(a)] <- NA
+  }
   X_matrix <- as.matrix(X_matrix)
   
   if(nrow(X_matrix)>max_gs){
@@ -45,17 +53,17 @@ plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, na_col="khak
   
   if(nes_sign){
     
-    nes_sign <- merge(gsea_res[[1]][, c("id", "nes")], gsea_res[[2]][, c("id", "nes")], by=1, all = T, sort=F)
+    nes_sign <- merge(gsea_res[[1]][, c("description", "nes")], gsea_res[[2]][, c("description", "nes")], by=1, all = T, sort=F)
     colnames(nes_sign)[2:3] <- names(gsea_res)[1:2]
     
     if(length(gsea_res)>2){
       for(i in 3:length(gsea_res)){
-        nes_sign <- merge(nes_sign, gsea_res[[i]][, c("id", "nes")], by=1, all = T, sort=F)
+        nes_sign <- merge(nes_sign, gsea_res[[i]][, c("description", "nes")], by=1, all = T, sort=F)
         colnames(nes_sign)[1+i] <- names(gsea_res)[i]
       }
     }
-    rownames(nes_sign) <- nes_sign$id
-    nes_sign$id <- NULL
+    rownames(nes_sign) <- nes_sign$description
+    nes_sign$description <- NULL
     nes_sign <- sign(nes_sign)
     nes_sign[which(nes_sign>0, arr.ind = T)] <- "+"
     nes_sign[which(nes_sign==-1, arr.ind = T)] <- "-"
@@ -68,6 +76,7 @@ plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, na_col="khak
   nes_sign <- nes_sign[match(rownames(X_matrix), rownames(nes_sign)), ]
   nes_sign[is.na(X_matrix)] <- ""
   
-  Heatmap(X_matrix, col=brewer.purples(5), na_col = na_col, name="-log10(q)", rect_gp = gpar(col = "black", lwd = 1), cell_fun = function(j, i, x, y, width, height, fill) { grid.text(nes_sign[i, j], x, y, gp = gpar(fontsize = 10, fontface = "bold", col=ifelse(nes_sign[i, j]=="+", "firebrick", "limegreen")))}, ...)
+  col_fun <- colorRamp2(seq(0, -log10(min.p), length.out=5), brewer.purples(5))
+  plot(Heatmap(X_matrix, col=col_fun, na_col = na_col, name=paste0("-log10(", p.stat, ")"), rect_gp = gpar(col = "black", lwd = 1), cell_fun = function(j, i, x, y, width, height, fill) { grid.text(nes_sign[i, j], x, y, gp = gpar(fontsize = 10, fontface = "bold", col=ifelse(nes_sign[i, j]=="+", "firebrick", "limegreen")))}, ...))
   
 }

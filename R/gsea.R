@@ -51,10 +51,10 @@ gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, decreasing=N
   if(!is.null(description)){
     description <- description[match(names(gsl), names(description))]
   }else{
-    description <- setNames(rep(NA, length(gsl)), names(gsl))
+    description <- setNames(names(gsl), names(gsl))
   }
   if(length(description)==0){
-    description <- setNames(rep(NA, length(gsl)), names(gsl))
+    description <- setNames(names(gsl), names(gsl))
   }
   
   #create the list of ranked vectors

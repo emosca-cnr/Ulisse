@@ -34,7 +34,6 @@ plot_ora_heatmap <- function(ora_res=NULL, p.stat="p_adj", a=0.25, na_col="khaki
   
   rownames(X_matrix) <- X_matrix$description
   X_matrix$description <- NULL
-  #rownames(X_matrix) <- gss$gs_name[match(rownames(X_matrix), gss$gs_id)]
   X_matrix <- -log10(X_matrix)
   
   if(is.null(na_col)){
