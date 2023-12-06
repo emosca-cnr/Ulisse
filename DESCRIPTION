@@ -19,6 +19,7 @@ Description: Ulisse implements functions for pathway analysis, pathway cross-tal
 License: GPL-3
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
+Encoding: UTF-8
 Imports:
   igraph,
   parallel,

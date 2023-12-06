@@ -42,7 +42,7 @@ gsea(
 \item{min.k}{minimum number of permutations to obtain valid permutation-based statistics}
 }
 \value{
-data.frame with: es, enrichment score; nes normalized enrichment score; nperm, number of permutations actually used; p-value, empirical p-value; adjusted p-value, BH FDR; q_val: q-value estimnated from p-values using qvalue package; FDR q-value, empirical FDR; tags, leading edge size; tags_perc, leading edge size percent over gene set; list_top, rank of the ES; list_top_perc, rank of the ES percent over full ranked list; lead_edge, gene names of the leading edge
+data.frame with: es, enrichment score; nes normalized enrichment score; nperm, number of permutations actually used; p-value, empirical p-value; adjusted p-value, BH FDR; q_val: q-value estimnated from p-values using qvalue package; FDR q-value, empirical FDR; tags, leading edge size; tags_perc, leading edge size percent over gene set; list_top, rank of the ES; list_top_perc, rank of the ES percent over full ranked list; lead_edge, signal strength; lead_edge_subset, gene names of the leading edge
 }
 \description{
 Gene Sert Enrichment Analysis

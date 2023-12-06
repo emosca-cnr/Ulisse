@@ -9,6 +9,7 @@ plot_ora_heatmap(
   p.stat = "p_adj",
   a = 0.25,
   na_col = "khaki",
+  min.p = 1e-04,
   max_gs = 50,
   ...
 )

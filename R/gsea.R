@@ -13,7 +13,7 @@
 #' @import parallel openxlsx
 #' @importFrom qvalue qvalue
 #' @importFrom utils write.table
-#' @return data.frame with: es, enrichment score; nes normalized enrichment score; nperm, number of permutations actually used; p-value, empirical p-value; adjusted p-value, BH FDR; q_val: q-value estimnated from p-values using qvalue package; FDR q-value, empirical FDR; tags, leading edge size; tags_perc, leading edge size percent over gene set; list_top, rank of the ES; list_top_perc, rank of the ES percent over full ranked list; lead_edge, gene names of the leading edge
+#' @return data.frame with: es, enrichment score; nes normalized enrichment score; nperm, number of permutations actually used; p-value, empirical p-value; adjusted p-value, BH FDR; q_val: q-value estimnated from p-values using qvalue package; FDR q-value, empirical FDR; tags, leading edge size; tags_perc, leading edge size percent over gene set; list_top, rank of the ES; list_top_perc, rank of the ES percent over full ranked list; lead_edge, signal strength; lead_edge_subset, gene names of the leading edge
 #' @export
 
 gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, decreasing=NULL, mc_cores_path=1, mc_cores_perm=1, description=NULL, out_file_prefix="gsea_res", min.k=20){
@@ -200,7 +200,12 @@ gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, decreasing=N
     
     out_file_xlsx <- paste0(out_file_prefix, ".xlsx")
     cat("Writing output to", out_file_xlsx, " and ", paste0(out_file_prefix, ".[run].txt"), "...\n")
+    
     wb <- createWorkbook()
+    
+    legend_txt <- data.frame(column=c("size", "es", "nes", "nperm", "p_val", "adj_p_val", "q_val", "FDRq", "tags", 	"tags_perc", "list_top", "list_top_perc", "lead_edge", "lead_edge_subset"), description=c("gene set size", "enrichment score", "normalized enriched score", "number of permutations actually used", "empirical p-value", "FDR (BH)", "FDR (qvalue)", "FDR (empirical)", "leading edge size", "leading edge size percent over gene set", "rank of the ES", "rank of the ES percent over full ranked list", "signal strength", "gene names of the leading edge"), stringsAsFactors = F)
+    addWorksheet(wb, "Legend")
+    writeData(wb, "Legend", legend_txt)
     
     for(i in 1:length(out)){
       

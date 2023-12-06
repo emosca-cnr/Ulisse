@@ -8,8 +8,10 @@ plot_gsea_heatmap(
   gsea_res = NULL,
   nes_sign = TRUE,
   a = 0.25,
+  p.stat = "FDRq",
   na_col = "khaki",
   max_gs = 50,
+  min.p = 1e-04,
   ...
 )
 }
