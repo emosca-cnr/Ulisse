@@ -80,6 +80,11 @@ ora <- function(wb=NULL, universe=NULL, gsl=NULL, p_adj_method='fdr', descriptio
     cat("Writing output to", out_file_xlsx, " and ", paste0(out_file_prefix, ".[run].txt"), "...\n")
     wb <- createWorkbook()
     
+    ### legend
+    legend_txt <- data.frame(column=c("N", "wb", "bb", "bd", "wbd", "exp", "er", "p", "p_adj", "q_val", "genes"), description=c("all considered genes", "genes in the input set", "genes not in the input set", "genes in the pathway", "genes in the input set & in the pathway", "expected wbd in an hypergeometric experiment", "enrichment ratio", "hypergeometric p", "FDR (BH)", "FDR (qvalue)", "genes in the input set & in the pathway"), stringsAsFactors = F)
+    addWorksheet(wb, "Legend")
+    writeData(wb, "Legend", legend_txt)
+    
     for(i in 1:length(out)){
       
       addWorksheet(wb, names(out)[i])

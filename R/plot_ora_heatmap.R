@@ -49,9 +49,11 @@ plot_ora_heatmap <- function(ora_res=NULL, p.stat="p_adj", a=0.25, na_col="khaki
   }
   
   if(any(is.na(X_matrix))){
-    warning("The presence of many NA values may cause errors in hclust(). To avoid this error, (i) increase 'a' or (ii) set cluster_columns = F and/or cluster_rows = F.\n")
+    cat("The presence of many NA values may cause errors in hclust(). To avoid this error, (i) increase 'a' or (ii) set cluster_columns = F and/or cluster_rows = F.\n")
   }
-  col_fun <- colorRamp2(seq(0, -log10(min.p), length.out=5), brewer.purples(5))
+  #col_fun <- colorRamp2(seq(0, -log10(min.p), length.out=5), brewer.purples(5))
+  col_fun <- colorRamp2(seq(min(X_matrix, na.rm = T), min(max(X_matrix, na.rm=T), -log10(min.p)), length.out=5), brewer.purples(5))
+  
   plot(Heatmap(X_matrix, col=col_fun, na_col = na_col, name=paste0("-log10(", p.stat, ")"), rect_gp = gpar(col = "black", lwd = 1), ...))
   
 }

@@ -48,7 +48,7 @@ plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, p.stat="FDRq
   }
   
   if(any(is.na(X_matrix))){
-    warning("The presence of many NA values may cause errors in hclust(). To avoid this error, (i) increase 'a' or (ii) set cluster_columns = F and/or cluster_rows = F.\n")
+    cat("The presence of many NA values may cause errors in hclust(). To avoid this error, (i) increase 'a' or (ii) set cluster_columns = F and/or cluster_rows = F.\n")
   }
   
   if(nes_sign){
@@ -76,7 +76,8 @@ plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, p.stat="FDRq
   nes_sign <- nes_sign[match(rownames(X_matrix), rownames(nes_sign)), ]
   nes_sign[is.na(X_matrix)] <- ""
   
-  col_fun <- colorRamp2(seq(0, -log10(min.p), length.out=5), brewer.purples(5))
-  plot(Heatmap(X_matrix, col=col_fun, na_col = na_col, name=paste0("-log10(", p.stat, ")"), rect_gp = gpar(col = "black", lwd = 1), cell_fun = function(j, i, x, y, width, height, fill) { grid.text(nes_sign[i, j], x, y, gp = gpar(fontsize = 10, fontface = "bold", col=ifelse(nes_sign[i, j]=="+", "firebrick", "limegreen")))}, ...))
+  col_fun <- colorRamp2(seq(min(X_matrix, na.rm = T), min(max(X_matrix, na.rm=T), -log10(min.p)), length.out=5), brewer.purples(5))
+  
+  plot(Heatmap(X_matrix, col=col_fun, na_col = na_col, name=paste0("-log10(", p.stat, ")"), rect_gp = gpar(col = "black", lwd = 1), cell_fun = function(j, i, x, y, width, height, fill) { grid.text(nes_sign[i, j], x, y, gp = gpar(fontsize = 10, fontface = "bold", col=ifelse(nes_sign[i, j]=="+", "limegreen", "firebrick")))}, ...))
   
 }
