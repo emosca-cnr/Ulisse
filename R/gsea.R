@@ -33,10 +33,6 @@ gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, decreasing=N
   
   #gene set size
   cat("Checking gene sets\n")
-  #gsl <- lapply(gsl, function(x) x[ x %in% rownames(rl)])
-  #gsl_size <- lengths(gsl)
-  #gsl <- gsl[gsl_size >= min_size & gsl_size <= max_size]
-  #print(gsl_size)
   
   gsl <- filter_gsl(gsl = gsl, universe =  rownames(rl), min_size = min_size, max_size = max_size)
   gsl_size <- lengths(gsl)

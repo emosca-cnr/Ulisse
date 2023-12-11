@@ -8,9 +8,14 @@
 
 filter_gsl <- function(gsl=NULL, universe=NULL, min_size=5, max_size=500){
   
+  ans <- gsl
+  
+  gs_size <- lengths(ans)
+  idx_keep <- gs_size >= min_size & gs_size <= max_size
+  ans <- ans[idx_keep]
+  
   ans <- lapply(gsl, function(x) x[x %in% universe])
   ans <- lapply(ans, unique)
-  #idx_keep <- unlist(lapply(ans, function(x) length(x) >= min_size & length(x) <= max_size))
   
   gs_size <- lengths(ans)
   idx_keep <- gs_size >= min_size & gs_size <= max_size
