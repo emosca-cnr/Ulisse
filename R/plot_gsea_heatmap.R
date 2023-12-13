@@ -9,7 +9,7 @@
 #' @importFrom pals brewer.purples
 #' @importFrom grid gpar grid.text
 
-plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, p.stat="FDRq", na_col="khaki", max_gs=50, min.p=0.0001, ...){
+plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, p.stat="FDRq", na_col="khaki", max_gs=50, min.p=NA, ...){
   
   if(length(gsea_res)<2){
     stop("This function requires at least two GSEAs.\n")
@@ -75,6 +75,12 @@ plot_gsea_heatmap <- function(gsea_res=NULL, nes_sign=TRUE, a=0.25, p.stat="FDRq
   
   nes_sign <- nes_sign[match(rownames(X_matrix), rownames(nes_sign)), ]
   nes_sign[is.na(X_matrix)] <- ""
+  
+  if(is.na(min.p)){
+    min.p <- min(10^-(X_matrix), na.rm = T)
+  }else{
+    X_matrix[X_matrix > -log10(min.p)] <- -log10(min.p)
+  }
   
   col_fun <- colorRamp2(seq(min(X_matrix, na.rm = T), min(max(X_matrix, na.rm=T), -log10(min.p)), length.out=5), brewer.purples(5))
   

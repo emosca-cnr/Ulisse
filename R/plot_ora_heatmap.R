@@ -10,7 +10,7 @@
 #' @importFrom grid gpar grid.text
 #' @importFrom circlize colorRamp2
 
-plot_ora_heatmap <- function(ora_res=NULL, p.stat="p_adj", a=0.25, na_col="khaki", min.p=0.0001, max_gs=50, ...){
+plot_ora_heatmap <- function(ora_res=NULL, p.stat="p_adj", a=0.25, na_col="khaki", min.p=NA, max_gs=50, ...){
   
   if(length(ora_res)<2){
     stop("This function requires at least two ORAs.\n")
@@ -51,7 +51,13 @@ plot_ora_heatmap <- function(ora_res=NULL, p.stat="p_adj", a=0.25, na_col="khaki
   if(any(is.na(X_matrix))){
     cat("The presence of many NA values may cause errors in hclust(). To avoid this error, (i) increase 'a' or (ii) set cluster_columns = F and/or cluster_rows = F.\n")
   }
-  #col_fun <- colorRamp2(seq(0, -log10(min.p), length.out=5), brewer.purples(5))
+  
+  if(is.na(min.p)){
+    min.p <- min(10^-(X_matrix), na.rm = T)
+  }else{
+    X_matrix[X_matrix > -log10(min.p)] <- -log10(min.p)
+  }
+  
   col_fun <- colorRamp2(seq(min(X_matrix, na.rm = T), min(max(X_matrix, na.rm=T), -log10(min.p)), length.out=5), brewer.purples(5))
   
   plot(Heatmap(X_matrix, col=col_fun, na_col = na_col, name=paste0("-log10(", p.stat, ")"), rect_gp = gpar(col = "black", lwd = 1), ...))
