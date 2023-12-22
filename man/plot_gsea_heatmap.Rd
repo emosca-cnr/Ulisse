@@ -11,7 +11,7 @@ plot_gsea_heatmap(
   p.stat = "FDRq",
   na_col = "khaki",
   max_gs = 50,
-  min.p = 1e-04,
+  min.p = NA,
   ...
 )
 }

@@ -10,6 +10,7 @@ gsea(
   k = 99,
   min_size = 5,
   max_size = 500,
+  min_tags = 3,
   decreasing = NULL,
   mc_cores_path = 1,
   mc_cores_perm = 1,
@@ -28,6 +29,8 @@ gsea(
 \item{min_size}{minimum gene set size}
 
 \item{max_size}{maximum gene set size}
+
+\item{min_tags}{minimum number of tags to consider the ES; gene sets with tags < min_tags will be excluded}
 
 \item{decreasing}{TRUE/FALSE vector that specifies whether to order each column of rl decreasingly or not; must be of length equal to `ncol(rl)`. If NULL, all columns will be ranked in decreasing order}
 

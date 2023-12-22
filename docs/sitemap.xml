@@ -7,6 +7,9 @@
     <loc>/articles/Ulisse_bulk.html</loc>
   </url>
   <url>
+    <loc>/articles/Ulisse_enrich.html</loc>
+  </url>
+  <url>
     <loc>/articles/Ulisse_sc.html</loc>
   </url>
   <url>
@@ -73,6 +76,9 @@
     <loc>/reference/gsea.html</loc>
   </url>
   <url>
+    <loc>/reference/gsea2enrich.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
@@ -106,10 +112,16 @@
     <loc>/reference/plot_functional_relevance.html</loc>
   </url>
   <url>
+    <loc>/reference/plot_gsea_heatmap.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot_network_CT.html</loc>
   </url>
   <url>
     <loc>/reference/plot_ora_comparison.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_ora_heatmap.html</loc>
   </url>
   <url>
     <loc>/reference/preparing_DEG_list.html</loc>

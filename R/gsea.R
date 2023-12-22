@@ -10,13 +10,14 @@
 #' @param description optional named vector with gene set description; names must be gene seet identifiers
 #' @param out_file_prefix prefix for .xlsx and .txt output files
 #' @param min.k minimum number of permutations to obtain valid permutation-based statistics
+#' @param min_tags minimum number of tags to consider the ES; gene sets with tags < min_tags will be excluded
 #' @import parallel openxlsx
 #' @importFrom qvalue qvalue
 #' @importFrom utils write.table
 #' @return data.frame with: es, enrichment score; nes normalized enrichment score; nperm, number of permutations actually used; p-value, empirical p-value; adjusted p-value, BH FDR; q_val: q-value estimnated from p-values using qvalue package; FDR q-value, empirical FDR; tags, leading edge size; tags_perc, leading edge size percent over gene set; list_top, rank of the ES; list_top_perc, rank of the ES percent over full ranked list; lead_edge, signal strength; lead_edge_subset, gene names of the leading edge
 #' @export
 
-gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, decreasing=NULL, mc_cores_path=1, mc_cores_perm=1, description=NULL, out_file_prefix="gsea_res", min.k=20){
+gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, min_tags=3, decreasing=NULL, mc_cores_path=1, mc_cores_perm=1, description=NULL, out_file_prefix="gsea_res", min.k=20){
   
   #checks
   if(!is.matrix(rl) | !is.numeric(rl)){
@@ -115,19 +116,41 @@ gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, decreasing=N
       cat("\t", rownames(res[[i]])[idx_na], "\n")
       p_val[idx_na] <- NA ### 
     }
+    
     idx_na <- which(res[[i]][, 1] > 0 & n_pos_perm < min.k)
     if(length(idx_na)>0){
       cat("\tES>0 but less than", min.k, " positive ES in permutations\n")
       cat("\t", rownames(res[[i]])[idx_na], "\n")
       p_val[idx_na] <- NA ### 
     }
+    
     idx_na <- which(res[[i]][, 1] < 0 & n_neg_perm < min.k)
     if(length(idx_na)>0){
       cat("\tES<0 but less than", min.k, " negative ES in permutations\n")
       cat("\t", rownames(res[[i]])[idx_na], "\n")
       p_val[idx_na] <- NA ### 
     }
-  
+    
+    idx_na <- which(leading_edge[[i]]$tags < min_tags)
+    if(length(idx_na)>0){
+      cat("\tES is based on less than", min_tags, "\n")
+      cat("\t", rownames(res[[i]])[idx_na], "\n")
+      res[[i]][idx_na, 1] <- NA ### ES <- NA
+      p_val[idx_na] <- NA ### 
+      
+      if(all(is.na(p_val))){
+        cat("\t All ES are based on less than", min_tags, "\n")
+        return(NULL)
+      }
+      
+      #remove ES with tags < min_tags
+      res[[i]] <- res[[i]][-idx_na, ]
+      p_val <- p_val[-idx_na]
+      n_pos_perm <- n_pos_perm[-idx_na]
+      n_neg_perm <- n_neg_perm[-idx_na]
+      
+    }
+    
     #normalized ES
     means <- t(apply(res[[i]], 1, function(x) c(mean(x[x>0]), abs(mean(x[x<0]))))) #positive, negative
     means[is.nan(means)] <- NA #NaN values are caused by the absence of any positive or negative value
