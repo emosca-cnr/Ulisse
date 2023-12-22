@@ -133,15 +133,10 @@ gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, min_tags=3, 
     
     idx_na <- which(leading_edge[[i]]$tags < min_tags)
     if(length(idx_na)>0){
-      cat("\tES is based on less than", min_tags, "\n")
+      cat("\tES is based on less than", min_tags, "tags\n")
       cat("\t", rownames(res[[i]])[idx_na], "\n")
       res[[i]][idx_na, 1] <- NA ### ES <- NA
       p_val[idx_na] <- NA ### 
-      
-      if(all(is.na(p_val))){
-        cat("\t All ES are based on less than", min_tags, "\n")
-        return(NULL)
-      }
       
       #remove ES with tags < min_tags
       res[[i]] <- res[[i]][-idx_na, ]
@@ -149,6 +144,11 @@ gsea <- function(rl=NULL, gsl=NULL, k=99, min_size=5, max_size=500, min_tags=3, 
       n_pos_perm <- n_pos_perm[-idx_na]
       n_neg_perm <- n_neg_perm[-idx_na]
       
+    }
+    
+    if(all(is.na(p_val))){
+      cat("\t All p-values are NA: k, min.k, min_tags\n")
+      return(NULL)
     }
     
     #normalized ES
