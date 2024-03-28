@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">Ulisse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/Ulisse_bulk.html">Ulisse workflow 1: Pathway Cross-Talk analysis of bulk data</a>
-    <a class="dropdown-item" href="../articles/Ulisse_enrich.html">ORA and GSEA with Ulisse</a>
     <a class="dropdown-item" href="../articles/Ulisse_sc.html">Ulisse workflow 2: Cell-cell cross-talk analysis on single cell data</a>
   </div>
 </li>
@@ -65,7 +64,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Ulisse workflow 1: Pathway Cross-Talk analysis of bulk data</h1>
             
-            <h4 data-toc-skip class="date">2023-12-22</h4>
+            <h4 data-toc-skip class="date">2024-03-28</h4>
       
       
       <div class="d-none name"><code>Ulisse_bulk.Rmd</code></div>
@@ -1980,7 +1979,7 @@ algorithms</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sub.PPI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r.igraph.org/reference/subgraph.html" class="external-link">induced.subgraph</a></span><span class="op">(</span><span class="va">PPI.g</span>, vids <span class="op">=</span> <span class="va">target_gene_weights</span><span class="op">$</span><span class="va">gene</span><span class="op">[</span><span class="va">target_gene_weights</span><span class="op">$</span><span class="va">gene</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://r.igraph.org/reference/V.html" class="external-link">V</a></span><span class="op">(</span><span class="va">PPI.g</span><span class="op">)</span><span class="op">$</span><span class="va">name</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">sub.PPI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r.igraph.org/reference/subgraph.html" class="external-link">induced.subgraph</a></span><span class="op">(</span><span class="va">sub.PPI</span>, <span class="fu"><a href="https://r.igraph.org/reference/V.html" class="external-link">V</a></span><span class="op">(</span><span class="va">sub.PPI</span><span class="op">)</span><span class="op">$</span><span class="va">name</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/degree.html" class="external-link">degree</a></span><span class="op">(</span><span class="va">sub.PPI</span><span class="op">)</span> <span class="op">==</span><span class="fl">0</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">comm_det</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/find_communities.html">find_communities</a></span><span class="op">(</span><span class="va">sub.PPI</span><span class="op">)</span></span>
+<span><span class="va">comm_det</span> <span class="op">&lt;-</span> <span class="fu">find_communities</span><span class="op">(</span><span class="va">sub.PPI</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">comm_det</span><span class="op">$</span><span class="va">info</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;    algorithm modularity  n</span></span>

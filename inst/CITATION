@@ -1,0 +1,9 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Cross-talk quantification in molecular networks with application to pathway-pathway and cell-cell interactions",
+  author   = "A Chiodi and P Pelucchi and E Mosca",
+  journal  = "bioRxiv",
+  year     = "2023",
+  publisher = "Cold Spring Harbor Laboratory",
+  doi      = "10.1101/2023.08.10.552776"
+)
