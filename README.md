@@ -36,6 +36,8 @@ if (!require("BiocManager", quietly = TRUE)){
   install.packages("BiocManager")
 }
 BiocManager::install(c("DOSE", "qvalue", "TCGAbiolinks", "ComplexHeatmap", "pander", "kableExtra"))
+
+devtools::install_github("emosca-cnr/NPATools", build_vignettes = TRUE)
 ```
 
 The other dependencies, if missing, should be automatically installed using the following command:

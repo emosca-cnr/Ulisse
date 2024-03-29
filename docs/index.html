@@ -93,9 +93,13 @@
 </h1>
 <p>Ulisse requires R &gt;= 4.0.0, and some Bioconductor packages.</p>
 <p>To successfully install Ulisse firstly run</p>
-<p><code>{r, include=TRUE, eval=FALSE} if (!require("BiocManager", quietly = TRUE)){   install.packages("BiocManager") } BiocManager::install(c("DOSE", "qvalue", "TCGAbiolinks", "ComplexHeatmap", "pander", "kableExtra"))</code></p>
-<p>The other dependencies, if missing, should be automatically installed using the following command:</p>
-<p><code>{r, include=TRUE, eval=FALSE} devtools::install_github("emosca-cnr/Ulisse", build_vignettes = TRUE)</code></p>
+<p>```{r, include=TRUE, eval=FALSE} if (!require(“BiocManager”, quietly = TRUE)){ install.packages(“BiocManager”) } BiocManager::install(c(“DOSE”, “qvalue”, “TCGAbiolinks”, “ComplexHeatmap”, “pander”, “kableExtra”))</p>
+<p>devtools::install_github(“emosca-cnr/NPATools”, build_vignettes = TRUE)</p>
+<pre><code>
+The other dependencies, if missing, should be automatically installed using the following command:
+
+```{r, include=TRUE, eval=FALSE}
+devtools::install_github("emosca-cnr/Ulisse", build_vignettes = TRUE)</code></pre>
 <p>Contacts:</p>
 <ul>
 <li>
