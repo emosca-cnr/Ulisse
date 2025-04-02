@@ -5,92 +5,72 @@
 \title{Cross-talks between gene-sets}
 \usage{
 gs_cross_talk(
-  gs_list,
-  gene_network_adj,
-  k = 9,
-  shared = F,
-  hash = T,
-  ct_info = F,
+  S_list = NULL,
+  A,
+  k = 0,
+  ct_type = "intracellular",
+  bin_type = "number",
+  cut_par = 9,
+  perm_link = "degree",
+  perm_weights = "simple",
   mc_cores_perm = 1,
   mc_cores_ct = 1
 )
 }
 \arguments{
-\item{gs_list}{a named list of genes grouped into gene sets, as obtained from `preparing_gs_list`, `preparing_msigdb_list()`, 
-`preparing_DEG_list()` or `preparing_expr_list()` functions}
+\item{S_list}{a named list of genes grouped into gene sets, as obtained from `build_S_list()`}
 
-\item{gene_network_adj}{adjacency matrix of the whole gene network considered (can be a sparseMatrix)}
+\item{A}{adjacency matrix of the whole gene network considered (can be a sparseMatrix)}
 
 \item{k}{number of permutations}
 
-\item{shared}{logical, if the cross-talk calculation should consider shared genes (`TRUE`, suggested only for cell-cell communication) or 
-not (`FALSE`, suggested for pathway cross-talk)}
+\item{ct_type}{= c("intracellular", "communication"). The main differences between the two methods lay in usage of shared genes and permutations building.
+In detail, "intracellular" does not consider shared genes in the ct calculation, while "communication" uses them; 
+"intracellular" permutes gene weights among the gene sets, while in "communication" weights are permuted only among cell-gene-sets. More details in the paper}
 
-\item{hash}{logical, if hash map should be used to speed cross-talk calculation. Suggested only with high number of gene-sets (like in pathway cross-talk)}
+\item{bin_type}{can be either "number" (suggested), "interval" or "width". See `ggplot2::cut_interval()` for details.}
 
-\item{ct_info}{logical, if the function has to return the detail of gene-gene interactions between gene sets}
+\item{cut_par}{number of bin to cut. If set to `NULL`, the function will search for the best cut in 2:15}
+
+\item{perm_link}{= c("degree", "simple") If the permutation of the link should be degree-conservative ("degree"), or random ("simple")}
+
+\item{perm_weights}{= c("degree", "simple") If the permutation of the weights should be degree-conservative ("degree"), or random ("simple")}
 
 \item{mc_cores_perm}{number of thread to be used in permutations}
 
 \item{mc_cores_ct}{number of threads to be used for cross talk calculation}
 }
 \value{
-The function can return two output type:
+The function returns a data.frame with the results of ct calculation:
 \itemize{
- \item `ct_info = FALSE`: only the cross-talk results are returned as output
- \itemize{
-   \item gs1,gs2: names of gene-set pairs considered
-   \item ct_score: cross-talk score
-   \item ngenes_gs1,ngenes_gs2: number of genes in `gs1` and `gs2`
-   \item nlink: number of links between `gs1` and `gs2`
-   \item p_value_link: p-value score calculated by using the permutation approach
-   \item FDR_link: empirical FDR
-   \item p_adj_BH: `p-value_link` adjusted using BH method (see `p.adjust()` function)
-   \item weight_gs1,weight_gs2: cumulative weights of the genes involved in cross-talk between `gs1` and `gs2`
-   \item genes_gs1,genes_gs2: genes involved in cross-talk between `gs1` and `gs2`
+   \item S1_name,S2_name: names of gene-set pairs considered
+   \item c: cross-talk score
+   \item S1_size,S2_size: total number of genes present in S1 and S2, respectively
+   \item S1_s2_size,S2_s1_size: number of S1 genes interacting with S2, and vice versa
+   \item dL: number of links between S1 and S2
+   \item L: number of possible links between S1 and S2
+   \item r_c: cross-talk saturation, calculated as `dL/L`
+   \item u1,u2: sum of the gene weights in S1 and S2, respectively
+   \itme S1,S2: list of interacting genes in S1 and S2, respectively
+   \item s: cross-talk summary score
+   \item pA,pU: p-values of the number of links (pA) and weights (pU)
+   \item p: combined p-value
  }
- \item `ct_info = TRUE`: the cross-talk results and the detail of gene-gene interactions between gene-sets are returned as output
- \enumerate{
-  \item ct_info: gene-gene interaction details
-  \itemize{
-   \item gs1,gs2: name of the gene-sets
-   \item gs1_gene,gs2_gene: genes involved in the cross-talk
-   \item score: the score of the interaction between `gs1_gene` and `gs1_gene`, calculated by multiplying their weigths
+ If `ct_type = "communication"`, the function returns a two-element list, where the first element is the data.frame with the 
+  results of ct calculation, while the second element is a list with a data.frame for each communication with 
+  the details of the genes involved in the communications
+ \itemize{
+   \item S1_name,S2_name: name of the gene-sets
+   \item S1_gene,S2_gene: genes involved in the cross-talk
+   \item u12: the score of the interaction between `S1_gene` and `S1_gene`, calculated by multiplying their weights
   }
- \item ct_res: cross-talk results
- \itemize{
-   \item gs1,gs2: names of gene-set pairs considered
-   \item ct_score: cross-talk score
-   \item ngenes_gs1,ngenes_gs2: number of genes in `gs1` and `gs2`
-   \item nlink: number of links between `gs1` and `gs2`
-   \item p_value_link: p-value score calculated by using the permutation approach
-   \item FDR_link: empirical FDR
-   \item p_adj_BH: `p-value_link` adjusted using BH method (see `p.adjust()` function)
-   \item weight_gs1,weight_gs2: cumulative weights of the genes involved in cross-talk between `gs1` and `gs2`
-   \item genes_gs1,genes_gs2: genes involved in cross-talk between `gs1` and `gs2`
-   }
- }
-}
 }
 \description{
 The function calculates cross-talk between all gene-set pairs that show a link between their genes
 }
 \details{
-The function takes as inputs the adjacency matrix of the biological network (`gene_network_adj`) and the gene-set list, 
- either obtained through `preparing_gs_list`, `preparing_msigdb_list()`, `preparing_DEG_list()` or `preparing_expr_list()` functions. 
- For each gene-set pair that shows at least a link between them, the function uses the adjacency matrix to calculate cross-talk as described in the paper. 
- Then, for each  pair the function samples randomly from the `gene_network_adj` two lists of the same dimensions of the gene-sets and calculates the 
- number of links between them. This process is repeated `k` times. The number of links obtained with the `k` permuted version of the gene-set pairs 
- are compared to the real to calculate the p-value and FDR. We also provide a corrected p-value using BH method.
-}
-\examples{
-\dontrun{  
- ptw_list <- list(ptwA = setNames(c(1, 1, 1), c("A", "B","C")), 
- ptwB = setNames(c(1, 1, 1), c("D", "E", "F")), ptwC = setNames(c(1, 1, 1), c("A", "B", "E")))
- adj <- matrix(data = sample(c(0,1), 20*20, replace = TRUE), nrow = 6, 
- ncol = 6, dimnames = list(LETTERS[1:20], LETTERS[1:20]))
- pct <- gs_cross_talk(pathway_list = ptw_list, gene_network_adj = adj, 
-                      shared = FALSE, hash = FALSE, ct_info = FALSE, 
-                      mc_cores_pct = 1, mc_cores_perm = 1, k = 9)
- }
+The function takes as inputs the adjacency matrix of the biological network (`A`) and the gene-set list, 
+ obtained through `build_S_list()` function. 
+ For each gene-set pair that shows at least a link between them, the function calculates the cross-talk and the statistical evaluation, 
+ as described in the paper, using `k` permutations.
 }
