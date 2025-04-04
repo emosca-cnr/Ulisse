@@ -35,6 +35,8 @@ plot_communication_network(
 \item{palette}{named vector of the color associated to each cluster or cell types, and it will be used to set both 
 cell points and communication network vertices color. If NULL ignored, ggplot automatic palette used}
 
+\item{e_scale}{value to scale the edge weights for plotting, change to adjust maximum link widths}
+
 \item{label}{logical, if cluster/cell type name should be plotted on the vertex names}
 
 \item{save_file}{saving plot name. If NULL ignored}
@@ -43,15 +45,17 @@ cell points and communication network vertices color. If NULL ignored, ggplot au
 
 \item{point_alpha}{= 0.5 transparency of the color fill of the cell points}
 
+\item{edge_alpha}{= 0.8 transparency of the edge color}
+
+\item{edge_color}{= edge color}
+
 \item{node_size}{= 5 size of the vertices of the cell-cell communication network overlapped to the cell points}
 
 \item{text_size}{size of the node labels plotted (if `label = T`)}
 
+\item{text_color}{= text color (if `label = T`)}
+
 \item{heigh, width, res, unit}{params used to save plot (in jpeg format)}
-
-\item{scale}{value to scale the edge weights for plotting, change to adjust maximum link widths}
-
-\item{edge_alpah}{= 0.8 transparency of the edge color}
 }
 \description{
 This function is used to plot the results of the cell-cell communication analysis

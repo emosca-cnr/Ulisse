@@ -26,7 +26,7 @@
 #'    \item L: number of possible links between S1 and S2
 #'    \item r_c: cross-talk saturation, calculated as `dL/L`
 #'    \item u1,u2: sum of the gene weights in S1 and S2, respectively
-#'    \itme S1,S2: list of interacting genes in S1 and S2, respectively
+#'    \item S1,S2: list of interacting genes in S1 and S2, respectively
 #'    \item s: cross-talk summary score
 #'    \item pA,pU: p-values of the number of links (pA) and weights (pU)
 #'    \item p: combined p-value
@@ -38,8 +38,8 @@
 #' @importFrom methods is as
 #' @importFrom collapse ss get_elem rowbind
 #' @export
-integrated_cross_talk <- function(cl_list = cl_list, ccc_list = ccc_list, 
-                          gs_list = ptw_list, A = adj.ppi, k = 9, 
+integrated_cross_talk <- function(cl_list, ccc_list, 
+                          gs_list, A, k = 9, bin_type = "number",
                           perm_link = "degree", perm_weights = "degree", cut_par = 3,
                           mc_cores_perm = 1, mc_cores_ct = 1
                           ) {
@@ -58,7 +58,7 @@ integrated_cross_talk <- function(cl_list = cl_list, ccc_list = ccc_list,
       cl_list_sub[as.character(g.not)] <- 0
       ptw_list_sub <- gs_list[[x]]
       ptw_list_sub[[x]] <- cl_list_sub
-      ict_pct_out <- single_integrated_cross_talk(S_list = ptw_list_sub, ref = x,
+      ict_pct_out <- single_integrated_cross_talk(S_list = ptw_list_sub, ref = x, bin_type = bin_type,
                              perm_link = perm_link, perm_weights = perm_weights, cut_par = cut_par,
                              A = A, k = k, mc_cores_perm = mc_cores_perm, mc_cores_ct = mc_cores_ct)#complete
       if(length(ict_pct_out) > 1) {

@@ -7,6 +7,15 @@ c("numbers", "width")}
 \usage{
 breaks(x = x, equal = "number", nbins = 6, binwidth = NULL)
 }
+\arguments{
+\item{x}{= x}
+
+\item{equal}{interval}
+
+\item{nbins}{= nbins}
+
+\item{binwidth}{dimension bin}
+}
 \description{
 Function to find best number of intervals iteratively. Works with cut methods 
 c("numbers", "width")

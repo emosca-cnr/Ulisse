@@ -5,11 +5,12 @@
 \title{Integrated cellular cross talk analysis}
 \usage{
 integrated_cross_talk(
-  cl_list = cl_list,
-  ccc_list = ccc_list,
-  gs_list = ptw_list,
-  A = adj.ppi,
+  cl_list,
+  ccc_list,
+  gs_list,
+  A,
   k = 9,
+  bin_type = "number",
   perm_link = "degree",
   perm_weights = "degree",
   cut_par = 3,
@@ -28,6 +29,8 @@ integrated_cross_talk(
 
 \item{k}{number of permutations}
 
+\item{bin_type}{can be either "number" (suggested), "interval" or "width". See `ggplot2::cut_interval()` for details.}
+
 \item{perm_link}{= c("degree", "simple") If the permutation of the link should be degree-conservative ("degree"), or random ("simple")}
 
 \item{perm_weights}{= c("degree", "simple") If the permutation of the weights should be degree-conservative ("degree"), or random ("simple")}
@@ -37,8 +40,6 @@ integrated_cross_talk(
 \item{mc_cores_perm}{number of thread to be used in permutations}
 
 \item{mc_cores_ct}{number of threads to be used for cross talk calculation}
-
-\item{bin_type}{can be either "number" (suggested), "interval" or "width". See `ggplot2::cut_interval()` for details.}
 }
 \value{
 The function returns a data.frame with the result of inter-intracellular communication:
@@ -52,7 +53,7 @@ The function returns a data.frame with the result of inter-intracellular communi
    \item L: number of possible links between S1 and S2
    \item r_c: cross-talk saturation, calculated as `dL/L`
    \item u1,u2: sum of the gene weights in S1 and S2, respectively
-   \itme S1,S2: list of interacting genes in S1 and S2, respectively
+   \item S1,S2: list of interacting genes in S1 and S2, respectively
    \item s: cross-talk summary score
    \item pA,pU: p-values of the number of links (pA) and weights (pU)
    \item p: combined p-value

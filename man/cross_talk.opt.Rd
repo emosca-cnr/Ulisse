@@ -10,7 +10,7 @@ cross_talk.opt(mat = NULL, w1 = NULL, w2 = NULL)
 \item{mat}{the matrix on which calculate the cross-talk. It should be the subset of the adjacency matrix of
 a gene network, with on the rows the genes of a gene set, and on the columns the genes of anoher one to}
 
-\item{weight}{the vector of weights associated to the gene in `mat`. The weights shoud be named by the genes}
+\item{w1, w2}{the vector of weights associated to the gene in `mat`. The weights shoud be named by the genes}
 }
 \value{
 The function returns an array with:

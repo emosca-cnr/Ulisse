@@ -1,7 +1,6 @@
 ---
 title: "Ulisse pipeline: crosstalk analysis of single cell data"
 author: "Alice Chiodi"
-date: "`r Sys.Date()`"
 package: Ulisse
 bibliography: references.bib
 output:
@@ -19,7 +18,6 @@ library(pander)
 library(knitr)
 library(rmarkdown)
 library(kableExtra)
-library(igraph)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -30,10 +28,6 @@ knitr::opts_chunk$set(
   #fig.width = 7,
   #fig.height = 7
 )
-
-#panderOptions("table.split.table", Inf)
-#panderOptions('knitr.auto.asis', TRUE)
-#options(width = 80)
 ```
 
 In this vignette we will describe the usage of Ulisse. We will use already processed data from [@pal2021single] and some Seurat v4 [@Hao2021] functions to obtain input data. As you will see, the usage of Seurat is not mandatory, as the same data can be obtained with other tools. Moreover, the same workflow can be applied to other data (i.e.: expression, mutation, combination of the two, etc...), or even applied only partially (i.e.: intracellular crosstalk only on bulk data).

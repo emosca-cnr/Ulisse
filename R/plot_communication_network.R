@@ -11,16 +11,18 @@
 #' @param cl_cell two column data-frame, the first should be the cell names, the second the annotation (cluster or cell types)
 #' @param palette named vector of the color associated to each cluster or cell types, and it will be used to set both 
 #'  cell points and communication network vertices color. If NULL ignored, ggplot automatic palette used
-#' @param scale value to scale the edge weights for plotting, change to adjust maximum link widths
+#' @param e_scale value to scale the edge weights for plotting, change to adjust maximum link widths
+#' @param edge_alpha = 0.8 transparency of the edge color
+#' @param edge_color = edge color
 #' @param label logical, if cluster/cell type name should be plotted on the vertex names
 #' @param save_file saving plot name. If NULL ignored
 #' @param point_size = 0.5 size of the cell points to be plotted.
 #' @param point_alpha = 0.5 transparency of the color fill of the cell points
-#' @param edge_alpah = 0.8 transparency of the edge color
 #' @param node_size = 5 size of the vertices of the cell-cell communication network overlapped to the cell points
 #' @param text_size size of the node labels plotted (if `label = T`)
+#' @param text_color = text color (if `label = T`)
 #' @param heigh,width,res,unit params used to save plot (in jpeg format)
-#' @importFrom  grDevices dev.off jpeg
+#' @importFrom grDevices dev.off jpeg boxplot.stats
 #' @importFrom igraph graph_from_data_frame get.edge.ids
 #' @importFrom ggplot2 ggplot aes geom_point guides theme_test  scale_color_manual scale_fill_manual
 #' @importFrom ggraph geom_edge_link geom_node_point geom_node_text

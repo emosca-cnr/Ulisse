@@ -26,7 +26,7 @@
 #'    \item L: number of possible links between S1 and S2
 #'    \item r_c: cross-talk saturation, calculated as `dL/L`
 #'    \item u1,u2: sum of the gene weights in S1 and S2, respectively
-#'    \itme S1,S2: list of interacting genes in S1 and S2, respectively
+#'    \item S1,S2: list of interacting genes in S1 and S2, respectively
 #'    \item s: cross-talk summary score
 #'    \item pA,pU: p-values of the number of links (pA) and weights (pU)
 #'    \item p: combined p-value
@@ -45,6 +45,7 @@
 #' @importFrom reshape2 acast
 #' @importFrom methods is as
 #' @importFrom collapse ss get_elem rowbind
+#' @importFrom NPATools perm_vertices perm_X0 calc_p
 #' @export
 
 gs_cross_talk <- function(S_list=NULL, A, k = 0, ct_type = "intracellular",#c("intracellular", "communication")

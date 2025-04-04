@@ -1,6 +1,10 @@
 #' Function to find best number of intervals iteratively. Works with cut methods 
 #' c("numbers", "width")
-#' 
+#' @param x = x
+#' @param equal interval
+#' @param nbins = nbins
+#' @param binwidth dimension bin
+#' @importFrom scales fullseq
 #' 
 
 breaks <- function(x = x, equal = "number", nbins = 6, binwidth = NULL) {
