@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">Ulisse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,8 +24,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/Ulisse_bulk.html">Ulisse workflow 1: Pathway Cross-Talk analysis of bulk data</a>
-    <a class="dropdown-item" href="../articles/Ulisse_sc.html">Ulisse workflow 2: Cell-cell cross-talk analysis on single cell data</a>
+    <a class="dropdown-item" href="../articles/Ulisse_pipeline.html">Ulisse pipeline: crosstalk analysis of single cell data</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -54,44 +53,30 @@
 
       <dl><dt>
           
-          <code><a href="TM_CT.html">TM_CT()</a></code> 
+          <code><a href="breaks.html">breaks()</a></code> 
         </dt>
-        <dd>Function to calculate cross-talks between pathways of different gene communities</dd>
+        <dd>Function to find best number of intervals iteratively. Works with cut methods 
+c("numbers", "width")</dd>
       </dl><dl><dt>
           
-          <code><a href="comparing_results_network.html">comparing_results_network()</a></code> 
+          <code><a href="build_S_list.html">build_S_list()</a></code> 
         </dt>
-        <dd>Visual representation of multiple cross-talk analyses.</dd>
+        <dd>Build list for cross-talk calculation</dd>
       </dl><dl><dt>
           
-          <code><a href="cross_talk.html">cross_talk()</a></code> 
+          <code><a href="cross_talk.opt.html">cross_talk.opt()</a></code> 
         </dt>
         <dd>Function to caluclate cross-talk</dd>
       </dl><dl><dt>
           
-          <code><a href="ct_heatmap.html">ct_heatmap()</a></code> 
+          <code><a href="cross_talk.perm.html">cross_talk.perm()</a></code> 
         </dt>
-        <dd>Function to plot the heatmap of cross-talk results</dd>
+        <dd>Function to caluclate cross-talk</dd>
       </dl><dl><dt>
           
-          <code><a href="edge_weights.html">edge_weights()</a></code> 
+          <code><a href="gene_classification.html">gene_classification()</a></code> 
         </dt>
-        <dd>Function for the assignment of edges weights in order to better visualize the communities</dd>
-      </dl><dl><dt>
-          
-          <code><a href="funct_rel_heatmap.html">funct_rel_heatmap()</a></code> 
-        </dt>
-        <dd>Function to obtain a detailed visualization of specific results of functional relevance analysis</dd>
-      </dl><dl><dt>
-          
-          <code><a href="gene_functional_relevance.html">gene_functional_relevance()</a></code> 
-        </dt>
-        <dd>Function to calculate gene functional relevance</dd>
-      </dl><dl><dt>
-          
-          <code><a href="gene_set_cc.html">gene_set_cc()</a></code> 
-        </dt>
-        <dd>Function to calculate sub-components pathway score</dd>
+        <dd>Cross-talk gene classification analysis</dd>
       </dl><dl><dt>
           
           <code><a href="gs_cross_talk.html">gs_cross_talk()</a></code> 
@@ -99,59 +84,24 @@
         <dd>Cross-talks between gene-sets</dd>
       </dl><dl><dt>
           
-          <code><a href="pathway_data.html">pathway_data()</a></code> 
+          <code><a href="integrated_cross_talk.html">integrated_cross_talk()</a></code> 
         </dt>
-        <dd>Returns filtered msigdb geneset in a format compatible with cross-talks calculations</dd>
+        <dd>Integrated cellular cross talk analysis</dd>
       </dl><dl><dt>
           
-          <code><a href="pathway_sim_comm.html">pathway_sim_comm()</a></code> 
+          <code><a href="plot_communication_network.html">plot_communication_network()</a></code> 
         </dt>
-        <dd>Pathway similarity and communities</dd>
-      </dl><dl><dt>
-          
-          <code><a href="pathway_similarity.html">pathway_similarity()</a></code> 
-        </dt>
-        <dd>Pathway similarity</dd>
-      </dl><dl><dt>
-          
-          <code><a href="perm_link.html">perm_link()</a></code> 
-        </dt>
-        <dd>Function to caluclate permutation of the number of links between two gene sets</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_functional_relevance.html">plot_functional_relevance()</a></code> 
-        </dt>
-        <dd>Function to plot functional relevance results</dd>
-      </dl><dl><dt>
-          
-          <code><a href="plot_network_CT.html">plot_network_CT()</a></code> 
-        </dt>
-        <dd>Plot cross-talk results as a network</dd>
-      </dl><dl><dt>
-          
-          <code><a href="preparing_DEG_list.html">preparing_DEG_list()</a></code> 
-        </dt>
-        <dd>Function to prepare the input for `cluster_communication()` by using DEG analysis results data</dd>
-      </dl><dl><dt>
-          
-          <code><a href="preparing_expr_list.html">preparing_expr_list()</a></code> 
-        </dt>
-        <dd>Function to prepare cluster list for `cluster_communication()`</dd>
-      </dl><dl><dt>
-          
-          <code><a href="preparing_gs_list.html">preparing_gs_list()</a></code> 
-        </dt>
-        <dd>Build list for cross-talk calculation from database list</dd>
-      </dl><dl><dt>
-          
-          <code><a href="preparing_msigdb_list.html">preparing_msigdb_list()</a></code> 
-        </dt>
-        <dd>Build list for cross-talk calculation from MSigDB database list</dd>
+        <dd>Cell-cell communication network plot</dd>
       </dl><dl><dt>
           
           <code><a href="round.html">round()</a></code> 
         </dt>
         <dd>Scientific approximation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="single_integrated_cross_talk.html">single_integrated_cross_talk()</a></code> 
+        </dt>
+        <dd>Integrated cross talk on specific cluster analysis</dd>
       </dl></div>
   </main></div>
 

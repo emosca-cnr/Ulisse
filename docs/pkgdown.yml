@@ -1,8 +1,7 @@
-pandoc: 2.17.1.1
+pandoc: 3.1.11
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  Ulisse_bulk: Ulisse_bulk.html
-  Ulisse_sc: Ulisse_sc.html
-last_built: 2024-03-29T07:58Z
+  Ulisse_pipeline: Ulisse_pipeline.html
+last_built: 2025-04-07T09:20Z
 

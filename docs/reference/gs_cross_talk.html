@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">Ulisse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,8 +24,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/Ulisse_bulk.html">Ulisse workflow 1: Pathway Cross-Talk analysis of bulk data</a>
-    <a class="dropdown-item" href="../articles/Ulisse_sc.html">Ulisse workflow 2: Cell-cell cross-talk analysis on single cell data</a>
+    <a class="dropdown-item" href="../articles/Ulisse_pipeline.html">Ulisse pipeline: crosstalk analysis of single cell data</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -50,12 +49,14 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gs_cross_talk</span><span class="op">(</span></span>
-<span>  <span class="va">gs_list</span>,</span>
-<span>  <span class="va">gene_network_adj</span>,</span>
-<span>  k <span class="op">=</span> <span class="fl">9</span>,</span>
-<span>  shared <span class="op">=</span> <span class="cn">F</span>,</span>
-<span>  hash <span class="op">=</span> <span class="cn">T</span>,</span>
-<span>  ct_info <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  S_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">A</span>,</span>
+<span>  k <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  ct_type <span class="op">=</span> <span class="st">"intracellular"</span>,</span>
+<span>  bin_type <span class="op">=</span> <span class="st">"number"</span>,</span>
+<span>  cut_par <span class="op">=</span> <span class="fl">9</span>,</span>
+<span>  perm_link <span class="op">=</span> <span class="st">"degree"</span>,</span>
+<span>  perm_weights <span class="op">=</span> <span class="st">"simple"</span>,</span>
 <span>  mc_cores_perm <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  mc_cores_ct <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -63,12 +64,11 @@
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>gs_list</dt>
-<dd><p>a named list of genes grouped into gene sets, as obtained from `preparing_gs_list`, `preparing_msigdb_list()`, 
-`preparing_DEG_list()` or `preparing_expr_list()` functions</p></dd>
+    <dl><dt>S_list</dt>
+<dd><p>a named list of genes grouped into gene sets, as obtained from `build_S_list()`</p></dd>
 
 
-<dt>gene_network_adj</dt>
+<dt>A</dt>
 <dd><p>adjacency matrix of the whole gene network considered (can be a sparseMatrix)</p></dd>
 
 
@@ -76,17 +76,26 @@
 <dd><p>number of permutations</p></dd>
 
 
-<dt>shared</dt>
-<dd><p>logical, if the cross-talk calculation should consider shared genes (`TRUE`, suggested only for cell-cell communication) or 
-not (`FALSE`, suggested for pathway cross-talk)</p></dd>
+<dt>ct_type</dt>
+<dd><p>= c("intracellular", "communication"). The main differences between the two methods lay in usage of shared genes and permutations building.
+In detail, "intracellular" does not consider shared genes in the ct calculation, while "communication" uses them; 
+"intracellular" permutes gene weights among the gene sets, while in "communication" weights are permuted only among cell-gene-sets. More details in the paper</p></dd>
 
 
-<dt>hash</dt>
-<dd><p>logical, if hash map should be used to speed cross-talk calculation. Suggested only with high number of gene-sets (like in pathway cross-talk)</p></dd>
+<dt>bin_type</dt>
+<dd><p>can be either "number" (suggested), "interval" or "width". See `ggplot2::cut_interval()` for details.</p></dd>
 
 
-<dt>ct_info</dt>
-<dd><p>logical, if the function has to return the detail of gene-gene interactions between gene sets</p></dd>
+<dt>cut_par</dt>
+<dd><p>number of bin to cut. If set to `NULL`, the function will search for the best cut in 2:15</p></dd>
+
+
+<dt>perm_link</dt>
+<dd><p>= c("degree", "simple") If the permutation of the link should be degree-conservative ("degree"), or random ("simple")</p></dd>
+
+
+<dt>perm_weights</dt>
+<dd><p>= c("degree", "simple") If the permutation of the weights should be degree-conservative ("degree"), or random ("simple")</p></dd>
 
 
 <dt>mc_cores_perm</dt>
@@ -101,55 +110,34 @@ not (`FALSE`, suggested for pathway cross-talk)</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>The function can return two output type:</p><ul><li><p>`ct_info = FALSE`: only the cross-talk results are returned as output</p><ul><li><p>gs1,gs2: names of gene-set pairs considered</p></li>
-<li><p>ct_score: cross-talk score</p></li>
-<li><p>ngenes_gs1,ngenes_gs2: number of genes in `gs1` and `gs2`</p></li>
-<li><p>nlink: number of links between `gs1` and `gs2`</p></li>
-<li><p>p_value_link: p-value score calculated by using the permutation approach</p></li>
-<li><p>FDR_link: empirical FDR</p></li>
-<li><p>p_adj_BH: `p-value_link` adjusted using BH method (see `p.adjust()` function)</p></li>
-<li><p>weight_gs1,weight_gs2: cumulative weights of the genes involved in cross-talk between `gs1` and `gs2`</p></li>
-<li><p>genes_gs1,genes_gs2: genes involved in cross-talk between `gs1` and `gs2`</p></li>
-</ul></li>
-<li><p>`ct_info = TRUE`: the cross-talk results and the detail of gene-gene interactions between gene-sets are returned as output</p><ol><li><p>ct_info: gene-gene interaction details</p><ul><li><p>gs1,gs2: name of the gene-sets</p></li>
-<li><p>gs1_gene,gs2_gene: genes involved in the cross-talk</p></li>
-<li><p>score: the score of the interaction between `gs1_gene` and `gs1_gene`, calculated by multiplying their weigths</p></li>
-</ul></li>
-<li><p>ct_res: cross-talk results</p><ul><li><p>gs1,gs2: names of gene-set pairs considered</p></li>
-<li><p>ct_score: cross-talk score</p></li>
-<li><p>ngenes_gs1,ngenes_gs2: number of genes in `gs1` and `gs2`</p></li>
-<li><p>nlink: number of links between `gs1` and `gs2`</p></li>
-<li><p>p_value_link: p-value score calculated by using the permutation approach</p></li>
-<li><p>FDR_link: empirical FDR</p></li>
-<li><p>p_adj_BH: `p-value_link` adjusted using BH method (see `p.adjust()` function)</p></li>
-<li><p>weight_gs1,weight_gs2: cumulative weights of the genes involved in cross-talk between `gs1` and `gs2`</p></li>
-<li><p>genes_gs1,genes_gs2: genes involved in cross-talk between `gs1` and `gs2`</p></li>
-</ul></li>
-</ol></li>
+<p>The function returns a data.frame with the results of ct calculation:</p><ul><li><p>S1_name,S2_name: names of gene-set pairs considered</p></li>
+<li><p>c: cross-talk score</p></li>
+<li><p>S1_size,S2_size: total number of genes present in S1 and S2, respectively</p></li>
+<li><p>S1_s2_size,S2_s1_size: number of S1 genes interacting with S2, and vice versa</p></li>
+<li><p>dL: number of links between S1 and S2</p></li>
+<li><p>L: number of possible links between S1 and S2</p></li>
+<li><p>r_c: cross-talk saturation, calculated as `dL/L`</p></li>
+<li><p>u1,u2: sum of the gene weights in S1 and S2, respectively</p></li>
+<li><p>S1,S2: list of interacting genes in S1 and S2, respectively</p></li>
+<li><p>s: cross-talk summary score</p></li>
+<li><p>pA,pU: p-values of the number of links (pA) and weights (pU)</p></li>
+<li><p>p: combined p-value</p></li>
+</ul><p>If `ct_type = "communication"`, the function returns a two-element list, where the first element is the data.frame with the 
+  results of ct calculation, while the second element is a list with a data.frame for each communication with 
+  the details of the genes involved in the communications</p>
+<p></p>
+<ul><li><p>S1_name,S2_name: name of the gene-sets</p></li>
+<li><p>S1_gene,S2_gene: genes involved in the cross-talk</p></li>
+<li><p>u12: the score of the interaction between `S1_gene` and `S1_gene`, calculated by multiplying their weights</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function takes as inputs the adjacency matrix of the biological network (`gene_network_adj`) and the gene-set list, 
- either obtained through `preparing_gs_list`, `preparing_msigdb_list()`, `preparing_DEG_list()` or `preparing_expr_list()` functions. 
- For each gene-set pair that shows at least a link between them, the function uses the adjacency matrix to calculate cross-talk as described in the paper. 
- Then, for each  pair the function samples randomly from the `gene_network_adj` two lists of the same dimensions of the gene-sets and calculates the 
- number of links between them. This process is repeated `k` times. The number of links obtained with the `k` permuted version of the gene-set pairs 
- are compared to the real to calculate the p-value and FDR. We also provide a corrected p-value using BH method.</p>
+    <p>The function takes as inputs the adjacency matrix of the biological network (`A`) and the gene-set list, 
+ obtained through `build_S_list()` function. 
+ For each gene-set pair that shows at least a link between them, the function calculates the cross-talk and the statistical evaluation, 
+ as described in the paper, using `k` permutations.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span>  </span></span>
-<span class="r-in"><span> <span class="va">ptw_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ptwA <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>,<span class="st">"C"</span><span class="op">)</span><span class="op">)</span>, </span></span>
-<span class="r-in"><span> ptwB <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"D"</span>, <span class="st">"E"</span>, <span class="st">"F"</span><span class="op">)</span><span class="op">)</span>, ptwC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"E"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span> <span class="va">adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, <span class="fl">20</span><span class="op">*</span><span class="fl">20</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">6</span>, </span></span>
-<span class="r-in"><span> ncol <span class="op">=</span> <span class="fl">6</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span>, <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span> <span class="va">pct</span> <span class="op">&lt;-</span> <span class="fu">gs_cross_talk</span><span class="op">(</span>pathway_list <span class="op">=</span> <span class="va">ptw_list</span>, gene_network_adj <span class="op">=</span> <span class="va">adj</span>, </span></span>
-<span class="r-in"><span>                      shared <span class="op">=</span> <span class="cn">FALSE</span>, hash <span class="op">=</span> <span class="cn">FALSE</span>, ct_info <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>                      mc_cores_pct <span class="op">=</span> <span class="fl">1</span>, mc_cores_perm <span class="op">=</span> <span class="fl">1</span>, k <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span></span>
-<span class="r-in"><span> <span class="op">}</span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

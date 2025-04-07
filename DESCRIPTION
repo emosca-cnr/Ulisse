@@ -1,8 +1,8 @@
 Package: Ulisse
 Type: Package
 Title: Pathway, pathway cross-talk and cell-cell communication 
-Version: 1.4.0
-Date: 2024-03-28
+Version: 2.0
+Date: 2025-04-07
 Authors@R: 
     c(person(given = "Alice",
            family = "Chiodi",
@@ -30,7 +30,6 @@ Imports:
   reshape2,
   ggplot2,
   ggraph,
-  pandoc,
   devtools,
   NPATools,
   scales

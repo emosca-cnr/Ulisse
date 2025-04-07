@@ -34,6 +34,9 @@ plot_communication_network <- function(cell_emb, cl_res, cl_cell, palette, e_sca
                                        edge_alpha = 0.8, edge_color = "gray45",
                                        node_size = 5, text_size = 2, text_color = "black", heigh = 100, width = 100, res = 300, unit = "mm") {
   
+  
+  .data <- cluster <- x <- y <- xend <- yend <- s_norm <- dim_1 <- dim_2 <- cl <- NULL #to please the check
+  
   colnames(cl_cell) <- c("cell", "cluster")
   
   cell_emb <- data.frame(cell_emb)

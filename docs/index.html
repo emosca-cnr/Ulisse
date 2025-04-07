@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">Ulisse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,8 +41,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="articles/Ulisse_bulk.html">Ulisse workflow 1: Pathway Cross-Talk analysis of bulk data</a>
-    <a class="dropdown-item" href="articles/Ulisse_sc.html">Ulisse workflow 2: Cell-cell cross-talk analysis on single cell data</a>
+    <a class="dropdown-item" href="articles/Ulisse_pipeline.html">Ulisse pipeline: crosstalk analysis of single cell data</a>
   </div>
 </li>
       </ul>
@@ -61,39 +60,26 @@
 <div class="section level1">
 <div class="page-header"><h1 id="ulisse---an-r-package-to-go-beyond-the-boundaries-of-gene-sets">Ulisse - An R package to go beyond the boundaries of gene-sets<a class="anchor" aria-label="anchor" href="#ulisse---an-r-package-to-go-beyond-the-boundaries-of-gene-sets"></a>
 </h1></div>
-<p>Omics assay results in long gene lists whose biological interpretation is a major challenge. Pathway enrichment analysis is used to test whether a pathway is richer in genes of a gene list than what is expected by chance. However, there are no clear boundaries between pathways, such that gene products interact within and between pathways, in a phenomenon called cross-talks. Cross-talks between pathways are relevant to dissect regulatory mechanisms, identify effective drug combinations and investigate complex disease phenotypes. As molecular interactions go beyond cell boundaries, cross-talks (or communication) between different cell-types can be studied thanks to single-cell RNA sequencing technologies.</p>
+<p>The understanding of how gene-related molecular alterations translate into pathological phenotypes is a major challenge in life sciences. Here, we address the challenge of assessing the possible alteration, with respect to a reference condition, of intra- and inter-cellular molecular interactions among sets of genes, which are intended to represent intra-cellular or cellular phenotypes. We provide a means to screen the alteration of intra-cellular pathway crosstalks and derive a map of the altered communications among pathways, which complements pathway enrichment analysis. Ulisse can also be used to reconstruct a cell-cell communication network between cell types/clusters. These two analyses (intra- and inter-cellular) can be combined to obtain integrated pathways of interactions that associate cell-cell communications with intracellular states. Further, we provide a score and a statistical assessment of the altered interactions, based on multiple empirical null models for networks. Lastly, we extract the key genes that take part in the altered interactions.</p>
 <p>Ulisse provide the tools to perform:</p>
 <ul>
-<li>Cross-talk analysis:
-<ul>
-<li>Gene-set cross-talk</li>
-<li>Gene-set connected components</li>
-<li>Gene-Set Topological-Module cross-talk</li>
-<li>Functional relevance analysis to reconstruct gene role in Gene-set cross-talk analysis in terms of number of interactor genes and processes/cell types involved</li>
+<li>Cross-talk analysis: intra-cellular and inter-cellular</li>
+<li>gene classification analysis: to reconstruct the role of the genes in the cross-talk network obtained</li>
+<li>Integrated cross-talk analysis: to integrate the communications between specific cells types/clusters to cellular mechanisms.</li>
 </ul>
-</li>
-<li>Gene-set enrichment analysis:
+<p>Typical application of Ulisse includes:</p>
 <ul>
-<li>ORA (Over Representation Analysis)</li>
-<li>GSEA (Gene set enrichment analysis)</li>
-<li>Enrichment map to help interpretation of ORA or GSEA results</li>
-</ul>
-</li>
-</ul>
-<p>Typical application of Ulisse include:</p>
-<ul>
-<li>Pathway cross-talk analysis of omics data obtained from bulk or single-cell samples</li>
-<li>Communication analysis between clusters or cell-type in single-cell samples</li>
-<li>Pathway enrichment analysis of omics data obtained from bulk or single-cell samples</li>
+<li>Intra-cellular cross-talk analysis of omics data obtained from bulk or single-cell samples</li>
+<li>Inter-cellular analysis between clusters or cell-type in single-cell samples</li>
 </ul>
 <p>Source code: <a href="https://github.com/emosca-cnr/Ulisse" class="external-link uri">https://github.com/emosca-cnr/Ulisse</a></p>
 </div>
 <div class="section level1">
 <h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h1>
-<p>Ulisse requires R &gt;= 4.0.0, and some Bioconductor packages.</p>
+<p>Ulisse requires R &gt;= 4.0.0, and some GitHub and Bioconductor packages.</p>
 <p>To successfully install Ulisse firstly run</p>
-<p>```{r, include=TRUE, eval=FALSE} if (!require(“BiocManager”, quietly = TRUE)){ install.packages(“BiocManager”) } BiocManager::install(c(“DOSE”, “qvalue”, “TCGAbiolinks”, “ComplexHeatmap”, “pander”, “kableExtra”))</p>
+<p>```{r, include=TRUE, eval=FALSE} if (!require(“BiocManager”, quietly = TRUE)){ install.packages(“BiocManager”) } BiocManager::install(c(“BiocParallel”, “ComplexHeatmap”, “DOSE”, “KEGGREST”, “qvalue”))</p>
 <p>devtools::install_github(“emosca-cnr/NPATools”, build_vignettes = TRUE)</p>
 <pre><code>
 The other dependencies, if missing, should be automatically installed using the following command:

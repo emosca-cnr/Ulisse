@@ -10,6 +10,9 @@
     <loc>/articles/Ulisse_enrich.html</loc>
   </url>
   <url>
+    <loc>/articles/Ulisse_pipeline.html</loc>
+  </url>
+  <url>
     <loc>/articles/Ulisse_sc.html</loc>
   </url>
   <url>
@@ -25,6 +28,12 @@
     <loc>/reference/TM_CT.html</loc>
   </url>
   <url>
+    <loc>/reference/breaks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/build_S_list.html</loc>
+  </url>
+  <url>
     <loc>/reference/calc_gs_perm.html</loc>
   </url>
   <url>
@@ -38,6 +47,12 @@
   </url>
   <url>
     <loc>/reference/cross_talk.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cross_talk.opt.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cross_talk.perm.html</loc>
   </url>
   <url>
     <loc>/reference/ct_heatmap.html</loc>
@@ -64,6 +79,9 @@
     <loc>/reference/funct_rel_heatmap.html</loc>
   </url>
   <url>
+    <loc>/reference/gene_classification.html</loc>
+  </url>
+  <url>
     <loc>/reference/gene_functional_relevance.html</loc>
   </url>
   <url>
@@ -80,6 +98,9 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/integrated_cross_talk.html</loc>
   </url>
   <url>
     <loc>/reference/ora.html</loc>
@@ -107,6 +128,9 @@
   </url>
   <url>
     <loc>/reference/perm_link.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_communication_network.html</loc>
   </url>
   <url>
     <loc>/reference/plot_functional_relevance.html</loc>
@@ -137,5 +161,8 @@
   </url>
   <url>
     <loc>/reference/round.html</loc>
+  </url>
+  <url>
+    <loc>/reference/single_integrated_cross_talk.html</loc>
   </url>
 </urlset>
