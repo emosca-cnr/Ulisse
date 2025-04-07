@@ -1,6 +1,6 @@
 <img src="vignettes/images/logo.png" width="250">
 
-# Ulisse - An R package to go beyond the boundaries of gene-sets
+# Ulisse - Analysis of intracellular and intercellular crosstalk from omics data
 
 The understanding of how gene-related molecular alterations translate into pathological phenotypes is a major challenge in life sciences. 
 Here, we address the challenge of assessing the possible alteration, with respect to a reference condition, of intra- and inter-cellular molecular interactions among sets of genes, which are intended to represent intra-cellular or cellular phenotypes. 
