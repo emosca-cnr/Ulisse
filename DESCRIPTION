@@ -38,6 +38,4 @@ Depends:
   R (>= 3.5.0)
 Suggests: 
   rmarkdown,
-  knitr,
-  kableExtra,
-  pander
+  knitr

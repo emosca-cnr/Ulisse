@@ -14,10 +14,10 @@ vignette: >
 ---
 
 ```{r setup, echo = FALSE, message = FALSE, warning=FALSE}
-library(pander)
+#library(pander)
 library(knitr)
 library(rmarkdown)
-library(kableExtra)
+#library(kableExtra)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -154,19 +154,13 @@ can_ct <- gs_cross_talk(S_list = gs_list,
                         k = 99, 
                         ct_type = "intracellular",
                         mc_cores_perm = 2, perm_link = "degree", perm_weights = "degree", cut_par = NULL, mc_cores_ct = 2)
-can_ct[1:10, ]
+can_ct[1:5, ]
 ```
 
 ```{r ct, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 tnbc_ct <- readRDS("data/tnbc_ct.Rds")
-tnbc_ct <- tnbc_ct[1:10,]
-tnbc_ct %>%
-  kable(format = "html", col.names = colnames(tnbc_ct)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
-
+tnbc_ct <- tnbc_ct[1:5,]
+tnbc_ct
 ```
 
 Results can be visualized as scatterplot, by plotting the score (`s`) and the crosstalk saturation (`r_c``) affected over the possible. This visualization allows to prioritize genes on the percentage of affected crosstalks.
@@ -239,21 +233,15 @@ can_class <- gene_classification(gs_ct = caf_ct,#only significant ones
                                  ct_ref = general_cl, #general model for normalization
                                  n_cores = 2)
 
-can_class[, 1:10]
+can_class[, 1:5]
 
 ```
 
 
 ```{r fr, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 tnbc_cl <- readRDS("data/tnbc_cl.rds")
-tnbc_cl <- tnbc_cl[1:10,]
-tnbc_cl %>%
-  kable(format = "html", col.names = colnames(tnbc_cl)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
-
+tnbc_cl <- tnbc_cl[1:5,]
+tnbc_cl
 ```
 
 Here we can visualize saturations of crosstalk diversity and interactor diversity (`r_q` and `r_d`, respectively), which are measure normalized on the general model, compared to their absolute values (`d_q` and `d_d`, respectively). This visualization allows to identify genes whose interactors or crosstalks diversity are fully or only partially affected. 
@@ -328,37 +316,25 @@ By specifying `ct_type = "communication"`, the `gs_cross_talk()` function will c
 * the results of crosstalk calculation
 
 ```{r CCC_resNOT, results="asis", eval=FALSE}
-tnbcCCC$ct_res[1:10,]
+tnbcCCC$ct_res[1:5,]
 ```
 
 ```{r CCC_res, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 ct_res <- readRDS("data/ccc_res.Rds")
-ct_res <- ct_res[1:10,]
-ct_res %>%
-  kable(format = "html", col.names = colnames(ct_res)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
-
+ct_res <- ct_res[1:5,]
+ct_res
 ```
 
 * a list, with a table for each cell type pair with the detail of the interactions.
 
 ```{r CCC_resNOT2, results="asis", eval=FALSE}
-tnbcCCC$ct_info$`CAF|Cancer_epi_cycling`[1:10,]
+tnbcCCC$ct_info$`CAF|Cancer_epi_cycling`[1:5,]
 ```
 
 ```{r CCC_res2, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 ct_res <- readRDS("data/ccc_caf_ccy.Rds")
-ct_res <- ct_res[1:10,]
-ct_res %>%
-  kable(format = "html", col.names = colnames(ct_res)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
-
+ct_res <- ct_res[1:5,]
+ct_res
 ```
 
 The communication network can be visualized overlapped to the map of the cells by using `plot_communication_network()`. Here we will use only significant communication ($\alpha$ < 0.01).
@@ -409,19 +385,14 @@ fr.tnbc <- gene_classification(gs_ct = ccc_res, #only significant communications
                                A = g.adj_intercell, 
                                ct_ref = general_cl, #general gene classification to calculate degree ratio and crosstalk activity
                                n_cores = 2)
-fr.tnbc[, 1:10]
+fr.tnbc[, 1:5]
 
 ```
 
 ```{r CCC_fr, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 fr.tnbc <- readRDS("data/fr.tnbc_CCC.rds")
-fr.tnbc <- fr.tnbc[1:10,]
-fr.tnbc %>%
-  kable(format = "html", col.names = colnames(fr.tnbc)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
+fr.tnbc <- fr.tnbc[1:5,]
+fr.tnbc
 ```
 
 Now we can plot saturation of interactor diversity and crosstalk diversity compared to their absolute values, to prioritize genes, as done before in Intracellular crosstalk section 
@@ -473,18 +444,13 @@ integr_can <- single_integrated_cross_talk(S_list = gs_list_int, #Hallmark gene 
                                            k = 99, 
                                            perm_link = "degree", perm_weights = "degree", 
                                            cut_par = NULL, mc_cores_perm = 2, mc_cores_ct = 2)
-integr_can[1:10, ]
+integr_can[1:5, ]
 ```
 
 ```{r singlInt, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 integr_can <- readRDS("data/meta_canc.Rds")
-integr_can <- integr_can[1:10,]
-integr_can %>%
-  kable(format = "html", col.names = colnames(integr_can)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
+integr_can <- integr_can[1:5,]
+integr_can
 ```
 
 ## Integrated analysis
@@ -519,19 +485,13 @@ integrated_tnbc <- integrated_cross_talk(cl_list = tnbc_list, #CCC gene sets lis
                                          perm_link = "degree", perm_weights = "degree", cut_par = NULL)
                                    
 
-integrated_tnbc[1:10, ]
+integrated_tnbc[1:5, ]
 ```
 
 ```{r meta, results="asis", echo=FALSE, warning=FALSE, message=F, results='show', eval=TRUE}
 meta_tnbc <- readRDS("data/meta_tnbc.Rds")
-meta_tnbc <- meta_tnbc[1:10,]
-meta_tnbc %>%
-  kable(format = "html", col.names = colnames(meta_tnbc)) %>%
-  kable_minimal() %>%
-  kable_styling(bootstrap_options = c("striped", "condensed")) %>%
-  column_spec(4, width = "5cm") %>%
-  kableExtra::scroll_box(width = "100%")
-
+meta_tnbc <- meta_tnbc[1:5,]
+meta_tnbc
 ```
 
 
