@@ -2,11 +2,7 @@
 
 # Ulisse - Analysis of intracellular and intercellular crosstalk from omics data
 
-The understanding of how gene-related molecular alterations translate into pathological phenotypes is a major challenge in life sciences. 
-Here, we address the challenge of assessing the possible alteration, with respect to a reference condition, of intra- and inter-cellular molecular interactions among sets of genes, which are intended to represent intra-cellular or cellular phenotypes. 
-We provide a means to screen the alteration of intra-cellular pathway crosstalks and derive a map of the altered communications among pathways, which complements pathway enrichment analysis. 
-Ulisse can also be used to reconstruct a cell-cell communication network between cell types/clusters. These two analyses (intra- and inter-cellular) can be combined to obtain integrated pathways of interactions that associate cell-cell communications with intracellular states. 
-Further, we provide a score and a statistical assessment of the altered interactions, based on multiple empirical null models for networks. Lastly, we extract the key genes that take part in the altered interactions. 
+Disease phenotypes can be described as the consequence of interactions among molecular processes that are altered beyond resilience. Here, we address the challenge of assessing the possible alteration of intra- and inter-cellular molecular interactions among processes or cells. We present an approach, designated as “Ulisse”, which complements the existing methods in the domains of enrichment analysis, pathway crosstalk analysis and cell-cell communication analysis. It applies to gene lists that contain quantitative information about gene-related alterations, typically derived in the context of omics or multi-omics studies. Ulisse highlights the presence of alterations in those components that control the interactions between processes or cells. Considering the complexity of statistical assessment of network-based analyses, crosstalk quantification is supported by two distinct null models, which systematically sample alternative configurations of gene-related changes and gene-gene interactions. Further, the approach provides an additional way of identifying the genes associated with the phenotype. As a proof-of-concept, we applied Ulisse to study the alteration of pathway crosstalks and cell-cell communications in triple negative breast cancer samples, based on single-cell RNA sequencing. In conclusion, our work supports the usefulness of crosstalk analysis as an additional instrument in the “toolkit” of biomedical research for translating complex biological data into actionable insights. 
 
 Ulisse provide the tools to perform:
 
@@ -42,6 +38,9 @@ The other dependencies, if missing, should be automatically installed using the 
 devtools::install_github("emosca-cnr/Ulisse", build_vignettes = TRUE)
 ```
 
-Contacts:
+# Citation and Contact
 
-- [Ettore Mosca](https://www.itb.cnr.it/en/institute/staff/ettore-mosca), Bioinformatics Lab, CNR-ITB
+- Citation: Chiodi A, Pelucchi P, Mosca E (2025) Analysis of intracellular and intercellular crosstalk from omics data. PLOS ONE 20(10): e0334981. https://doi.org/10.1371/journal.pone.0334981
+
+- Contact: [Ettore Mosca](https://www.itb.cnr.it/en/institute/staff/ettore-mosca), Bioinformatics Lab, CNR-ITB
+
